@@ -1,26 +1,36 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/config"
 	"github.com/webjohny/cashflow-go/controller"
 	"github.com/webjohny/cashflow-go/middleware"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/service"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"os"
 )
 
 var (
-	db             *gorm.DB                         = config.SetupDatabaseConnection()
+	db *gorm.DB = config.SetupDatabaseConnection()
+
+	// Repositories
+	raceRepository repository.RaceRepository        = repository.NewRaceRepository(db)
 	userRepository repository.UserRepository        = repository.NewUserRepository(db)
 	trxRepository  repository.TransactionRepository = repository.NewTransactionRepository(db)
-	jwtService     service.JWTService               = service.NewJWTService()
-	userService    service.UserService              = service.NewUserService(userRepository)
-	authService    service.AuthService              = service.NewAuthService(userRepository)
-	authController controller.AuthController        = controller.NewAuthController(authService, jwtService)
-	userController controller.UserController        = controller.NewUserController(userService, jwtService)
-	trxSertvice    service.TransactionService       = service.NewTransactionService(trxRepository)
-	trxController  controller.TransactionContoller  = controller.NewTransactionController(trxSertvice, jwtService)
+
+	// Services
+	jwtService  service.JWTService  = service.NewJWTService()
+	userService service.UserService = service.NewUserService(userRepository)
+	authService service.AuthService = service.NewAuthService(userRepository)
+	cardService service.CardService = service.NewCardService()
+	gameService service.GameService = service.NewGameService(raceRepository)
+	raceService service.RaceService = service.NewRaceService(raceRepository)
+
+	// Controllers
+	cardController controller.CardController = controller.NewCardController(cardService, gameService)
+	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
+	userController controller.UserController = controller.NewUserController(userService, jwtService)
 )
 
 func main() {
@@ -28,24 +38,18 @@ func main() {
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 
+	r.Use(middleware.PreRequest())
+
+	cardRoutes := r.Group("api/card")
+	{
+		//cardRoutes.POST("/:action/:family/:type", cardController.Action)
+		cardRoutes.GET("/:action/:family/:type", cardController.Action)
+	}
+
 	authRoutes := r.Group("api/auth")
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
-	}
-
-	trxRoutes := r.Group("api/transaction", middleware.AuthorizeJWT(jwtService))
-	{
-		trxRoutes.GET("/", trxController.All)
-		trxRoutes.POST("/", trxController.Insert)
-		trxRoutes.PUT("/", trxController.Update)
-		trxRoutes.DELETE("/:id", trxController.Delete)
-	}
-
-	reportRoutes := r.Group("api/report", middleware.AuthorizeJWT(jwtService))
-	{
-		reportRoutes.GET("/", trxController.SumGroupId)
-		reportRoutes.GET("/summary", trxController.TransactionReport)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
@@ -88,5 +92,5 @@ func main() {
 	// 	pagerStatusRoutes.GET("/:id", pagerController.FindStatusById)
 	// }
 
-	r.Run(":8001")
+	r.Run(":" + os.Getenv("PORT"))
 }

@@ -2,10 +2,13 @@ package config
 
 import (
 	"fmt"
+	mysqlSession "github.com/go-session/mysql"
+	"github.com/go-session/session"
 	"os"
 
-	"github.com/webjohny/cashflow-go/entity"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/webjohny/cashflow-go/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -21,16 +24,21 @@ func SetupDatabaseConnection() *gorm.DB {
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
 	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:7286)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	session.InitManager(
+		session.SetStore(mysqlSession.NewStore(mysqlSession.NewConfig(dsn), "sessions", 0)),
+	)
 
 	if err != nil {
 		panic("Failed to create connection to database")
 	}
 
 	//Isi model / table disini
-	db.AutoMigrate(&entity.User{}, &entity.Transaction{})
+	db.AutoMigrate(&entity.User{}, &entity.RatRace{}, &entity.BigRace{})
 	return db
 }
 

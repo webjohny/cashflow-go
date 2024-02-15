@@ -4,4 +4,4 @@
 
 export GOOS=windows
 go build .
-cashflow-go.exe
+./cashflow-go.exe

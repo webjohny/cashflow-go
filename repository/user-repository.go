@@ -18,6 +18,8 @@ type UserRepository interface {
 	UpdateUserProfile(userId uint64, filePath string) error
 }
 
+const UserTable = "users"
+
 type userConnection struct {
 	connection *gorm.DB
 }
