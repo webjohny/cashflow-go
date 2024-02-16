@@ -1,25 +1,36 @@
 package service
 
-type CardService interface{}
-
-type cardService struct{}
-
-func NewCardService() CardService {
-	return &cardService{}
+type CardService interface {
+	Prepare(raceId uint64, family string, actionType string, username string) string
+	Accept(raceId uint64, family string, actionType string, username string) string
+	Purchase(raceId uint64, family string, actionType string, username string) string
+	Selling(raceId uint64, family string, actionType string, username string) string
 }
 
-func (service *cardService) Prepare() {
-	//
+type cardService struct {
+	gameService GameService
+	raceService RaceService
 }
 
-func (service *cardService) Accept() {
-	//
+func NewCardService(gameService GameService, raceService RaceService) CardService {
+	return &cardService{
+		gameService: gameService,
+		raceService: raceService,
+	}
 }
 
-func (service *cardService) Purchase() {
-	//
+func (service *cardService) Prepare(raceId uint64, family string, actionType string, username string) string {
+	return ""
 }
 
-func (service *cardService) Selling() {
-	//
+func (service *cardService) Accept(raceId uint64, family string, actionType string, username string) string {
+	return ""
+}
+
+func (service *cardService) Purchase(raceId uint64, family string, actionType string, username string) string {
+	return ""
+}
+
+func (service *cardService) Selling(raceId uint64, family string, actionType string, username string) string {
+	return ""
 }

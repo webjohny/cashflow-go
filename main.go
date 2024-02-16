@@ -23,12 +23,12 @@ var (
 	jwtService  service.JWTService  = service.NewJWTService()
 	userService service.UserService = service.NewUserService(userRepository)
 	authService service.AuthService = service.NewAuthService(userRepository)
-	cardService service.CardService = service.NewCardService()
 	gameService service.GameService = service.NewGameService(raceRepository)
 	raceService service.RaceService = service.NewRaceService(raceRepository)
+	cardService service.CardService = service.NewCardService(gameService, raceService)
 
 	// Controllers
-	cardController controller.CardController = controller.NewCardController(cardService, gameService)
+	cardController controller.CardController = controller.NewCardController(cardService)
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
 	userController controller.UserController = controller.NewUserController(userService, jwtService)
 )

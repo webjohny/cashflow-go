@@ -1,9 +1,15 @@
 package entity
 
 var RaceStatus = struct {
-	STARTED string
+	STARTED   string
+	LOBBY     string
+	CANCELLED string
+	FINISHED  string
 }{
-	STARTED: "started",
+	STARTED:   "started",
+	LOBBY:     "lobby",
+	CANCELLED: "cancelled",
+	FINISHED:  "finished",
 }
 
 type Race struct {

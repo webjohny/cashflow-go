@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/webjohny/cashflow-go/session"
 	"log"
 	"net/http"
 
@@ -11,40 +12,58 @@ import (
 )
 
 type CardController interface {
-	Action(ctx *gin.Context)
+	Action(ctx *gin.Context) string
 }
 
 type cardController struct {
 	cardService service.CardService
-	gameService service.GameService
 }
 
-func NewCardController(cardService service.CardService, gameService service.GameService) CardController {
+func NewCardController(cardService service.CardService) CardController {
 	return &cardController{
 		cardService: cardService,
-		gameService: gameService,
 	}
 }
 
-func (c *cardController) Action(ctx *gin.Context) {
+func (c *cardController) Action(ctx *gin.Context) string {
 	action := ctx.Param("action")
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	race := c.gameService.GetRaceByCtx(ctx)
+	raceId := session.GetItem[uint64](ctx, "raceId")
+	username := session.GetItem[string](ctx, "username")
 
-	//username := session.GetItem[string](ctx, "username")
-	//game := ctx.MustGet("game")
+	var resp string
 
-	log.Println(action, family, actionType)
+	switch action {
+	case "pre":
+		resp = c.cardService.Prepare(raceId, family, actionType, username)
+		break
+
+	case "buy":
+		resp = c.cardService.Purchase(raceId, family, actionType, username)
+		break
+
+	case "sell":
+		resp = c.cardService.Selling(raceId, family, actionType, username)
+		break
+
+	case "ok":
+		resp = c.cardService.Accept(raceId, family, actionType, username)
+		break
+	}
+
+	log.Println(resp, action, family, actionType)
 
 	var actionDTO dto.CardActionDTO
 	errDTO := ctx.ShouldBind(&actionDTO)
 	if errDTO != nil {
 		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
+		return ""
 	}
 	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+
+	return resp
 }
