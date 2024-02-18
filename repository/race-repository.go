@@ -13,7 +13,7 @@ type RaceRepository interface {
 	FindRaceById(ID uint64, IsBigRace bool) *entity.Race
 }
 
-const RaceTable = "rat_races"
+const RaceTable = "races"
 
 type raceConnection struct {
 	connection *gorm.DB

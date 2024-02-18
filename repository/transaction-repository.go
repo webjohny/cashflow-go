@@ -11,11 +11,11 @@ type TransactionRepository interface {
 	InsertTransaction(b *entity.Transaction) entity.Transaction
 	UpdateTransaction(b *entity.Transaction) entity.Transaction
 	All(idUser string) []entity.Transaction
-	SumGroupId(idUser string) []helper.TransactionGroupSum
-	TransactionReport(idUser string) helper.TransactionReport
 	DeleteTransaction(b *entity.Transaction)
-	FindTransactionById(UserID uint64) entity.Transaction
+	FindTransactionByPlayerId(ID uint64) entity.Transaction
 }
+
+const TransactionsTable = "transactions"
 
 type transactionConnection struct {
 	connection *gorm.DB
@@ -29,24 +29,14 @@ func NewTransactionRepository(dbConn *gorm.DB) TransactionRepository {
 
 func (db *transactionConnection) InsertTransaction(b *entity.Transaction) entity.Transaction {
 	db.connection.Save(&b)
-	db.connection.Preload("User").Find(&b)
+	db.connection.Preload(TransactionsTable).Find(&b)
 	return *b
 }
 
 func (db *transactionConnection) All(idUser string) []entity.Transaction {
 	var transactions []entity.Transaction
-	db.connection.Preload("User").Where("user_id = ?", idUser).Find(&transactions)
+	db.connection.Preload(TransactionsTable).Where("user_id = ?", idUser).Find(&transactions)
 	return transactions
-}
-
-func (db *transactionConnection) SumGroupId(idUser string) []helper.TransactionGroupSum {
-	var result []helper.TransactionGroupSum
-	db.connection.Model(&entity.Transaction{}).
-		Select("transaction_group, SUM(transaction_value) AS total_transaction").
-		Where("user_id = ?", idUser).
-		Group("transaction_group").
-		Scan(&result)
-	return result
 }
 
 func (db *transactionConnection) TransactionReport(idUser string) helper.TransactionReport {
@@ -63,7 +53,7 @@ func (db *transactionConnection) TransactionReport(idUser string) helper.Transac
 
 func (db *transactionConnection) UpdateTransaction(b *entity.Transaction) entity.Transaction {
 	db.connection.Save(&b)
-	db.connection.Preload("User").Find(&b)
+	db.connection.Preload(TransactionsTable).Find(&b)
 	return *b
 }
 
@@ -71,8 +61,14 @@ func (db *transactionConnection) DeleteTransaction(b *entity.Transaction) {
 	db.connection.Delete(&b)
 }
 
-func (db *transactionConnection) FindTransactionById(UserID uint64) entity.Transaction {
+func (db *transactionConnection) FindTransactionByPlayerId(ID uint64) entity.Transaction {
 	var transaction entity.Transaction
-	db.connection.Preload("User").Find(&transaction, UserID)
+	db.connection.Preload(TransactionsTable).Find(&transaction, ID)
+	return transaction
+}
+
+func (db *transactionConnection) FindTransactionByRaceId(ID uint64) entity.Transaction {
+	var transaction entity.Transaction
+	db.connection.Preload(TransactionsTable).Find(&transaction, ID)
 	return transaction
 }

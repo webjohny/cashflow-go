@@ -20,10 +20,16 @@ func NewCardService(gameService GameService, raceService RaceService) CardServic
 }
 
 func (service *cardService) Prepare(raceId uint64, family string, actionType string, username string) string {
+	if actionType == "risk" || actionType == "riskStock" {
+		service.raceService.PreRiskAction(raceId)
+	}
 	return ""
 }
 
 func (service *cardService) Accept(raceId uint64, family string, actionType string, username string) string {
+	if family == "payday" {
+		service.raceService.PaydayAction(raceId)
+	}
 	return ""
 }
 

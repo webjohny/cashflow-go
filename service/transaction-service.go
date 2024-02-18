@@ -1,38 +1,25 @@
 package service
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/mashingan/smapping"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
-	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/repository"
-	"github.com/mashingan/smapping"
 )
 
 type TransactionService interface {
-	InsertTransaction(b dto.TransactionCreateDTO) entity.Transaction
+	InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) entity.Transaction
+	InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction
 	UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction
 	Delete(b entity.Transaction)
-	IsAllowedToEdit(userID string, transactionID uint64) bool
+	//IsAllowedToEdit(userID string, transactionID uint64) bool
 	All(idUser string) []entity.Transaction
-	SumGroupId(idUser string) []helper.TransactionGroupSum
-	TransactionReport(idUser string) helper.TransactionReport
 }
 
 type transactionService struct {
 	transactionRepository repository.TransactionRepository
-}
-
-// TransactionReport implements TransactionService
-func (service *transactionService) TransactionReport(idUser string) helper.TransactionReport {
-	return service.transactionRepository.TransactionReport(idUser)
-}
-
-// SumGroupId implements TransactionService
-func (service *transactionService) SumGroupId(idUser string) []helper.TransactionGroupSum {
-	return service.transactionRepository.SumGroupId(idUser)
 }
 
 func NewTransactionService(transactionRepo repository.TransactionRepository) TransactionService {
@@ -41,11 +28,29 @@ func NewTransactionService(transactionRepo repository.TransactionRepository) Tra
 	}
 }
 
-func (service *transactionService) InsertTransaction(b dto.TransactionCreateDTO) entity.Transaction {
+func (service *transactionService) InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) entity.Transaction {
 	trx := entity.Transaction{}
-	err := smapping.FillStruct(&trx, smapping.MapFields(&b))
-	if err != nil {
-		log.Fatalf("Failed map %v", err)
+	trx.PlayerID = &b.PlayerID
+	trx.TransactionType = entity.TransactionType.PLAYER
+	trx.Details = b.Details
+	trx.Data = &entity.TransactionData{
+		CurrentCash: &b.CurrentCash,
+		Cash:        &b.Cash,
+		Amount:      &b.Amount,
+	}
+	res := service.transactionRepository.InsertTransaction(&trx)
+	return res
+}
+
+func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction {
+	trx := entity.Transaction{}
+	trx.PlayerID = &b.RaceID
+	trx.TransactionType = entity.TransactionType.PLAYER
+	trx.Details = b.Details
+	trx.Data = &entity.TransactionData{
+		TxType:   &b.TxType,
+		Color:    &b.Color,
+		Username: &b.Username,
 	}
 	res := service.transactionRepository.InsertTransaction(&trx)
 	return res
@@ -69,8 +74,8 @@ func (service *transactionService) Delete(b entity.Transaction) {
 	service.transactionRepository.DeleteTransaction(&b)
 }
 
-func (service *transactionService) IsAllowedToEdit(userID string, transactionID uint64) bool {
-	b := service.transactionRepository.FindTransactionById(transactionID)
-	id := fmt.Sprintf("%v", b.UserID)
-	return userID == id
-}
+//func (service *transactionService) IsAllowedToEdit(userID string, transactionID uint64) bool {
+//	b := service.transactionRepository.FindTransactionById(transactionID)
+//	id := fmt.Sprintf("%v", b.UserID)
+//	return userID == id
+//}
