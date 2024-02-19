@@ -39,6 +39,7 @@ func GetMessage(message string) string {
 		"YOU_BOUGHT_DREAM":                  "Вы успешно приобрели мечту!",
 		"YOU_BOUGHT_PERSONAL_DREAM":         "Вы успешно приобрели СВОЮ мечту! Поздравляем!",
 		"YOU_BOUGHT_BUSINESS":               "Вы успешно приобрели бизнес!",
+		"ERROR_NOT_FOUND_ASSET":             "Нет такого актива",
 		"ERROR_NOT_ENOUGH_MONEY":            "Не хватает денег на балансе",
 		"ERROR_NOT_FOUND_STOCKS":            "Акции не найдены в инвестиционном портфеле",
 		"ERROR_NOT_ENOUGH_STOCKS":           "Акции в таком количестве не найдены в инвестиционном портфеле",
@@ -46,7 +47,7 @@ func GetMessage(message string) string {
 		"ERROR_YOU_HAVE_NO_PROPERTIES":      "У вас нет недвижимости",
 		"ERROR_TRANSACTION_DECLINED":        "Транзакция отклонена",
 		"ERROR_INSUFFICIENT_PLAYERS":        "Недостающее кол-во игроков (2 или более).",
-		"ERROR_MOVING_BIG_BOARD_DECLINED":   "Переход на большой круг отклонён",
+		"ERROR_MOVING_BIG_RACE_DECLINED":    "Переход на большой круг отклонён",
 		"ERROR_CANNOT_TAKE_BIG_DEALS":       "Для больших сделок Вам нужно минимум $10000 наличных средств",
 	}
 

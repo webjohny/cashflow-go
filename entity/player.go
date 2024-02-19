@@ -28,7 +28,9 @@ type CardRealEstate struct {
 	Heading     string  `json:"heading"`
 	Description string  `json:"description"`
 	Rule        *string `json:"rule"`
+	Plus        bool    `json:"plus"`
 	Cost        int     `json:"cost"`
+	Value       int     `json:"value"`
 	Mortgage    *int    `json:"mortgage"`
 	DownPayment *int    `json:"down_payment"`
 	CashFlow    *int    `json:"cash_flow"`
@@ -50,6 +52,8 @@ type CardStocks struct {
 type CardPreciousMetals struct {
 	ID          string `json:"id"`
 	Type        string `json:"type"`
+	Cost        int    `json:"cost"`
+	Count       int    `json:"count"`
 	Symbol      string `json:"symbol"`
 	Heading     string `json:"heading"`
 	Description string `json:"description"`
@@ -63,17 +67,71 @@ type CardDream struct {
 	Cost        int    `json:"cost"`
 }
 
+type CardCharity struct {
+	ID          string `json:"id"`
+	Heading     string `json:"heading"`
+	Description string `json:"description"`
+	Cost        int    `json:"cost"`
+	Type        string `json:"type"`
+	Symbol      string `json:"symbol"`
+}
+
+type CardPayTax struct {
+	ID          string `json:"id"`
+	Heading     string `json:"heading"`
+	Description string `json:"description"`
+	Type        string `json:"type"`
+	Percent     int    `json:"percent"`
+}
+
+type CardDownsized struct {
+	ID          string `json:"id"`
+	Heading     string `json:"heading"`
+	Description string `json:"description"`
+	Type        string `json:"type"`
+	Percent     int    `json:"percent"`
+}
+
+type CardSmallDeal struct {
+	ID                   string    `json:"id"`
+	Type                 string    `json:"type"`
+	Cost                 *int      `json:"cost"`
+	Count                *int      `json:"count"`
+	Symbol               string    `json:"symbol"`
+	Heading              string    `json:"heading"`
+	Description          string    `json:"description"`
+	Percent              *int      `json:"percent"`
+	Rule                 *string   `json:"rule"`
+	Price                *int      `json:"price"`
+	OnlyYou              *bool     `json:"only_you"`
+	Range                *[]int    `json:"range"`
+	SubRule              *[]string `json:"subRule"`
+	ApplicableToEveryOne *bool     `json:"applicable_to_every_one"`
+}
+
 type CardDice struct {
 	Dices      []int    `json:"dices"`
-	CashFlow   *int     `json:"cashFlow"`
-	CostPerOne *float32 `json:"costPerOne"`
+	CashFlow   *int     `json:"cash_flow"`
+	CostPerOne *float32 `json:"cost_per_one"`
+}
+
+type CardDamages struct {
+	ID                   string   `json:"id"`
+	Type                 string   `json:"type"`
+	Heading              string   `json:"heading"`
+	Symbol               string   `json:"symbol"`
+	Description          string   `json:"description"`
+	Rule                 string   `json:"rule"`
+	SubRule              []string `json:"sub_rule"`
+	Cost                 int      `json:"cost"`
+	ApplicableToEveryOne bool     `json:"applicable_to_every_one"`
 }
 
 type CardRiskBusiness struct {
 	ID          string     `json:"id"`
 	Type        string     `json:"type"`
 	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extraDices"`
+	ExtraDices  int        `json:"extra_dices"`
 	Symbol      string     `json:"symbol"`
 	Heading     string     `json:"heading"`
 	Description string     `json:"description"`
@@ -86,11 +144,11 @@ type CardRiskStocks struct {
 	Count       int        `json:"count"`
 	Cost        int        `json:"cost"`
 	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extraDices"`
+	ExtraDices  int        `json:"extra_dices"`
 	Symbol      string     `json:"symbol"`
 	Heading     string     `json:"heading"`
 	Description string     `json:"description"`
-	CostPerOne  float64    `json:"costPerOne"`
+	CostPerOne  float64    `json:"cost_per_one"`
 }
 
 type PlayerIncome struct {
@@ -107,7 +165,12 @@ type PlayerAssets struct {
 }
 
 type PlayerLiabilities struct {
-	RealEstates []CardRealEstate `json:"real_estates"`
+	RealEstates    []CardRealEstate `json:"real_estates"`
+	BankLoan       int              `json:"bank_loan"`
+	HomeMortgage   int              `json:"home_mortgage"`
+	SchoolLoans    int              `json:"school_loans"`
+	CarLoans       int              `json:"car_loans"`
+	CreditCardDebt int              `json:"credit_card_debt"`
 }
 
 type Player struct {
@@ -149,6 +212,10 @@ func (e *Player) FindStocks(symbol string) (int, *CardStocks) {
 	return -1, nil
 }
 
+func (e *Player) HasRealEstates() bool {
+	return len(e.Assets.RealEstates) > 0
+}
+
 func (e *Player) FindRealEstate(id string) *CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
@@ -159,10 +226,48 @@ func (e *Player) FindRealEstate(id string) *CardRealEstate {
 	return nil
 }
 
-func (e *Player) FindPreciousMetals(symbol string) *CardPreciousMetals {
+func (e *Player) FindPreciousMetals(symbol string) (int, *CardPreciousMetals) {
 	for i := 0; i < len(e.Assets.PreciousMetals); i++ {
 		if symbol == e.Assets.PreciousMetals[i].Symbol {
-			return &e.Assets.PreciousMetals[i]
+			return i, &e.Assets.PreciousMetals[i]
+		}
+	}
+
+	return -1, nil
+}
+
+func (e *Player) RemovePreciousMetals(symbol string) *CardPreciousMetals {
+	index, _ := e.FindPreciousMetals(symbol)
+	if index >= 0 && index < len(e.Assets.PreciousMetals) {
+		e.Assets.PreciousMetals = append(e.Assets.PreciousMetals[:index], e.Assets.PreciousMetals[index+1:]...)
+	}
+
+	return nil
+}
+
+func (e *Player) RemoveStocks(symbol string) *CardPreciousMetals {
+	index, _ := e.FindStocks(symbol)
+	if index >= 0 && index < len(e.Assets.Stocks) {
+		e.Assets.Stocks = append(e.Assets.Stocks[:index], e.Assets.Stocks[index+1:]...)
+	}
+
+	return nil
+}
+
+func (e *Player) RemoveRealEstate(id string) *CardRealEstate {
+	for i := 0; i < len(e.Assets.RealEstates); i++ {
+		if id == e.Assets.RealEstates[i].ID {
+			e.Assets.RealEstates = append(e.Assets.RealEstates[:i], e.Assets.RealEstates[i+1:]...)
+		}
+	}
+	for i := 0; i < len(e.Liabilities.RealEstates); i++ {
+		if id == e.Liabilities.RealEstates[i].ID {
+			e.Liabilities.RealEstates = append(e.Liabilities.RealEstates[:i], e.Liabilities.RealEstates[i+1:]...)
+		}
+	}
+	for i := 0; i < len(e.Income.RealEstates); i++ {
+		if id == e.Income.RealEstates[i].ID {
+			e.Income.RealEstates = append(e.Income.RealEstates[:i], e.Income.RealEstates[i+1:]...)
 		}
 	}
 
