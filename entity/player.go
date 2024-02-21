@@ -1,5 +1,7 @@
 package entity
 
+import "math"
+
 var PlayerRoles = struct {
 	GUEST string
 	OWNER string
@@ -10,149 +12,9 @@ var PlayerRoles = struct {
 	ADMIN: "admin",
 }
 
-type CardDoodad struct {
-	ID            string `json:"id"`
-	Type          string `json:"type"`
-	Heading       string `json:"heading"`
-	Description   string `json:"description"`
-	Cost          int    `json:"cost"`
-	Rule          string `json:"rule"`
-	IsConditional bool   `json:"is_conditional"`
-	HasBabies     bool   `json:"has_babies"`
-}
-
-type CardRealEstate struct {
-	ID          string  `json:"id"`
-	Type        string  `json:"type"`
-	Symbol      string  `json:"symbol"`
-	Heading     string  `json:"heading"`
-	Description string  `json:"description"`
-	Rule        *string `json:"rule"`
-	Plus        bool    `json:"plus"`
-	Cost        int     `json:"cost"`
-	Value       int     `json:"value"`
-	Mortgage    *int    `json:"mortgage"`
-	DownPayment *int    `json:"down_payment"`
-	CashFlow    *int    `json:"cash_flow"`
-}
-
-type CardStocks struct {
-	ID          string `json:"id"`
-	Type        string `json:"type"`
-	Symbol      string `json:"symbol"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-	Rule        string `json:"rule"`
-	Price       int    `json:"price"`
-	Count       int    `json:"count"`
-	OnlyYou     bool   `json:"only_you"`
-	Range       []int  `json:"range"`
-}
-
-type CardPreciousMetals struct {
-	ID          string `json:"id"`
-	Type        string `json:"type"`
-	Cost        int    `json:"cost"`
-	Count       int    `json:"count"`
-	Symbol      string `json:"symbol"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-}
-
-type CardDream struct {
-	ID          string `json:"id"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-	Type        string `json:"type"`
-	Cost        int    `json:"cost"`
-}
-
-type CardCharity struct {
-	ID          string `json:"id"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-	Cost        int    `json:"cost"`
-	Type        string `json:"type"`
-	Symbol      string `json:"symbol"`
-}
-
-type CardPayTax struct {
-	ID          string `json:"id"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-	Type        string `json:"type"`
-	Percent     int    `json:"percent"`
-}
-
-type CardDownsized struct {
-	ID          string `json:"id"`
-	Heading     string `json:"heading"`
-	Description string `json:"description"`
-	Type        string `json:"type"`
-	Percent     int    `json:"percent"`
-}
-
-type CardSmallDeal struct {
-	ID                   string    `json:"id"`
-	Type                 string    `json:"type"`
-	Cost                 *int      `json:"cost"`
-	Count                *int      `json:"count"`
-	Symbol               string    `json:"symbol"`
-	Heading              string    `json:"heading"`
-	Description          string    `json:"description"`
-	Percent              *int      `json:"percent"`
-	Rule                 *string   `json:"rule"`
-	Price                *int      `json:"price"`
-	OnlyYou              *bool     `json:"only_you"`
-	Range                *[]int    `json:"range"`
-	SubRule              *[]string `json:"subRule"`
-	ApplicableToEveryOne *bool     `json:"applicable_to_every_one"`
-}
-
-type CardDice struct {
-	Dices      []int    `json:"dices"`
-	CashFlow   *int     `json:"cash_flow"`
-	CostPerOne *float32 `json:"cost_per_one"`
-}
-
-type CardDamages struct {
-	ID                   string   `json:"id"`
-	Type                 string   `json:"type"`
-	Heading              string   `json:"heading"`
-	Symbol               string   `json:"symbol"`
-	Description          string   `json:"description"`
-	Rule                 string   `json:"rule"`
-	SubRule              []string `json:"sub_rule"`
-	Cost                 int      `json:"cost"`
-	ApplicableToEveryOne bool     `json:"applicable_to_every_one"`
-}
-
-type CardRiskBusiness struct {
-	ID          string     `json:"id"`
-	Type        string     `json:"type"`
-	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extra_dices"`
-	Symbol      string     `json:"symbol"`
-	Heading     string     `json:"heading"`
-	Description string     `json:"description"`
-	Cost        int        `json:"cost"`
-}
-
-type CardRiskStocks struct {
-	ID          string     `json:"id"`
-	Type        string     `json:"type"`
-	Count       int        `json:"count"`
-	Cost        int        `json:"cost"`
-	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extra_dices"`
-	Symbol      string     `json:"symbol"`
-	Heading     string     `json:"heading"`
-	Description string     `json:"description"`
-	CostPerOne  float64    `json:"cost_per_one"`
-}
-
 type PlayerIncome struct {
 	RealEstates []CardRealEstate `json:"real_estates"`
+	Business    []CardBusiness   `json:"business"`
 	Salary      int              `json:"salary"`
 }
 
@@ -160,12 +22,14 @@ type PlayerAssets struct {
 	Dreams         []CardDream          `json:"dreams"`
 	PreciousMetals []CardPreciousMetals `json:"precious_metals"`
 	RealEstates    []CardRealEstate     `json:"real_estates"`
+	Business       []CardBusiness       `json:"business"`
 	Stocks         []CardStocks         `json:"stocks"`
 	Savings        int                  `json:"savings"`
 }
 
 type PlayerLiabilities struct {
 	RealEstates    []CardRealEstate `json:"real_estates"`
+	Business       []CardBusiness   `json:"business"`
 	BankLoan       int              `json:"bank_loan"`
 	HomeMortgage   int              `json:"home_mortgage"`
 	SchoolLoans    int              `json:"school_loans"`
@@ -194,11 +58,12 @@ type Player struct {
 	CurrentPosition uint8             `json:"current_position"`
 	DualDiceCount   uint8             `json:"dual_dice_count"`
 	SkippedTurns    uint8             `json:"skipped_turns"`
-	CanReRoll       *bool             `json:"can_re_roll"`
-	InBigRace       *bool             `json:"in_big_race"`
-	HasBankrupt     *bool             `json:"has_bankrupt"`
-	AboutToBankrupt *bool             `json:"about_to_bankrupt"`
-	HasMlm          *bool             `json:"has_mlm"`
+	IsRolledDice    bool              `json:"is_rolled_dice"`
+	CanReRoll       bool              `json:"can_re_roll"`
+	OnBigRace       bool              `json:"on_big_race"`
+	HasBankrupt     bool              `json:"has_bankrupt"`
+	AboutToBankrupt bool              `json:"about_to_bankrupt"`
+	HasMlm          bool              `json:"has_mlm"`
 	CreatedAt       string            `json:"created_at"`
 }
 
@@ -212,8 +77,52 @@ func (e *Player) FindStocks(symbol string) (int, *CardStocks) {
 	return -1, nil
 }
 
+func (e *Player) ChangeDiceStatus(status bool) {
+	e.IsRolledDice = status
+}
+
+func (e *Player) IncrementDualDiceCount() {
+	e.DualDiceCount += 3
+}
+
+func (e *Player) DecrementDualDiceCount() {
+	e.DualDiceCount--
+}
+
+func (e *Player) AllowReRoll() {
+	e.ChangeDiceStatus(false)
+	e.CanReRoll = true
+}
+
+func (e *Player) DeactivateReRoll() {
+	e.ChangeDiceStatus(true)
+	e.CanReRoll = false
+}
+
+func (e *Player) InitializeSkippedTurns() {
+	e.SkippedTurns = 2
+}
+
+func (e *Player) DecrementSkippedTurns() {
+	e.SkippedTurns--
+}
+
 func (e *Player) HasRealEstates() bool {
 	return len(e.Assets.RealEstates) > 0
+}
+
+func (e *Player) HasBusiness() bool {
+	return len(e.Assets.Business) > 0
+}
+
+func (e *Player) FindBusiness(id string) *CardBusiness {
+	for i := 0; i < len(e.Assets.Business); i++ {
+		if id == e.Assets.Business[i].ID {
+			return &e.Assets.Business[i]
+		}
+	}
+
+	return nil
 }
 
 func (e *Player) FindRealEstate(id string) *CardRealEstate {
@@ -274,8 +183,44 @@ func (e *Player) RemoveRealEstate(id string) *CardRealEstate {
 	return nil
 }
 
+func (e *Player) RemoveBusiness(id string) *CardBusiness {
+	for i := 0; i < len(e.Assets.Business); i++ {
+		if id == e.Assets.Business[i].ID {
+			e.Assets.Business = append(e.Assets.Business[:i], e.Assets.Business[i+1:]...)
+		}
+	}
+	for i := 0; i < len(e.Liabilities.Business); i++ {
+		if id == e.Liabilities.Business[i].ID {
+			e.Liabilities.Business = append(e.Liabilities.Business[:i], e.Liabilities.Business[i+1:]...)
+		}
+	}
+	for i := 0; i < len(e.Income.Business); i++ {
+		if id == e.Income.Business[i].ID {
+			e.Income.Business = append(e.Income.Business[:i], e.Income.Business[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
+func (e *Player) SplitStocks(card string) {
+	_, stock := e.FindStocks(card)
+	stock.Count *= 2
+	e.DeactivateReRoll()
+}
+
+func (e *Player) ReverseSplitStocks(card string) {
+	_, stock := e.FindStocks(card)
+	stock.Count = int(math.Ceil(float64(stock.Count) / 2))
+	e.DeactivateReRoll()
+}
+
 func (e *Player) CanContinue() bool {
 	return e.Cash > 0
+}
+
+func (e *Player) ConditionsForBigRace() bool {
+	return e.IsIncomeStable()
 }
 
 func (e *Player) IsIncomeStable() bool {

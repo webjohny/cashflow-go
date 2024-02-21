@@ -15,17 +15,20 @@ var (
 	db *gorm.DB = config.SetupDatabaseConnection()
 
 	// Repositories
-	raceRepository repository.RaceRepository        = repository.NewRaceRepository(db)
-	userRepository repository.UserRepository        = repository.NewUserRepository(db)
-	trxRepository  repository.TransactionRepository = repository.NewTransactionRepository(db)
+	raceRepository   repository.RaceRepository        = repository.NewRaceRepository(db)
+	userRepository   repository.UserRepository        = repository.NewUserRepository(db)
+	playerRepository repository.PlayerRepository      = repository.NewPlayerRepository(db)
+	trxRepository    repository.TransactionRepository = repository.NewTransactionRepository(db)
 
 	// Services
-	jwtService  service.JWTService  = service.NewJWTService()
-	userService service.UserService = service.NewUserService(userRepository)
-	authService service.AuthService = service.NewAuthService(userRepository)
-	gameService service.GameService = service.NewGameService(raceRepository)
-	raceService service.RaceService = service.NewRaceService(raceRepository)
-	cardService service.CardService = service.NewCardService(gameService, raceService)
+	jwtService         service.JWTService         = service.NewJWTService()
+	userService        service.UserService        = service.NewUserService(userRepository)
+	transactionService service.TransactionService = service.NewTransactionService(trxRepository)
+	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, transactionService)
+	authService        service.AuthService        = service.NewAuthService(userRepository)
+	gameService        service.GameService        = service.NewGameService(raceRepository)
+	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService)
+	cardService        service.CardService        = service.NewCardService(gameService, raceService)
 
 	// Controllers
 	cardController controller.CardController = controller.NewCardController(cardService)

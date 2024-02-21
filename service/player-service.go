@@ -12,7 +12,26 @@ import (
 type PlayerService interface {
 	GetPlayerByUsername(username string) *entity.Player
 	Payday(player entity.Player)
+	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
+	BuyDream(card entity.CardDream, player entity.Player) error
+	BuyStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
+	SellGold(card entity.CardPreciousMetals, player entity.Player, count int) error
+	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
+	SellRealEstate(card entity.CardRealEstate, player entity.Player) error
+	DivideStocks(card entity.CardStocks, player entity.Player, count int) error
+	IncreaseStocks(card entity.CardStocks, player entity.Player, count int) error
+	Charity(player entity.Player) error
+	BigCharity(card entity.CardCharity, player entity.Player) error
+	PayTax(card entity.CardPayTax, player entity.Player) error
+	Downsized(player entity.Player) error
+	MoveToBigRace(player entity.Player) error
+	PayDamages(card entity.CardMarket, player entity.Player) error
+	AddGoldCoins(card entity.CardPreciousMetals, player entity.Player) error
+	SellRealEstates(player entity.Player) (error, int)
+	SellBusiness(player entity.Player) (error, int)
+	TakeLoan(player entity.Player, amount int) error
+	PayLoan(player entity.Player, actionType string, amount int) error
 	UpdateCash(player *entity.Player, amount int, details string)
 }
 
@@ -36,6 +55,10 @@ func (service *playerService) Payday(player entity.Player) {
 	service.UpdateCash(&player, player.CalculateCashFlow(), "Зарплата")
 }
 
+func (service *playerService) CashFlowDay(player entity.Player) {
+	service.UpdateCash(&player, player.CalculateCashFlow(), "Кэш-флоу день")
+}
+
 func (service *playerService) Doodad(card entity.CardDoodad, player entity.Player) error {
 	cost := card.Cost
 
@@ -52,7 +75,7 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 	return nil
 }
 
-func (service *playerService) Dream(card entity.CardDream, player entity.Player) error {
+func (service *playerService) BuyDream(card entity.CardDream, player entity.Player) error {
 	cost := card.Cost
 
 	if player.Cash < cost {
@@ -224,13 +247,13 @@ func (service *playerService) Downsized(player entity.Player) error {
 }
 
 func (service *playerService) MoveToBigRace(player entity.Player) error {
-	if !player.IsIncomeStable() {
+	if !player.ConditionsForBigRace() {
 		return fmt.Errorf(helper.GetMessage("ERROR_MOVING_BIG_RACE_DECLINED"))
 	}
 
 	cashFlow := player.CalculatePassiveIncome() * 100
 
-	*player.InBigRace = true
+	player.OnBigRace = true
 	player.CashFlow = cashFlow
 	player.Cash = cashFlow + player.Cash
 	player.TotalIncome = 0
@@ -241,6 +264,7 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 		Stocks:         make([]entity.CardStocks, 0),
 		PreciousMetals: make([]entity.CardPreciousMetals, 0),
 		RealEstates:    make([]entity.CardRealEstate, 0),
+		Business:       make([]entity.CardBusiness, 0),
 		Dreams:         make([]entity.CardDream, 0),
 	}
 	player.Income = entity.PlayerIncome{
@@ -254,8 +278,8 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 	return nil
 }
 
-func (service *playerService) PayDamages(card entity.CardDamages, player entity.Player) error {
-	if player.Cash < card.Cost {
+func (service *playerService) PayDamages(card entity.CardMarket, player entity.Player) error {
+	if player.Cash < *card.Cost {
 		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
 	}
 
@@ -263,7 +287,7 @@ func (service *playerService) PayDamages(card entity.CardDamages, player entity.
 		return fmt.Errorf(helper.GetMessage("ERROR_YOU_HAVE_NO_PROPERTIES"))
 	}
 
-	service.UpdateCash(&player, -card.Cost, "Имущество поврежденно")
+	service.UpdateCash(&player, -*card.Cost, "Имущество поврежденно")
 
 	return nil
 }
@@ -295,6 +319,25 @@ func (service *playerService) SellRealEstates(player entity.Player) (error, int)
 	player.Assets.RealEstates = make([]entity.CardRealEstate, 0)
 	player.Income.RealEstates = make([]entity.CardRealEstate, 0)
 	player.Liabilities.RealEstates = make([]entity.CardRealEstate, 0)
+
+	return nil, totalCash
+}
+
+func (service *playerService) SellBusiness(player entity.Player) (error, int) {
+	var totalCash int
+
+	if !player.HasBusiness() {
+		return fmt.Errorf(helper.GetMessage("ERROR_YOU_HAVE_NO_PROPERTIES")), 0
+	}
+
+	for i := 0; i < len(player.Assets.Business); i++ {
+		property := player.Assets.Business[i]
+		totalCash += property.Cost / 2
+	}
+
+	player.Assets.Business = make([]entity.CardBusiness, 0)
+	player.Income.Business = make([]entity.CardBusiness, 0)
+	player.Liabilities.Business = make([]entity.CardBusiness, 0)
 
 	return nil, totalCash
 }
@@ -361,7 +404,21 @@ func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player e
 	return nil
 }
 
-func (service *playerService) RiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) error {
+func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player) error {
+	if player.Cash < card.Cost {
+		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+	}
+
+	player.Assets.Business = append(player.Assets.Business, card)
+	player.Income.Business = append(player.Income.Business, card)
+	player.Liabilities.Business = append(player.Liabilities.Business, card)
+
+	service.UpdateCash(&player, -card.Cost, card.Heading)
+
+	return nil
+}
+
+func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) error {
 	cost := card.Cost
 
 	if player.Cash < cost {
@@ -380,7 +437,7 @@ func (service *playerService) RiskBusiness(card entity.CardRiskBusiness, player 
 	if cashFlow > 0 {
 		service.UpdateCash(&player, -cost, card.Heading)
 
-		realEstate := entity.CardRealEstate{
+		business := entity.CardBusiness{
 			ID:          card.ID,
 			Type:        card.Type,
 			Symbol:      card.Symbol,
@@ -390,9 +447,9 @@ func (service *playerService) RiskBusiness(card entity.CardRiskBusiness, player 
 			CashFlow:    &cashFlow,
 		}
 
-		player.Assets.RealEstates = append(player.Assets.RealEstates, realEstate)
-		player.Income.RealEstates = append(player.Income.RealEstates, realEstate)
-		player.Liabilities.RealEstates = append(player.Liabilities.RealEstates, realEstate)
+		player.Assets.Business = append(player.Assets.Business, business)
+		player.Income.Business = append(player.Income.Business, business)
+		player.Liabilities.Business = append(player.Liabilities.Business, business)
 
 		return nil
 	}
@@ -400,7 +457,7 @@ func (service *playerService) RiskBusiness(card entity.CardRiskBusiness, player 
 	return fmt.Errorf(helper.GetMessage("RISK_REQUEST_DECLINED"))
 }
 
-func (service *playerService) RiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) error {
+func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) error {
 	cost := card.Cost
 
 	if player.Cash < cost {

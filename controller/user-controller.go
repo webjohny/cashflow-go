@@ -2,16 +2,16 @@ package controller
 
 import (
 	"fmt"
+	"github.com/webjohny/cashflow-go/request"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
 
-	"github.com/webjohny/cashflow-go/dto"
-	"github.com/webjohny/cashflow-go/helper"
-	"github.com/webjohny/cashflow-go/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/dto"
+	"github.com/webjohny/cashflow-go/service"
 )
 
 type UserController interface {
@@ -37,7 +37,7 @@ func (c *userController) Update(context *gin.Context) {
 	var userUpdateDTO dto.UserUpdateDTO
 	errDTO := context.ShouldBind(&userUpdateDTO)
 	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		res := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		context.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
@@ -53,7 +53,7 @@ func (c *userController) Update(context *gin.Context) {
 	}
 	userUpdateDTO.ID = id
 	u := c.userService.Update(userUpdateDTO)
-	res := helper.BuildResponse(true, "OK!", u)
+	res := request.BuildResponse(true, "OK!", u)
 	context.JSON(http.StatusOK, res)
 }
 
@@ -66,7 +66,7 @@ func (c *userController) Profile(context *gin.Context) {
 	claims := token.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["userid"])
 	user := c.userService.Profile(id)
-	res := helper.BuildResponse(true, "OK", user)
+	res := request.BuildResponse(true, "OK", user)
 	context.JSON(http.StatusOK, res)
 
 }
@@ -116,7 +116,7 @@ func (c *userController) GetFile(context *gin.Context) {
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		res := helper.BuildErrorResponse("Failed to fetch file", err.Error(), helper.EmptyObj{})
+		res := request.BuildErrorResponse("Failed to fetch file", err.Error(), request.EmptyObj{})
 		context.AbortWithStatusJSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -124,7 +124,7 @@ func (c *userController) GetFile(context *gin.Context) {
 
 	fileInfo, err := file.Stat()
 	if err != nil {
-		res := helper.BuildErrorResponse("Failed to fetch file", err.Error(), helper.EmptyObj{})
+		res := request.BuildErrorResponse("Failed to fetch file", err.Error(), request.EmptyObj{})
 		context.AbortWithStatusJSON(http.StatusInternalServerError, res)
 		return
 	}
@@ -139,7 +139,7 @@ func (c *userController) GetFile(context *gin.Context) {
 	// Copy the file data to the response body
 	_, err = io.Copy(context.Writer, file)
 	if err != nil {
-		res := helper.BuildErrorResponse("Failed to fetch file", err.Error(), helper.EmptyObj{})
+		res := request.BuildErrorResponse("Failed to fetch file", err.Error(), request.EmptyObj{})
 		context.AbortWithStatusJSON(http.StatusInternalServerError, res)
 		return
 	}

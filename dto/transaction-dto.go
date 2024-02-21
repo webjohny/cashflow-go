@@ -16,6 +16,14 @@ type TransactionCreateRaceDTO struct {
 	Color    string `json:"color" form:"color" binding:"required"`
 }
 
+type TransactionCreateDTO struct {
+	RaceID   uint64 `json:"race_id" form:"race_id" binding:"required"`
+	Details  string `json:"details" form:"details" binding:"required"`
+	TxType   string `json:"tx_type" form:"tx_type" binding:"required"`
+	Username string `json:"username" form:"username" binding:"required"`
+	Color    string `json:"color" form:"color" binding:"required"`
+}
+
 type TransactionUpdateDTO struct {
 	ID               uint64 `json:"id" form:"id" binding:"required"`
 	UserID           uint64 `json:"userid" form:"userid" binding:"required"`

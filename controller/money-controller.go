@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"github.com/webjohny/cashflow-go/request"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
-	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/service"
 )
 
@@ -27,10 +27,10 @@ func (c *moneyController) Send(ctx *gin.Context) {
 	var loginDTO dto.LoginDTO
 	errDTO := ctx.ShouldBind(&loginDTO)
 	if errDTO != nil {
-		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		response := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
+	response := request.BuildErrorResponse("Please check again your credential", "Invalid Credential", request.EmptyObj{})
 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 }

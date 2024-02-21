@@ -26,6 +26,7 @@ func GetMessage(message string) string {
 		"YOU_PARTICIPATED_BIG_CHARITY":      "Вы успешно поучавствовали в Акции Милосердия",
 		"YOU_WAS_DOWNSIZED":                 "К сожалению Вас уволили...",
 		"RISK_REQUEST_DECLINED":             "К сожалению риск не оправдал надежды",
+		"HAVE_NO_DEFINED_CARD":              "Карточка не доступна",
 		"YOU_HAVE_NO_BABIES":                "У Вас нету детей",
 		"YOU_HAVE_CHILD_BOY":                "Поздравляем, у Вас родился мальчик!",
 		"YOU_HAVE_CHILD_GIRL":               "Поздравляем, у Вас родилась девочка!",

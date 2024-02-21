@@ -1,18 +1,15 @@
 package controller
 
 import (
-	"github.com/webjohny/cashflow-go/session"
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/webjohny/cashflow-go/dto"
-	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
+	"github.com/webjohny/cashflow-go/session"
+	"strconv"
 )
 
 type CardController interface {
-	Action(ctx *gin.Context) string
+	Action(ctx *gin.Context)
 }
 
 type cardController struct {
@@ -25,45 +22,35 @@ func NewCardController(cardService service.CardService) CardController {
 	}
 }
 
-func (c *cardController) Action(ctx *gin.Context) string {
+func (c *cardController) Action(ctx *gin.Context) {
 	action := ctx.Param("action")
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
+	count, _ := strconv.Atoi(ctx.Query("count"))
 
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	var resp string
+	var err error
+	var response interface{}
 
 	switch action {
 	case "pre":
-		resp = c.cardService.Prepare(raceId, family, actionType, username)
+		err, response = c.cardService.Prepare(raceId, family, actionType, username)
 		break
 
 	case "buy":
-		resp = c.cardService.Purchase(raceId, family, actionType, username)
+		err, response = c.cardService.Purchase(raceId, family, actionType, username, count)
 		break
 
 	case "sell":
-		resp = c.cardService.Selling(raceId, family, actionType, username)
+		err, response = c.cardService.Selling(raceId, family, actionType, username)
 		break
 
 	case "ok":
-		resp = c.cardService.Accept(raceId, family, actionType, username)
+		err, response = c.cardService.Accept(raceId, family, actionType, username)
 		break
 	}
 
-	log.Println(resp, action, family, actionType)
-
-	var actionDTO dto.CardActionDTO
-	errDTO := ctx.ShouldBind(&actionDTO)
-	if errDTO != nil {
-		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return ""
-	}
-	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
-	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
-
-	return resp
+	request.FinalResponse(ctx, err, response)
 }

@@ -1,6 +1,8 @@
-package helper
+package request
 
 import (
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"strings"
 )
 
@@ -42,4 +44,13 @@ func BuildErrorResponse(message string, err string, data interface{}) Response {
 		Data:    data,
 	}
 	return res
+}
+
+func FinalResponse(ctx *gin.Context, err error, response interface{}) {
+	if err != nil {
+		response := BuildErrorResponse("Failed to process request", err.Error(), EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 }

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/webjohny/cashflow-go/request"
 	"net/http"
 
 	"strconv"
@@ -8,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
-	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/service"
 )
 
@@ -32,7 +32,7 @@ func (c *gameController) Start(ctx *gin.Context) {
 	var loginDTO dto.LoginDTO
 	errDTO := ctx.ShouldBind(&loginDTO)
 	if errDTO != nil {
-		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		response := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
@@ -40,10 +40,10 @@ func (c *gameController) Start(ctx *gin.Context) {
 	if v, ok := authResult.(entity.User); ok {
 		generatedTokn := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10), v.Email, v.Profile, v.Jk, v.Telephone, v.Pin, v.Name)
 		v.Token = generatedTokn
-		response := helper.BuildResponse(true, "OK", v)
+		response := request.BuildResponse(true, "OK", v)
 		ctx.JSON(http.StatusOK, response)
 		return
 	}
-	response := helper.BuildErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObj{})
+	response := request.BuildErrorResponse("Please check again your credential", "Invalid Credential", request.EmptyObj{})
 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 }

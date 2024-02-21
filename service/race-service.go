@@ -1,18 +1,31 @@
 package service
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/repository"
+	"github.com/webjohny/cashflow-go/request"
 	"net/http"
 	"strconv"
 )
 
 type RaceService interface {
-	PreRiskAction(raceId uint64, username string)
-	PaydayAction(raceId uint64, username string)
+	PreRiskAction(raceId uint64, username string, actionType string)
+	BusinessAction(raceId uint64, username string, actionType string) error
+	RealEstateAction(raceId uint64, username string, actionType string) error
+	DreamAction(raceId uint64, username string, actionType string)
+	RiskBusinessAction(raceId uint64, username string, actionType string) error
+	RiskStocksAction(raceId uint64, username string, actionType string) error
+	StocksAction(raceId uint64, username string, actionType string, count int) error
+	LotteryAction(raceId uint64, username string, actionType string)
+	GoldCoinsAction(raceId uint64, username string, actionType string)
+	MlmAction(raceId uint64, username string, actionType string)
+	SkipAction(raceId uint64, username string, actionType string)
+	PaydayAction(raceId uint64, username string, actionType string)
+	MarketAction(raceId uint64, username string, actionType string) error
 	GetInjectedRace(ctx *gin.Context) *entity.Race
 	GetRaceByRaceId(raceId uint64) *entity.Race
 }
@@ -29,17 +42,97 @@ func NewRaceService(raceRepo repository.RaceRepository, playerService PlayerServ
 	}
 }
 
-func (service *raceService) PreRiskAction(raceId uint64, username string) {
+func (service *raceService) PreRiskAction(raceId uint64, username string, actionType string) {
 	//race := service.GetRaceByRaceId(raceId)
 }
+func (service *raceService) BusinessAction(raceId uint64, username string, actionType string) error {
+	return nil
+}
+func (service *raceService) RealEstateAction(raceId uint64, username string, actionType string) error {
+	return nil
+}
+func (service *raceService) DreamAction(raceId uint64, username string, actionType string) {}
+func (service *raceService) RiskBusinessAction(raceId uint64, username string, actionType string) error {
+	return nil
+}
+func (service *raceService) RiskStocksAction(raceId uint64, username string, actionType string) error {
+	return nil
+}
+func (service *raceService) StocksAction(raceId uint64, username string, actionType string, count int) error {
+	return nil
+}
+func (service *raceService) LotteryAction(raceId uint64, username string, actionType string)   {}
+func (service *raceService) GoldCoinsAction(raceId uint64, username string, actionType string) {}
+func (service *raceService) MlmAction(raceId uint64, username string, actionType string)       {}
+func (service *raceService) SkipAction(raceId uint64, username string, actionType string)      {}
 
-func (service *raceService) PaydayAction(raceId uint64, username string) {
+func (service *raceService) MarketAction(raceId uint64, username string, actionType string) error {
+	race := service.GetRaceByRaceId(raceId)
+
+	if race.CurrentCard == nil {
+		return fmt.Errorf(helper.GetMessage("HAVE_NO_DEFINED_CARD"))
+	}
+
+	player := service.playerService.GetPlayerByUsername(username)
+
+	var err error
+
+	cardMarket := entity.CardMarket{
+		ID:                   race.CurrentCard.ID,
+		Type:                 race.CurrentCard.Type,
+		Heading:              race.CurrentCard.Heading,
+		Symbol:               race.CurrentCard.Symbol,
+		Description:          race.CurrentCard.Description,
+		Rule:                 *race.CurrentCard.Rule,
+		SubRule:              *race.CurrentCard.SubRule,
+		Cost:                 race.CurrentCard.Cost,
+		ApplicableToEveryOne: race.CurrentCard.ApplicableToEveryOne,
+		Success:              race.CurrentCard.Success,
+		Plus:                 race.CurrentCard.Plus,
+	}
+
+	if player != nil {
+		switch actionType {
+		case "damage":
+			err = service.playerService.PayDamages(cardMarket, *player)
+
+			//player.payDamages(this.#card);
+			//
+			//this.setTransactionState('market', player.username, messages.YOU_HAVE_PAID_PROPERTY_DAMAGE, { type: 'warning' });
+			//
+			//this.#log.addLog(player, messages.YOU_HAVE_PAID_PROPERTY_DAMAGE);
+			//this.respond(player.username);
+			break
+
+		case "realEstate":
+			//err = service.playerService.MarketRealEstate(cardMarket, *player)
+			break
+
+		case "goldCoins":
+			//err = service.playerService.MarketGoldCoins(cardMarket, *player)
+			break
+
+		case "lottery":
+			//err = service.playerService.MarketLottery(cardMarket, *player)
+			break
+		}
+	}
+
+	return err
+
+}
+
+func (service *raceService) PaydayAction(raceId uint64, username string, actionType string) {
 	//race := service.GetRaceByRaceId(raceId)
 
 	player := service.playerService.GetPlayerByUsername(username)
 
 	if player != nil {
-		service.playerService.Payday(*player)
+		if actionType == "payday" {
+			service.playerService.Payday(*player)
+		} else if actionType == "cashFlowDay" {
+			service.playerService.CashFlowDay(*player)
+		}
 	}
 
 	//const status = this.#currentPlayer.payday();
@@ -58,7 +151,7 @@ func (service *raceService) GetInjectedRace(ctx *gin.Context) *entity.Race {
 	errDTO := ctx.ShouldBind(&queryDTO)
 
 	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		res := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return nil
 	}

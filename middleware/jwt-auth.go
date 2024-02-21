@@ -1,20 +1,20 @@
 package middleware
 
 import (
+	"github.com/webjohny/cashflow-go/request"
 	"log"
 	"net/http"
 
-	"github.com/webjohny/cashflow-go/helper"
-	"github.com/webjohny/cashflow-go/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/service"
 )
 
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			response := helper.BuildErrorResponse("Failed to process request", "No Token Found !", nil)
+			response := request.BuildErrorResponse("Failed to process request", "No Token Found !", nil)
 			c.AbortWithStatusJSON(http.StatusBadRequest, response)
 			return
 		}
@@ -25,7 +25,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 			log.Println("Claim[issuer] : ", claims["issuer"])
 		} else {
 			log.Println(err)
-			response := helper.BuildErrorResponse("Token is not valid", err.Error(), nil)
+			response := request.BuildErrorResponse("Token is not valid", err.Error(), nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 		}
 	}

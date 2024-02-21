@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/webjohny/cashflow-go/entity"
-	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/request"
 
 	"gorm.io/gorm"
 )
@@ -39,8 +39,8 @@ func (db *transactionConnection) All(idUser string) []entity.Transaction {
 	return transactions
 }
 
-func (db *transactionConnection) TransactionReport(idUser string) helper.TransactionReport {
-	var result helper.TransactionReport
+func (db *transactionConnection) TransactionReport(idUser string) request.TransactionReport {
+	var result request.TransactionReport
 
 	db.connection.Model(&entity.Transaction{}).
 		Select("SUM(CASE WHEN transaction_type = '1' THEN transaction_value ELSE 0 END) AS transaction_in, "+
