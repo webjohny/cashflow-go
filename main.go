@@ -27,7 +27,7 @@ var (
 	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, transactionService)
 	authService        service.AuthService        = service.NewAuthService(userRepository)
 	gameService        service.GameService        = service.NewGameService(raceRepository)
-	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService)
+	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
 
 	// Controllers

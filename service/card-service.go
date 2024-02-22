@@ -63,10 +63,11 @@ func NewCardService(gameService GameService, raceService RaceService) CardServic
 }
 
 func (service *cardService) Prepare(raceId uint64, family string, actionType string, username string) (error, interface{}) {
+	var err error
 	if actionType == "risk" || actionType == "riskStock" {
-		service.raceService.PreRiskAction(raceId, username, actionType)
+		err = service.raceService.PreRiskAction(raceId, username, actionType)
 	}
-	return nil, nil
+	return err, nil
 }
 
 func (service *cardService) Accept(raceId uint64, family string, actionType string, username string) (error, interface{}) {
@@ -74,7 +75,7 @@ func (service *cardService) Accept(raceId uint64, family string, actionType stri
 	var response interface{}
 
 	if family == "payday" {
-		service.raceService.PaydayAction(raceId, username, actionType)
+		err = service.raceService.PaydayAction(raceId, username, actionType)
 	} else if family == "market" && actionType == "damage" {
 		err = service.raceService.MarketAction(raceId, username, actionType)
 	}
@@ -95,7 +96,7 @@ func (service *cardService) Purchase(raceId uint64, family string, actionType st
 		break
 
 	case "dream":
-		service.raceService.DreamAction(raceId, username, actionType)
+		err = service.raceService.DreamAction(raceId, username, actionType)
 		break
 
 	case "riskBusiness":
@@ -111,19 +112,19 @@ func (service *cardService) Purchase(raceId uint64, family string, actionType st
 		break
 
 	case "lottery":
-		service.raceService.LotteryAction(raceId, username, actionType)
+		err = service.raceService.LotteryAction(raceId, username, actionType)
 		break
 
 	case "goldCoins":
-		service.raceService.GoldCoinsAction(raceId, username, actionType)
+		err = service.raceService.GoldCoinsAction(raceId, username, actionType)
 		break
 
 	case "mlm":
-		service.raceService.MlmAction(raceId, username, actionType)
+		err = service.raceService.MlmAction(raceId, username, actionType)
 		break
 
 	default:
-		service.raceService.SkipAction(raceId, username, actionType)
+		err = service.raceService.SkipAction(raceId, username, actionType)
 		break
 	}
 

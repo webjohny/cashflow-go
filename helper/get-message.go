@@ -40,6 +40,8 @@ func GetMessage(message string) string {
 		"YOU_BOUGHT_DREAM":                  "Вы успешно приобрели мечту!",
 		"YOU_BOUGHT_PERSONAL_DREAM":         "Вы успешно приобрели СВОЮ мечту! Поздравляем!",
 		"YOU_BOUGHT_BUSINESS":               "Вы успешно приобрели бизнес!",
+		"UNDEFINED_USER":                    "Пользователь не найден",
+		"UNDEFINED_GAME":                    "Игра не найдена",
 		"ERROR_NOT_FOUND_ASSET":             "Нет такого актива",
 		"ERROR_NOT_ENOUGH_MONEY":            "Не хватает денег на балансе",
 		"ERROR_NOT_FOUND_STOCKS":            "Акции не найдены в инвестиционном портфеле",

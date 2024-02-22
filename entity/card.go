@@ -1,33 +1,35 @@
 package entity
 
 type CardDefault struct {
-	ID                   string    `json:"id"`
-	Type                 string    `json:"type"`
-	Symbol               string    `json:"symbol"`
-	Name                 string    `json:"name"`
-	Family               string    `json:"family"`
-	Heading              string    `json:"heading"`
-	Description          string    `json:"description"`
-	Cost                 *int      `json:"cost,omitempty"`
-	Rule                 *string   `json:"rule,omitempty"`
-	IsConditional        *bool     `json:"is_conditional,omitempty"`
-	HasBabies            *bool     `json:"has_babies,omitempty"`
-	Plus                 *bool     `json:"plus,omitempty"`
-	Value                *int      `json:"value,omitempty"`
-	Mortgage             *int      `json:"mortgage,omitempty"`
-	DownPayment          *int      `json:"down_payment,omitempty"`
-	CashFlow             *int      `json:"cash_flow,omitempty"`
-	Price                *int      `json:"price,omitempty"`
-	Count                *int      `json:"count,omitempty"`
-	OnlyYou              *bool     `json:"only_you,omitempty"`
-	Range                *[]int    `json:"range,omitempty"`
-	SubRule              *[]string `json:"subRule,omitempty"`
-	ApplicableToEveryOne *bool     `json:"applicable_to_every_one,omitempty"`
-	Percent              *int      `json:"percent,omitempty"`
-	Success              *[]int    `json:"success,omitempty"`
-	Dices                *[]int    `json:"dices,omitempty"`
-	CostPerOne           *float32  `json:"cost_per_one,omitempty"`
-	ExtraDices           *int      `json:"extra_dices,omitempty"`
+	ID                   string           `json:"id"`
+	Type                 string           `json:"type"`
+	Symbol               string           `json:"symbol"`
+	Name                 string           `json:"name"`
+	Family               string           `json:"family"`
+	Heading              string           `json:"heading"`
+	Description          string           `json:"description"`
+	Cost                 *int             `json:"cost,omitempty"`
+	Rule                 *string          `json:"rule,omitempty"`
+	IsConditional        *bool            `json:"is_conditional,omitempty"`
+	HasBabies            *bool            `json:"has_babies,omitempty"`
+	Plus                 *bool            `json:"plus,omitempty"`
+	Value                *int             `json:"value,omitempty"`
+	Mortgage             *int             `json:"mortgage,omitempty"`
+	DownPayment          *int             `json:"down_payment,omitempty"`
+	CashFlow             *int             `json:"cash_flow,omitempty"`
+	Price                *int             `json:"price,omitempty"`
+	Count                *int             `json:"count,omitempty"`
+	Increase             *int             `json:"increase,omitempty"`
+	Decrease             *int             `json:"decrease,omitempty"`
+	OnlyYou              *bool            `json:"only_you,omitempty"`
+	Range                *[]int           `json:"range,omitempty"`
+	SubRule              *[]string        `json:"subRule,omitempty"`
+	ApplicableToEveryOne *bool            `json:"applicable_to_every_one,omitempty"`
+	Percent              *int             `json:"percent,omitempty"`
+	Success              *[]int           `json:"success,omitempty"`
+	Dices                *[]CardRiskDices `json:"dices,omitempty"`
+	CostPerOne           *float32         `json:"cost_per_one,omitempty"`
+	ExtraDices           *int             `json:"extra_dices,omitempty"`
 }
 
 type CardDoodad struct {
@@ -75,9 +77,11 @@ type CardStocks struct {
 	Description string `json:"description"`
 	Rule        string `json:"rule"`
 	Price       int    `json:"price"`
-	Count       int    `json:"count"`
-	OnlyYou     bool   `json:"only_you"`
-	Range       []int  `json:"range"`
+	Count       *int   `json:"count"`
+	Increase    *int   `json:"increase"`
+	Decrease    *int   `json:"decrease"`
+	OnlyYou     *bool  `json:"only_you"`
+	Range       *[]int `json:"range"`
 }
 
 type CardPreciousMetals struct {
@@ -140,7 +144,7 @@ type CardSmallDeal struct {
 	ApplicableToEveryOne *bool     `json:"applicable_to_every_one"`
 }
 
-type CardDice struct {
+type CardRiskDices struct {
 	Dices      []int    `json:"dices"`
 	CashFlow   *int     `json:"cash_flow"`
 	CostPerOne *float32 `json:"cost_per_one"`
@@ -161,25 +165,25 @@ type CardMarket struct {
 }
 
 type CardRiskBusiness struct {
-	ID          string     `json:"id"`
-	Type        string     `json:"type"`
-	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extra_dices"`
-	Symbol      string     `json:"symbol"`
-	Heading     string     `json:"heading"`
-	Description string     `json:"description"`
-	Cost        int        `json:"cost"`
+	ID          string          `json:"id"`
+	Type        string          `json:"type"`
+	Dices       []CardRiskDices `json:"dices"`
+	ExtraDices  int             `json:"extra_dices"`
+	Symbol      string          `json:"symbol"`
+	Heading     string          `json:"heading"`
+	Description string          `json:"description"`
+	Cost        int             `json:"cost"`
 }
 
 type CardRiskStocks struct {
-	ID          string     `json:"id"`
-	Type        string     `json:"type"`
-	Count       int        `json:"count"`
-	Cost        int        `json:"cost"`
-	Dices       []CardDice `json:"dices"`
-	ExtraDices  int        `json:"extra_dices"`
-	Symbol      string     `json:"symbol"`
-	Heading     string     `json:"heading"`
-	Description string     `json:"description"`
-	CostPerOne  float64    `json:"cost_per_one"`
+	ID          string          `json:"id"`
+	Type        string          `json:"type"`
+	Count       int             `json:"count"`
+	Cost        int             `json:"cost"`
+	Dices       []CardRiskDices `json:"dices"`
+	ExtraDices  int             `json:"extra_dices"`
+	Symbol      string          `json:"symbol"`
+	Heading     string          `json:"heading"`
+	Description string          `json:"description"`
+	CostPerOne  float32         `json:"cost_per_one"`
 }

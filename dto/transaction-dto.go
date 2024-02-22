@@ -10,6 +10,7 @@ type TransactionCreatePlayerDTO struct {
 
 type TransactionCreateRaceDTO struct {
 	RaceID   uint64 `json:"race_id" form:"race_id" binding:"required"`
+	PlayerID uint64 `json:"player_id" form:"player_id" binding:"required"`
 	Details  string `json:"details" form:"details" binding:"required"`
 	TxType   string `json:"tx_type" form:"tx_type" binding:"required"`
 	Username string `json:"username" form:"username" binding:"required"`

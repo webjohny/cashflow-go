@@ -14,13 +14,17 @@ type PlayerService interface {
 	Payday(player entity.Player)
 	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
+	BuyBusiness(card entity.CardBusiness, player entity.Player) error
+	BuyRealEstate(card entity.CardRealEstate, player entity.Player) error
+	BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) (error, bool)
+	BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) (error, bool)
 	BuyDream(card entity.CardDream, player entity.Player) error
 	BuyStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
 	SellGold(card entity.CardPreciousMetals, player entity.Player, count int) error
 	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
 	SellRealEstate(card entity.CardRealEstate, player entity.Player) error
-	DivideStocks(card entity.CardStocks, player entity.Player, count int) error
-	IncreaseStocks(card entity.CardStocks, player entity.Player, count int) error
+	DecreaseStocks(card entity.CardStocks, player entity.Player) error
+	IncreaseStocks(card entity.CardStocks, player entity.Player) error
 	Charity(player entity.Player) error
 	BigCharity(card entity.CardCharity, player entity.Player) error
 	PayTax(card entity.CardPayTax, player entity.Player) error
@@ -99,8 +103,8 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 	key, stock := player.FindStocks(card.Symbol)
 
 	if stock != nil {
-		totalCount := count + stock.Count
-		stock.Count = totalCount
+		totalCount := count + *stock.Count
+		*stock.Count = totalCount
 		player.Assets.Stocks[key] = *stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
@@ -135,18 +139,18 @@ func (service *playerService) SellGold(card entity.CardPreciousMetals, player en
 func (service *playerService) SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error {
 	_, stock := player.FindStocks(card.Symbol)
 
-	if stock != nil || stock.Count < count {
+	if stock != nil || *stock.Count < count {
 		return fmt.Errorf(helper.GetMessage("ERROR_NOT_FOUND_STOCKS"))
 	}
 
 	totalCost := card.Price * count
-	stock.Count -= count
+	*stock.Count -= count
 
 	if updateCash {
 		service.UpdateCash(&player, totalCost, card.Symbol)
 	}
 
-	if stock.Count <= 0 {
+	if *stock.Count <= 0 {
 		player.RemoveStocks(stock.Symbol)
 	}
 
@@ -174,11 +178,11 @@ func (service *playerService) SellRealEstate(card entity.CardRealEstate, player 
 	return nil
 }
 
-func (service *playerService) DivideStocks(card entity.CardStocks, player entity.Player, count int) error {
+func (service *playerService) DecreaseStocks(card entity.CardStocks, player entity.Player) error {
 	key, stock := player.FindStocks(card.Symbol)
 
 	if stock != nil {
-		stock.Count = int(math.Floor(float64(stock.Count / count)))
+		*stock.Count = int(math.Floor(float64(*stock.Count / *card.Decrease)))
 		player.Assets.Stocks[key] = *stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
@@ -187,11 +191,11 @@ func (service *playerService) DivideStocks(card entity.CardStocks, player entity
 	return nil
 }
 
-func (service *playerService) IncreaseStocks(card entity.CardStocks, player entity.Player, count int) error {
+func (service *playerService) IncreaseStocks(card entity.CardStocks, player entity.Player) error {
 	key, stock := player.FindStocks(card.Symbol)
 
 	if stock != nil {
-		stock.Count = int(math.Floor(float64(stock.Count * count)))
+		*stock.Count = int(math.Floor(float64(*stock.Count * *card.Increase)))
 		player.Assets.Stocks[key] = *stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
@@ -418,11 +422,11 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 	return nil
 }
 
-func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) error {
+func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) (error, bool) {
 	cost := card.Cost
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY")), false
 	}
 
 	var cashFlow int
@@ -451,17 +455,17 @@ func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, play
 		player.Income.Business = append(player.Income.Business, business)
 		player.Liabilities.Business = append(player.Liabilities.Business, business)
 
-		return nil
+		return nil, true
 	}
 
-	return fmt.Errorf(helper.GetMessage("RISK_REQUEST_DECLINED"))
+	return nil, false
 }
 
-func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) error {
+func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) (error, bool) {
 	cost := card.Cost
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY")), false
 	}
 
 	var costPerOne float32
@@ -477,10 +481,10 @@ func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player e
 		service.UpdateCash(&player, -cost, card.Heading)
 		service.UpdateCash(&player, int(float32(card.Count)*costPerOne), card.Heading)
 
-		return nil
+		return nil, true
 	}
 
-	return fmt.Errorf(helper.GetMessage("RISK_REQUEST_DECLINED"))
+	return nil, false
 }
 
 func (service *playerService) UpdateCash(player *entity.Player, amount int, details string) {
