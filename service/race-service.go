@@ -5,20 +5,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
-	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/objects"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/request"
+	"github.com/webjohny/cashflow-go/storage"
 	"net/http"
 	"strconv"
 )
 
 type RaceService interface {
-	PreRiskAction(raceId uint64, username string, actionType string) error
 	BusinessAction(raceId uint64, username string, actionType string) error
 	RealEstateAction(raceId uint64, username string, actionType string) error
 	DreamAction(raceId uint64, username string, actionType string) error
-	RiskBusinessAction(raceId uint64, username string, actionType string) error
-	RiskStocksAction(raceId uint64, username string, actionType string) error
+	RiskBusinessAction(raceId uint64, username string, actionType string) (error, dto.RiskResponseDTO)
+	RiskStocksAction(raceId uint64, username string, actionType string) (error, dto.RiskResponseDTO)
 	StocksAction(raceId uint64, username string, actionType string, count int) error
 	LotteryAction(raceId uint64, username string, actionType string) error
 	GoldCoinsAction(raceId uint64, username string, actionType string) error
@@ -26,6 +26,7 @@ type RaceService interface {
 	SkipAction(raceId uint64, username string, actionType string) error
 	PaydayAction(raceId uint64, username string, actionType string) error
 	MarketAction(raceId uint64, username string, actionType string) error
+	GetRaceAndPlayer(raceId uint64, username string) (error, *entity.Race, *entity.Player)
 	GetInjectedRace(ctx *gin.Context) *entity.Race
 	GetRaceByRaceId(raceId uint64) *entity.Race
 }
@@ -44,29 +45,23 @@ func NewRaceService(raceRepo repository.RaceRepository, playerService PlayerServ
 	}
 }
 
-func (service *raceService) getRaceAndPlayer(raceId uint64, username string) (error, *entity.Race, *entity.Player) {
+func (service *raceService) GetRaceAndPlayer(raceId uint64, username string) (error, *entity.Race, *entity.Player) {
 	race := service.GetRaceByRaceId(raceId)
 	player := service.playerService.GetPlayerByUsername(username)
 
 	if player == nil {
-		return fmt.Errorf(helper.GetMessage("UNDEFINED_USER")), nil, nil
+		return fmt.Errorf(storage.ErrorUndefinedUser), nil, nil
 	} else if race == nil {
-		return fmt.Errorf(helper.GetMessage("UNDEFINED_GAME")), nil, nil
+		return fmt.Errorf(storage.ErrorUndefinedGame), nil, nil
 	} else if race.CurrentCard == nil {
-		return fmt.Errorf(helper.GetMessage("HAVE_NO_DEFINED_CARD")), nil, nil
+		return fmt.Errorf(storage.ErrorHaveNoDefinedCard), nil, nil
 	}
 
 	return nil, race, player
 }
 
-func (service *raceService) PreRiskAction(raceId uint64, username string, actionType string) error {
-	//race := service.GetRaceByRaceId(raceId)
-
-	return nil
-}
-
 func (service *raceService) BusinessAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err
@@ -86,13 +81,13 @@ func (service *raceService) BusinessAction(raceId uint64, username string, actio
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, helper.GetMessage("YOU_BOUGHT_BUSINESS"))
+	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtBusiness)
 
 	return err
 }
 
 func (service *raceService) RealEstateAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err
@@ -116,13 +111,13 @@ func (service *raceService) RealEstateAction(raceId uint64, username string, act
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, helper.GetMessage("YOU_BOUGHT_REAL_ESTATE"))
+	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtRealEstate)
 
 	return err
 }
 
 func (service *raceService) DreamAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err
@@ -139,17 +134,21 @@ func (service *raceService) DreamAction(raceId uint64, username string, actionTy
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, helper.GetMessage("YOU_BOUGHT_DREAM"))
+	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtDream)
 
 	return err
 }
 
-func (service *raceService) RiskBusinessAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+func (service *raceService) RiskBusinessAction(raceId uint64, username string, actionType string) (error, dto.RiskResponseDTO) {
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
-		return err
+		return err, dto.RiskResponseDTO{RolledDice: 0}
 	}
+
+	dice := objects.Dice{}
+	roll := dice.Roll(0)
+	rolledDice := roll[0] | 1
 
 	var status bool
 
@@ -162,15 +161,15 @@ func (service *raceService) RiskBusinessAction(raceId uint64, username string, a
 		Dices:       *race.CurrentCard.Dices,
 		ExtraDices:  *race.CurrentCard.ExtraDices,
 		Symbol:      race.CurrentCard.Symbol,
-	}, *player, 0)
+	}, *player, rolledDice)
 
 	if err == nil {
 		if status {
-			go service.SetTransaction(race.ID, *player, helper.GetMessage("SUCCESS_RISK_DEAL"))
+			go service.SetTransaction(race.ID, *player, storage.MessageSuccessRiskDeal)
 			//this.setTransactionState('risk', player.username, messages.SUCCESS_RISK_DEAL, { type: 'success', timeout: 1000 });
 			//this.#log.addLog(player, `Рискованный бизнес - ${this.#card.symbol} за $${this.#card.cost}`);
 		} else {
-			go service.SetTransaction(race.ID, *player, helper.GetMessage("FAIL_RISK_DEAL"))
+			go service.SetTransaction(race.ID, *player, storage.MessageFailRiskDeal)
 			//this.setTransactionState('risk', player.username, messages.FAIL_RISK_DEAL, { type: 'warning', timeout: 1000 });
 		}
 
@@ -178,15 +177,19 @@ func (service *raceService) RiskBusinessAction(raceId uint64, username string, a
 		race.Respond(player.ID, race.CurrentPlayer.ID)
 	}
 
-	return err
+	return err, dto.RiskResponseDTO{RolledDice: rolledDice}
 }
 
-func (service *raceService) RiskStocksAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+func (service *raceService) RiskStocksAction(raceId uint64, username string, actionType string) (error, dto.RiskResponseDTO) {
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
-		return err
+		return err, dto.RiskResponseDTO{RolledDice: 0}
 	}
+
+	dice := objects.Dice{}
+	roll := dice.Roll(0)
+	rolledDice := roll[0] | 1
 
 	var status bool
 
@@ -200,15 +203,15 @@ func (service *raceService) RiskStocksAction(raceId uint64, username string, act
 		Dices:       *race.CurrentCard.Dices,
 		ExtraDices:  *race.CurrentCard.ExtraDices,
 		Symbol:      race.CurrentCard.Symbol,
-	}, *player, 0)
+	}, *player, rolledDice)
 
 	if err == nil {
 		if status {
-			go service.SetTransaction(race.ID, *player, helper.GetMessage("SUCCESS_RISK_DEAL"))
+			go service.SetTransaction(race.ID, *player, storage.MessageSuccessRiskStocksDeal)
 			//this.setTransactionState('risk', player.username, messages.SUCCESS_RISK_DEAL, { type: 'success', timeout: 1000 });
 			//this.#log.addLog(player, `Рискованный бизнес - ${this.#card.symbol} за $${this.#card.cost}`);
 		} else {
-			go service.SetTransaction(race.ID, *player, helper.GetMessage("FAIL_RISK_DEAL"))
+			go service.SetTransaction(race.ID, *player, storage.MessageFailRiskStocksDeal)
 			//this.setTransactionState('risk', player.username, messages.FAIL_RISK_DEAL, { type: 'warning', timeout: 1000 });
 		}
 
@@ -216,16 +219,11 @@ func (service *raceService) RiskStocksAction(raceId uint64, username string, act
 		race.Respond(player.ID, race.CurrentPlayer.ID)
 	}
 
-	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
-	race.Respond(player.ID, race.CurrentPlayer.ID)
-
-	go service.SetTransaction(race.ID, *player, helper.GetMessage("YOU_BOUGHT_DREAM"))
-
-	return err
+	return err, dto.RiskResponseDTO{RolledDice: rolledDice}
 }
 
 func (service *raceService) StocksAction(raceId uint64, username string, actionType string, count int) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err
@@ -257,7 +255,7 @@ func (service *raceService) StocksAction(raceId uint64, username string, actionT
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, helper.GetMessage("YOU_BOUGHT_STOCKS"))
+	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtStocks)
 
 	return err
 }
@@ -287,7 +285,7 @@ func (service *raceService) SkipAction(raceId uint64, username string, actionTyp
 }
 
 func (service *raceService) MarketAction(raceId uint64, username string, actionType string) error {
-	err, race, player := service.getRaceAndPlayer(raceId, username)
+	err, race, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err
@@ -341,7 +339,7 @@ func (service *raceService) MarketAction(raceId uint64, username string, actionT
 }
 
 func (service *raceService) PaydayAction(raceId uint64, username string, actionType string) error {
-	err, _, player := service.getRaceAndPlayer(raceId, username)
+	err, _, player := service.GetRaceAndPlayer(raceId, username)
 
 	if err != nil {
 		return err

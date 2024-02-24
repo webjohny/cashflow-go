@@ -9,7 +9,11 @@ import (
 )
 
 type CardController interface {
-	Action(ctx *gin.Context)
+	Prepare(ctx *gin.Context)
+	Purchase(ctx *gin.Context)
+	Selling(ctx *gin.Context)
+	Accept(ctx *gin.Context)
+	Skip(ctx *gin.Context)
 }
 
 type cardController struct {
@@ -22,35 +26,58 @@ func NewCardController(cardService service.CardService) CardController {
 	}
 }
 
-func (c *cardController) Action(ctx *gin.Context) {
-	action := ctx.Param("action")
+func (c *cardController) Prepare(ctx *gin.Context) {
 	family := ctx.Param("family")
+	actionType := ctx.Param("type")
+
+	raceId := session.GetItem[uint64](ctx, "raceId")
+	username := session.GetItem[string](ctx, "username")
+
+	err, response := c.cardService.Prepare(raceId, family, actionType, username)
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *cardController) Selling(ctx *gin.Context) {
+	actionType := ctx.Param("type")
+
+	raceId := session.GetItem[uint64](ctx, "raceId")
+	username := session.GetItem[string](ctx, "username")
+
+	err, response := c.cardService.Selling(raceId, actionType, username)
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *cardController) Accept(ctx *gin.Context) {
+	family := ctx.Param("family")
+	actionType := ctx.Param("type")
+
+	raceId := session.GetItem[uint64](ctx, "raceId")
+	username := session.GetItem[string](ctx, "username")
+
+	err, response := c.cardService.Accept(raceId, family, actionType, username)
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *cardController) Skip(ctx *gin.Context) {
+	raceId := session.GetItem[uint64](ctx, "raceId")
+	username := session.GetItem[string](ctx, "username")
+
+	err, response := c.cardService.Skip(raceId, username)
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *cardController) Purchase(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 	count, _ := strconv.Atoi(ctx.Query("count"))
 
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	var err error
-	var response interface{}
-
-	switch action {
-	case "pre":
-		err, response = c.cardService.Prepare(raceId, family, actionType, username)
-		break
-
-	case "buy":
-		err, response = c.cardService.Purchase(raceId, family, actionType, username, count)
-		break
-
-	case "sell":
-		err, response = c.cardService.Selling(raceId, family, actionType, username)
-		break
-
-	case "ok":
-		err, response = c.cardService.Accept(raceId, family, actionType, username)
-		break
-	}
+	err, response := c.cardService.Purchase(raceId, actionType, username, count)
 
 	request.FinalResponse(ctx, err, response)
 }

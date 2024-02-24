@@ -16,6 +16,7 @@ var (
 
 	// Repositories
 	raceRepository   repository.RaceRepository        = repository.NewRaceRepository(db)
+	lobbyRepository  repository.LobbyRepository       = repository.NewLobbyRepository(db)
 	userRepository   repository.UserRepository        = repository.NewUserRepository(db)
 	playerRepository repository.PlayerRepository      = repository.NewPlayerRepository(db)
 	trxRepository    repository.TransactionRepository = repository.NewTransactionRepository(db)
@@ -26,14 +27,16 @@ var (
 	transactionService service.TransactionService = service.NewTransactionService(trxRepository)
 	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, transactionService)
 	authService        service.AuthService        = service.NewAuthService(userRepository)
-	gameService        service.GameService        = service.NewGameService(raceRepository)
+	gameService        service.GameService        = service.NewGameService(raceService)
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
+	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
 
 	// Controllers
-	cardController controller.CardController = controller.NewCardController(cardService)
-	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
-	userController controller.UserController = controller.NewUserController(userService, jwtService)
+	lobbyController controller.LobbyController = controller.NewLobbyController(gameService, raceService)
+	cardController  controller.CardController  = controller.NewCardController(cardService)
+	authController  controller.AuthController  = controller.NewAuthController(authService, jwtService)
+	userController  controller.UserController  = controller.NewUserController(userService, jwtService)
 )
 
 func main() {
@@ -45,8 +48,11 @@ func main() {
 
 	cardRoutes := r.Group("api/card")
 	{
-		//cardRoutes.POST("/:action/:family/:type", cardController.Action)
-		cardRoutes.GET("/:action/:family/:type", cardController.Action)
+		cardRoutes.GET("/prepare/:family/:type", cardController.Prepare)
+		cardRoutes.GET("/skip/:family/:type", cardController.Skip)
+		cardRoutes.GET("/sell/:family/:type", cardController.Selling)
+		cardRoutes.GET("/buy/:family/:type", cardController.Purchase)
+		cardRoutes.GET("/ok/:family/:type", cardController.Accept)
 	}
 
 	authRoutes := r.Group("api/auth")
@@ -59,6 +65,12 @@ func main() {
 	{
 		userRoutes.GET("/profile", userController.Profile)
 		userRoutes.PUT("/profile", userController.Update)
+		// userRoutes.POST("/picture", userController.SaveFile)
+	}
+
+	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
+	{
+		lobbyRoutes.POST("/create", lobbyController.CreateLobby)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 

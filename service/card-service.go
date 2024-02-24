@@ -10,8 +10,9 @@ import (
 type CardService interface {
 	Prepare(raceId uint64, family string, actionType string, username string) (error, interface{})
 	Accept(raceId uint64, family string, actionType string, username string) (error, interface{})
-	Purchase(raceId uint64, family string, actionType string, username string, count int) (error, interface{})
-	Selling(raceId uint64, family string, actionType string, username string) (error, interface{})
+	Purchase(raceId uint64, actionType string, username string, count int) (error, interface{})
+	Selling(raceId uint64, actionType string, username string) (error, interface{})
+	Skip(raceId uint64, username string) (error, interface{})
 }
 
 type CardRatRace struct {
@@ -64,9 +65,10 @@ func NewCardService(gameService GameService, raceService RaceService) CardServic
 
 func (service *cardService) Prepare(raceId uint64, family string, actionType string, username string) (error, interface{}) {
 	var err error
-	if actionType == "risk" || actionType == "riskStock" {
-		err = service.raceService.PreRiskAction(raceId, username, actionType)
-	}
+
+	//if actionType == "risk" || actionType == "riskStock" {
+	//	err = service.raceService.PreRiskAction(raceId, username, actionType)
+	//}
 	return err, nil
 }
 
@@ -82,7 +84,14 @@ func (service *cardService) Accept(raceId uint64, family string, actionType stri
 	return err, response
 }
 
-func (service *cardService) Purchase(raceId uint64, family string, actionType string, username string, count int) (error, interface{}) {
+func (service *cardService) Skip(raceId uint64, username string) (error, interface{}) {
+	var err error
+	var response interface{}
+
+	return err, response
+}
+
+func (service *cardService) Purchase(raceId uint64, actionType string, username string, count int) (error, interface{}) {
 	var err error
 	var response interface{}
 
@@ -100,11 +109,11 @@ func (service *cardService) Purchase(raceId uint64, family string, actionType st
 		break
 
 	case "riskBusiness":
-		err = service.raceService.RiskBusinessAction(raceId, username, actionType)
+		err, response = service.raceService.RiskBusinessAction(raceId, username, actionType)
 		break
 
 	case "riskStocks":
-		err = service.raceService.RiskStocksAction(raceId, username, actionType)
+		err, response = service.raceService.RiskStocksAction(raceId, username, actionType)
 		break
 
 	case "stocks":
@@ -131,7 +140,7 @@ func (service *cardService) Purchase(raceId uint64, family string, actionType st
 	return err, response
 }
 
-func (service *cardService) Selling(raceId uint64, family string, actionType string, username string) (error, interface{}) {
+func (service *cardService) Selling(raceId uint64, actionType string, username string) (error, interface{}) {
 	return nil, nil
 }
 

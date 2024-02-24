@@ -1,17 +1,14 @@
 package service
 
-import (
-	"github.com/webjohny/cashflow-go/repository"
-)
-
-type GameService interface{}
-
-type gameService struct {
-	raceRepository repository.RaceRepository
+type GameService interface {
 }
 
-func NewGameService(raceRepo repository.RaceRepository) GameService {
+type gameService struct {
+	raceService RaceService
+}
+
+func NewGameService(raceService RaceService) GameService {
 	return &gameService{
-		raceRepository: raceRepo,
+		raceService: raceService,
 	}
 }

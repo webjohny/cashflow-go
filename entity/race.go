@@ -26,7 +26,6 @@ type RacePlayer struct {
 type Race struct {
 	ID                uint64         `gorm:"primary_key:auto_increment" json:"id"`
 	Responses         []RaceResponse `json:"responses"`
-	MaxPlayers        string         `json:"max_players"`
 	ParentID          uint64         `gorm:"index" json:"parent_id"`
 	Status            string         `json:"status"`
 	CurrentPlayer     RacePlayer     `json:"current_player"`

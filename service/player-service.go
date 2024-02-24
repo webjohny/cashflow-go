@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
-	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/repository"
+	"github.com/webjohny/cashflow-go/storage"
 	"math"
 )
 
@@ -67,11 +67,11 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 	cost := card.Cost
 
 	if card.HasBabies && player.Babies <= 0 {
-		return fmt.Errorf(helper.GetMessage("YOU_HAVE_NO_BABIES"))
+		return fmt.Errorf(storage.ErrorYouHaveNoBabies)
 	}
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	service.UpdateCash(&player, -cost, "Растраты")
@@ -83,7 +83,7 @@ func (service *playerService) BuyDream(card entity.CardDream, player entity.Play
 	cost := card.Cost
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	player.Assets.Dreams = append(player.Assets.Dreams, card)
@@ -97,7 +97,7 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 	totalCost := int(float64(card.Price) * float64(count))
 
 	if player.Cash < totalCost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	key, stock := player.FindStocks(card.Symbol)
@@ -122,7 +122,7 @@ func (service *playerService) SellGold(card entity.CardPreciousMetals, player en
 	totalCost := card.Cost * count
 
 	if gold.Count < count {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	gold.Count -= count
@@ -140,7 +140,7 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 	_, stock := player.FindStocks(card.Symbol)
 
 	if stock != nil || *stock.Count < count {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_FOUND_STOCKS"))
+		return fmt.Errorf(storage.ErrorNotFoundStocks)
 	}
 
 	totalCost := card.Price * count
@@ -161,7 +161,7 @@ func (service *playerService) SellRealEstate(card entity.CardRealEstate, player 
 	realEstate := player.FindRealEstate(card.ID)
 
 	if realEstate == nil {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_FOUND_ASSET"))
+		return fmt.Errorf(storage.ErrorNotFoundAssets)
 	}
 
 	value := (realEstate.Cost / 100) * card.Value
@@ -208,7 +208,7 @@ func (service *playerService) Charity(player entity.Player) error {
 	amount := int(math.Floor(0.1 * float64(player.CalculateTotalIncome())))
 
 	if player.Cash < amount {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	service.UpdateCash(&player, -amount, "Благотворительность")
@@ -218,7 +218,7 @@ func (service *playerService) Charity(player entity.Player) error {
 
 func (service *playerService) BigCharity(card entity.CardCharity, player entity.Player) error {
 	if player.Cash < card.Cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	service.UpdateCash(&player, -card.Cost, "Акция милосердия")
@@ -230,7 +230,7 @@ func (service *playerService) PayTax(card entity.CardPayTax, player entity.Playe
 	amount := (player.Cash / 100) * card.Percent
 
 	if player.Cash < amount {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	service.UpdateCash(&player, -amount, "Налоги")
@@ -242,7 +242,7 @@ func (service *playerService) Downsized(player entity.Player) error {
 	amount := player.CalculateTotalExpenses()
 
 	if player.Cash < amount {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	service.UpdateCash(&player, -amount, "Уволен")
@@ -252,7 +252,7 @@ func (service *playerService) Downsized(player entity.Player) error {
 
 func (service *playerService) MoveToBigRace(player entity.Player) error {
 	if !player.ConditionsForBigRace() {
-		return fmt.Errorf(helper.GetMessage("ERROR_MOVING_BIG_RACE_DECLINED"))
+		return fmt.Errorf(storage.ErrorMovingBigRaceDeclined)
 	}
 
 	cashFlow := player.CalculatePassiveIncome() * 100
@@ -284,11 +284,11 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 
 func (service *playerService) PayDamages(card entity.CardMarket, player entity.Player) error {
 	if player.Cash < *card.Cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	if !player.HasRealEstates() {
-		return fmt.Errorf(helper.GetMessage("ERROR_YOU_HAVE_NO_PROPERTIES"))
+		return fmt.Errorf(storage.ErrorYouHaveNoProperties)
 	}
 
 	service.UpdateCash(&player, -*card.Cost, "Имущество поврежденно")
@@ -298,7 +298,7 @@ func (service *playerService) PayDamages(card entity.CardMarket, player entity.P
 
 func (service *playerService) AddGoldCoins(card entity.CardPreciousMetals, player entity.Player) error {
 	if player.Cash < card.Cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	player.Assets.PreciousMetals = append(player.Assets.PreciousMetals, card)
@@ -312,7 +312,7 @@ func (service *playerService) SellRealEstates(player entity.Player) (error, int)
 	var totalCash int
 
 	if !player.HasRealEstates() {
-		return fmt.Errorf(helper.GetMessage("ERROR_YOU_HAVE_NO_PROPERTIES")), 0
+		return fmt.Errorf(storage.ErrorYouHaveNoProperties), 0
 	}
 
 	for i := 0; i < len(player.Assets.RealEstates); i++ {
@@ -331,7 +331,7 @@ func (service *playerService) SellBusiness(player entity.Player) (error, int) {
 	var totalCash int
 
 	if !player.HasBusiness() {
-		return fmt.Errorf(helper.GetMessage("ERROR_YOU_HAVE_NO_PROPERTIES")), 0
+		return fmt.Errorf(storage.ErrorYouHaveNoProperties), 0
 	}
 
 	for i := 0; i < len(player.Assets.Business); i++ {
@@ -357,7 +357,7 @@ func (service *playerService) TakeLoan(player entity.Player, amount int) error {
 
 func (service *playerService) PayLoan(player entity.Player, actionType string, amount int) error {
 	if player.Cash < amount {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	loanMapper := map[string]string{
@@ -396,7 +396,7 @@ func (service *playerService) PayLoan(player entity.Player, actionType string, a
 
 func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player entity.Player) error {
 	if player.Cash < *card.DownPayment {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	player.Assets.RealEstates = append(player.Assets.RealEstates, card)
@@ -410,7 +410,7 @@ func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player e
 
 func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player) error {
 	if player.Cash < card.Cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY"))
+		return fmt.Errorf(storage.ErrorNotEnoughMoney)
 	}
 
 	player.Assets.Business = append(player.Assets.Business, card)
@@ -426,7 +426,7 @@ func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, play
 	cost := card.Cost
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY")), false
+		return fmt.Errorf(storage.ErrorNotEnoughMoney), false
 	}
 
 	var cashFlow int
@@ -465,7 +465,7 @@ func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player e
 	cost := card.Cost
 
 	if player.Cash < cost {
-		return fmt.Errorf(helper.GetMessage("ERROR_NOT_ENOUGH_MONEY")), false
+		return fmt.Errorf(storage.ErrorNotEnoughMoney), false
 	}
 
 	var costPerOne float32

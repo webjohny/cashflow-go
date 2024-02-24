@@ -205,13 +205,13 @@ func (e *Player) RemoveBusiness(id string) *CardBusiness {
 
 func (e *Player) SplitStocks(card string) {
 	_, stock := e.FindStocks(card)
-	stock.Count *= 2
+	*stock.Count *= 2
 	e.DeactivateReRoll()
 }
 
 func (e *Player) ReverseSplitStocks(card string) {
 	_, stock := e.FindStocks(card)
-	stock.Count = int(math.Ceil(float64(stock.Count) / 2))
+	*stock.Count = int(math.Ceil(float64(*stock.Count) / 2))
 	e.DeactivateReRoll()
 }
 
