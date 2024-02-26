@@ -8,7 +8,7 @@ import (
 type LobbyRepository interface {
 	InsertLobby(b *entity.Lobby) entity.Lobby
 	UpdateLobby(b *entity.Lobby) entity.Lobby
-	All(idUser string) []entity.Lobby
+	All() []entity.Lobby
 	DeleteLobby(b *entity.Lobby)
 	FindLobbyById(ID uint64) *entity.Lobby
 }
@@ -31,10 +31,10 @@ func (db *lobbyConnection) InsertLobby(b *entity.Lobby) entity.Lobby {
 	return *b
 }
 
-func (db *lobbyConnection) All(idUser string) []entity.Lobby {
-	var lobbys []entity.Lobby
-	db.connection.Preload(LobbyTable).Where("user_id = ?", idUser).Find(&lobbys)
-	return lobbys
+func (db *lobbyConnection) All() []entity.Lobby {
+	var lobbies []entity.Lobby
+	db.connection.Preload(LobbyTable).Find(&lobbies)
+	return lobbies
 }
 
 func (db *lobbyConnection) UpdateLobby(b *entity.Lobby) entity.Lobby {

@@ -1,9 +1,14 @@
 package service
 
-import "github.com/webjohny/cashflow-go/repository"
+import (
+	"fmt"
+	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/repository"
+	"github.com/webjohny/cashflow-go/storage"
+)
 
 type LobbyService interface {
-	CreateLobby(username string) error
+	CreateLobby(username string) (error, *entity.Lobby)
 	Join(ID uint64, username string) error
 }
 
@@ -17,15 +22,34 @@ func NewLobbyService(lobbyRepository repository.LobbyRepository) LobbyService {
 	}
 }
 
-func (service *lobbyService) CreateLobby(username string) error {
-	return nil
+func (service *lobbyService) CreateLobby(username string) (error, *entity.Lobby) {
+	lobby := &entity.Lobby{
+		Players:    make([]entity.LobbyPlayer, 0),
+		MaxPlayers: 0,
+		Status:     entity.LobbyStatus.STARTED,
+		Options:    nil,
+	}
+	lobby.AddOwner(username)
+	instance := service.lobbyRepository.InsertLobby(lobby)
+
+	if instance.ID == 0 {
+		return fmt.Errorf(storage.ErrorUndefinedLobby), nil
+	}
+
+	return nil, lobby
 }
 
 func (service *lobbyService) Join(ID uint64, username string) error {
 	lobby := service.lobbyRepository.FindLobbyById(ID)
 
 	if lobby != nil {
-		lobby.AddPlayer(username)
+		if lobby.IsFull() {
+			return fmt.Errorf(storage.ErrorGameIsFull)
+		}
+
+		player := lobby.GetPlayer(username)
+
+		lobby.AddGuest(username)
 	}
 
 	return nil

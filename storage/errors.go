@@ -3,6 +3,8 @@ package storage
 const (
 	ErrorUndefinedUser         = "Пользователь не найден"
 	ErrorUndefinedGame         = "Игра не найдена"
+	ErrorGameIsFull            = "Игра переполнена игроками, уточняйте информацию у администратора"
+	ErrorUndefinedLobby        = "Лобби не найдено"
 	ErrorHaveNoDefinedCard     = "Карточка не доступна"
 	ErrorYouHaveNoBabies       = "У Вас нету детей"
 	ErrorNotFoundAssets        = "Нет такого актива"

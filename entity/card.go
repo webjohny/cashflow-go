@@ -1,6 +1,6 @@
 package entity
 
-type CardDefault struct {
+type Card struct {
 	ID                   string           `json:"id"`
 	Type                 string           `json:"type"`
 	Symbol               string           `json:"symbol"`

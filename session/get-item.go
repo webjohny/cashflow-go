@@ -15,3 +15,9 @@ func GetItem[T comparable](ctx *gin.Context, key string) T {
 
 	return value.(T)
 }
+
+func SetItem(ctx *gin.Context, key string, value interface{}) {
+	store := GetStore(ctx)
+
+	store.Set(key, value)
+}
