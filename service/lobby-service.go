@@ -10,6 +10,7 @@ import (
 type LobbyService interface {
 	CreateLobby(username string) (error, *entity.Lobby)
 	Join(ID uint64, username string) error
+	Leave(ID uint64, username string) error
 }
 
 type lobbyService struct {
@@ -47,10 +48,29 @@ func (service *lobbyService) Join(ID uint64, username string) error {
 			return fmt.Errorf(storage.ErrorGameIsFull)
 		}
 
+		if lobby.IsStarted() {
+			return fmt.Errorf(storage.ErrorGameIsFull)
+		}
+
 		player := lobby.GetPlayer(username)
 
-		lobby.AddGuest(username)
+		if player != nil {
+			lobby.AddGuest(username)
+		}
+	} else {
+		return fmt.Errorf(storage.ErrorUndefinedLobby)
 	}
 
 	return nil
+}
+
+func (service *lobbyService) Leave(ID uint64, username string) error {
+	lobby := service.lobbyRepository.FindLobbyById(ID)
+
+	if lobby != nil {
+		lobby.RemovePlayer(username)
+		return nil
+	}
+
+	return fmt.Errorf(storage.ErrorUndefinedLobby)
 }

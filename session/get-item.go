@@ -21,3 +21,9 @@ func SetItem(ctx *gin.Context, key string, value interface{}) {
 
 	store.Set(key, value)
 }
+
+func DeleteItem(ctx *gin.Context, key string) {
+	store := GetStore(ctx)
+
+	store.Delete(key)
+}

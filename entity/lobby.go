@@ -1,9 +1,11 @@
 package entity
 
 var LobbyStatus = struct {
+	NEW       string
 	STARTED   string
 	CANCELLED string
 }{
+	NEW:       "new",
 	STARTED:   "started",
 	CANCELLED: "cancelled",
 }
@@ -100,6 +102,10 @@ func (l *Lobby) IsFull() bool {
 	return len(l.Players) == int(l.MaxPlayers)
 }
 
+func (l *Lobby) IsStarted() bool {
+	return l.Status == LobbyStatus.STARTED
+}
+
 func (l *Lobby) IsPlayerAlreadyJoined(username string) bool {
 	for _, player := range l.Players {
 		if player.Username == username {
@@ -112,6 +118,19 @@ func (l *Lobby) IsPlayerAlreadyJoined(username string) bool {
 
 func (l *Lobby) AddOption(key string, value interface{}) {
 	l.Options[key] = value
+}
+
+func (l *Lobby) AvailableToStart() bool {
+	var count int
+
+	for i := 0; i < len(l.Players); i++ {
+		player := l.Players[i]
+		if player.Role != PlayerRoles.ADMIN {
+			count++
+		}
+	}
+
+	return count < 2
 }
 
 func (l *Lobby) RemovePlayer(username string) {

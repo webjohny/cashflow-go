@@ -5,11 +5,13 @@ import (
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/session"
+	"strconv"
 )
 
 type LobbyController interface {
 	CreateLobby(ctx *gin.Context)
 	Join(ctx *gin.Context)
+	Leave(ctx *gin.Context)
 }
 
 type lobbyController struct {
@@ -34,9 +36,34 @@ func (c *lobbyController) CreateLobby(ctx *gin.Context) {
 
 func (c *lobbyController) Join(ctx *gin.Context) {
 	username := session.GetItem[string](ctx, "username")
-	gameId := session.GetItem[uint64](ctx, "gameId")
+	gameId, _ := strconv.Atoi(ctx.Param("gameId"))
 
-	err := c.lobbyService.Join(gameId, username)
+	var err error
+	var response request.Response
 
-	request.FinalResponse(ctx, err, nil)
+	err = c.lobbyService.Join(uint64(gameId), username)
+
+	if err == nil {
+		session.SetItem(ctx, "gameId", uint64(gameId))
+		response = request.SuccessResponse()
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *lobbyController) Leave(ctx *gin.Context) {
+	username := session.GetItem[string](ctx, "username")
+	gameId, _ := strconv.Atoi(ctx.Param("gameId"))
+
+	var err error
+	var response request.Response
+
+	err = c.lobbyService.Leave(uint64(gameId), username)
+
+	if err == nil {
+		session.DeleteItem(ctx, "gameId")
+		response = request.SuccessResponse()
+	}
+
+	request.FinalResponse(ctx, err, response)
 }

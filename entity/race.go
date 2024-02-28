@@ -12,30 +12,52 @@ var RaceStatus = struct {
 	FINISHED:  "finished",
 }
 
+type RaceNotification struct {
+	AlertType   string                 `json:"alert_type"`
+	Description string                 `json:"description"`
+	Options     map[string]interface{} `json:"options"`
+}
+
+type RaceLog struct {
+	Username string `json:"username"`
+	Color    string `json:"color"`
+	Message  string `json:"message"`
+}
+
 type RaceResponse struct {
-	ID        uint64
-	Username  string
-	Responded bool
+	ID        uint64 `json:"id,omitempty"`
+	Username  string `json:"username"`
+	Responded bool   `json:"responded"`
 }
 
 type RacePlayer struct {
-	ID       uint64
-	Username string
+	ID       uint64 `json:"id,omitempty"`
+	Username string `json:"username"`
+}
+
+type RaceBankruptPlayer struct {
+	ID         uint64 `json:"id,omitempty"`
+	Username   string `json:"username"`
+	CountDices int    `json:"count_dices"`
+}
+
+type RaceOptions struct {
+	EnterAfterGameStarting bool `json:"enter_after_game_starting"`
 }
 
 type Race struct {
-	ID                uint64         `gorm:"primary_key:auto_increment" json:"id"`
-	Responses         []RaceResponse `json:"responses"`
-	ParentID          uint64         `gorm:"index" json:"parent_id"`
-	Status            string         `json:"status"`
-	CurrentPlayer     RacePlayer     `json:"current_player"`
-	CurrentCard       *CardDefault   `json:"current_card"`
-	Notifications     string         `json:"notifications"`
-	BankruptedPlayers string         `json:"bankrupted_players"`
-	Logs              string         `json:"logs"`
-	Dice              string         `json:"dice"`
-	Options           string         `json:"options"`
-	CreatedAt         string         `json:"created_at"`
+	ID                uint64               `gorm:"primary_key:auto_increment" json:"id"`
+	Responses         []RaceResponse       `json:"responses"`
+	ParentID          uint64               `gorm:"index" json:"parent_id"`
+	Status            string               `json:"status"`
+	CurrentPlayer     *RacePlayer          `json:"current_player"`
+	CurrentCard       *Card                `json:"current_card"`
+	Notifications     []RaceNotification   `json:"notifications"`
+	BankruptedPlayers []RaceBankruptPlayer `json:"bankrupted_players"`
+	Logs              []RaceLog            `json:"logs"`
+	Dice              []int                `json:"dice"`
+	Options           RaceOptions          `json:"options"`
+	CreatedAt         string               `json:"created_at"`
 }
 
 func (r *Race) Respond(ID uint64, currentPlayerID uint64) {

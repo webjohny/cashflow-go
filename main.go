@@ -33,7 +33,7 @@ var (
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
 
 	// Controllers
-	lobbyController controller.LobbyController = controller.NewLobbyController(gameService, raceService)
+	lobbyController controller.LobbyController = controller.NewLobbyController(lobbyService)
 	cardController  controller.CardController  = controller.NewCardController(cardService)
 	authController  controller.AuthController  = controller.NewAuthController(authService, jwtService)
 	userController  controller.UserController  = controller.NewUserController(userService, jwtService)
@@ -71,6 +71,8 @@ func main() {
 	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
 	{
 		lobbyRoutes.POST("/create", lobbyController.CreateLobby)
+		lobbyRoutes.GET("/join/:gameId", lobbyController.Join)
+		lobbyRoutes.GET("/leave/:gameId", lobbyController.Leave)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
