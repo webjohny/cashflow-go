@@ -2,13 +2,16 @@ package service
 
 import (
 	"fmt"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 )
 
 type GameService interface {
-	Start(ID uint64, username string) error
+	Start(lobbyId uint64) (error, *entity.Race)
+	GetGame(raceId uint64, lobbyId uint64, username string, isBigRace *bool) (error, dto.GetGameResponseDTO)
 }
 
 type gameService struct {
@@ -25,16 +28,41 @@ func NewGameService(lobbyRepository repository.LobbyRepository, raceRepository r
 	}
 }
 
-func (service *gameService) Start(ID uint64, username string) error {
-	lobby := service.lobbyRepository.FindLobbyById(ID)
+func (service *gameService) GetGame(raceId uint64, lobbyId uint64, username string, isBigRace *bool) (error, dto.GetGameResponseDTO) {
+	player := service.playerRepository.FindPlayerByUsername(username)
 
-	if lobby != nil {
-		lobby.RemovePlayer(username)
-		return nil
+	response := dto.GetGameResponseDTO{
+		Username: username,
+		You:      *player,
+	}
+	if lobbyId > 0 {
+		lobby := service.lobbyRepository.FindLobbyById(lobbyId)
+		response.Lobby = lobby
+		response.Hash = helper.CreateHashByJson(lobby)
+	} else if raceId > 0 {
+		bigRace := player.OnBigRace
+
+		if isBigRace != nil {
+			bigRace = *isBigRace
+		}
+
+		race := service.raceRepository.FindRaceById(raceId, bigRace)
+		response.Race = race
+		response.Hash = helper.CreateHashByJson(race)
+	}
+
+	return nil, response
+}
+
+func (service *gameService) Start(lobbyId uint64) (error, *entity.Race) {
+	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
+
+	if lobby == nil {
+		return fmt.Errorf(storage.ErrorUndefinedLobby), nil
 	}
 
 	if !lobby.AvailableToStart() {
-		return fmt.Errorf(storage.ErrorInsufficientPlayers)
+		return fmt.Errorf(storage.ErrorInsufficientPlayers), nil
 	}
 
 	race := service.raceRepository.InsertRace(&entity.Race{
@@ -61,5 +89,5 @@ func (service *gameService) Start(ID uint64, username string) error {
 		})
 	}
 
-	return fmt.Errorf(storage.ErrorUndefinedLobby)
+	return nil, &race
 }

@@ -15,7 +15,8 @@ type TransactionService interface {
 	UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction
 	Delete(b entity.Transaction)
 	//IsAllowedToEdit(userID string, transactionID uint64) bool
-	All(idUser string) []entity.Transaction
+	GetPlayerTransactions(playerId uint64) []entity.Transaction
+	GetRaceTransactions(raceId uint64) []entity.Transaction
 }
 
 type transactionService struct {
@@ -56,8 +57,12 @@ func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreate
 	return res
 }
 
-func (service *transactionService) All(idUser string) []entity.Transaction {
-	return service.transactionRepository.All(idUser)
+func (service *transactionService) GetPlayerTransactions(playerId uint64) []entity.Transaction {
+	return service.transactionRepository.GetPlayerTransactions(playerId)
+}
+
+func (service *transactionService) GetRaceTransactions(raceId uint64) []entity.Transaction {
+	return service.transactionRepository.GetRaceTransactions(raceId)
 }
 
 func (service *transactionService) UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction {

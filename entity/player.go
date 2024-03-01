@@ -53,17 +53,17 @@ type Player struct {
 	TotalExpenses   int               `json:"total_expenses"`
 	CashFlow        int               `json:"cash_flow"`
 	PassiveIncome   int               `json:"passive_income"`
-	Profession      uint8             `json:"profession"`
+	ProfessionId    uint8             `json:"profession_id"`
 	LastPosition    uint8             `json:"last_position"`
 	CurrentPosition uint8             `json:"current_position"`
 	DualDiceCount   uint8             `json:"dual_dice_count"`
 	SkippedTurns    uint8             `json:"skipped_turns"`
-	IsRolledDice    bool              `json:"is_rolled_dice"`
-	CanReRoll       bool              `json:"can_re_roll"`
-	OnBigRace       bool              `json:"on_big_race"`
-	HasBankrupt     bool              `json:"has_bankrupt"`
-	AboutToBankrupt bool              `json:"about_to_bankrupt"`
-	HasMlm          bool              `json:"has_mlm"`
+	IsRolledDice    uint8             `json:"is_rolled_dice"`
+	CanReRoll       uint8             `json:"can_re_roll"`
+	OnBigRace       uint8             `json:"on_big_race"`
+	HasBankrupt     uint8             `json:"has_bankrupt"`
+	AboutToBankrupt string            `json:"about_to_bankrupt"`
+	HasMlm          uint8             `json:"has_mlm"`
 	CreatedAt       string            `json:"created_at"`
 }
 
@@ -78,7 +78,11 @@ func (e *Player) FindStocks(symbol string) (int, *CardStocks) {
 }
 
 func (e *Player) ChangeDiceStatus(status bool) {
-	e.IsRolledDice = status
+	if status {
+		e.IsRolledDice = 1
+	} else {
+		e.IsRolledDice = 0
+	}
 }
 
 func (e *Player) IncrementDualDiceCount() {
@@ -91,12 +95,12 @@ func (e *Player) DecrementDualDiceCount() {
 
 func (e *Player) AllowReRoll() {
 	e.ChangeDiceStatus(false)
-	e.CanReRoll = true
+	e.CanReRoll = 1
 }
 
 func (e *Player) DeactivateReRoll() {
 	e.ChangeDiceStatus(true)
-	e.CanReRoll = false
+	e.CanReRoll = 0
 }
 
 func (e *Player) InitializeSkippedTurns() {

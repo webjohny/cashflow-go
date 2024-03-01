@@ -10,6 +10,7 @@ import (
 
 type GameController interface {
 	Start(ctx *gin.Context)
+	GetGame(ctx *gin.Context)
 }
 
 type gameController struct {
@@ -22,16 +23,33 @@ func NewGameController(gameService service.GameService) GameController {
 	}
 }
 
-func (c *gameController) Start(ctx *gin.Context) {
+func (c *gameController) GetGame(ctx *gin.Context) {
 	username := session.GetItem[string](ctx, "username")
-	gameId, _ := strconv.Atoi(ctx.Param("gameId"))
+	raceId, _ := strconv.Atoi(ctx.Param("raceId"))
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+	bigRaceQuery := ctx.Query("bigRace")
 
-	var err error
+	var bigRace *bool
+
+	if bigRaceQuery != "" {
+		*bigRace = bigRaceQuery == "true"
+	}
+
+	err, game := c.gameService.GetGame(uint64(raceId), uint64(lobbyId), username, bigRace)
+
+	request.FinalResponse(ctx, err, game)
+}
+
+func (c *gameController) Start(ctx *gin.Context) {
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+
 	var response request.Response
 
-	err = c.gameService.Start(uint64(gameId), username)
+	err, race := c.gameService.Start(uint64(lobbyId))
 
 	if err == nil {
+		session.DeleteItem(ctx, "lobbyId")
+		session.SetItem(ctx, "raceId", race.ID)
 		response = request.SuccessResponse()
 	}
 

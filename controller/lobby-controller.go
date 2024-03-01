@@ -29,22 +29,22 @@ func (c *lobbyController) CreateLobby(ctx *gin.Context) {
 
 	err, lobby := c.lobbyService.CreateLobby(username)
 
-	session.SetItem(ctx, "gameId", lobby.ID)
+	session.SetItem(ctx, "lobbyId", lobby.ID)
 
 	request.FinalResponse(ctx, err, lobby)
 }
 
 func (c *lobbyController) Join(ctx *gin.Context) {
 	username := session.GetItem[string](ctx, "username")
-	gameId, _ := strconv.Atoi(ctx.Param("gameId"))
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
 
 	var err error
 	var response request.Response
 
-	err = c.lobbyService.Join(uint64(gameId), username)
+	err = c.lobbyService.Join(uint64(lobbyId), username)
 
 	if err == nil {
-		session.SetItem(ctx, "gameId", uint64(gameId))
+		session.SetItem(ctx, "lobbyId", uint64(lobbyId))
 		response = request.SuccessResponse()
 	}
 
@@ -53,15 +53,15 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 
 func (c *lobbyController) Leave(ctx *gin.Context) {
 	username := session.GetItem[string](ctx, "username")
-	gameId, _ := strconv.Atoi(ctx.Param("gameId"))
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
 
 	var err error
 	var response request.Response
 
-	err = c.lobbyService.Leave(uint64(gameId), username)
+	err = c.lobbyService.Leave(uint64(lobbyId), username)
 
 	if err == nil {
-		session.DeleteItem(ctx, "gameId")
+		session.DeleteItem(ctx, "lobbyId")
 		response = request.SuccessResponse()
 	}
 

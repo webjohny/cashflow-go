@@ -12,6 +12,7 @@ type PlayerRepository interface {
 	DeletePlayer(b *entity.Player)
 	FindPlayerById(ID uint64) *entity.Player
 	FindPlayerByUsername(username string) *entity.Player
+	FindPlayerByUsernameAndRaceId(raceId uint64, username string) *entity.Player
 }
 
 const PlayerTable = "players"
@@ -60,6 +61,14 @@ func (db *playerConnection) FindPlayerByUsername(Username string) *entity.Player
 	var player *entity.Player
 
 	db.connection.Preload(PlayerTable).Find(&player, Username)
+
+	return player
+}
+
+func (db *playerConnection) FindPlayerByUsernameAndRaceId(RaceId uint64, Username string) *entity.Player {
+	var player *entity.Player
+
+	db.connection.Preload(PlayerTable).Find(&player, Username).Find(&player, RaceId)
 
 	return player
 }

@@ -10,7 +10,8 @@ import (
 type TransactionRepository interface {
 	InsertTransaction(b *entity.Transaction) entity.Transaction
 	UpdateTransaction(b *entity.Transaction) entity.Transaction
-	All(idUser string) []entity.Transaction
+	GetPlayerTransactions(playerId uint64) []entity.Transaction
+	GetRaceTransactions(raceId uint64) []entity.Transaction
 	DeleteTransaction(b *entity.Transaction)
 	FindTransactionByPlayerId(ID uint64) entity.Transaction
 }
@@ -33,9 +34,15 @@ func (db *transactionConnection) InsertTransaction(b *entity.Transaction) entity
 	return *b
 }
 
-func (db *transactionConnection) All(idUser string) []entity.Transaction {
+func (db *transactionConnection) GetPlayerTransactions(playerId uint64) []entity.Transaction {
 	var transactions []entity.Transaction
-	db.connection.Preload(TransactionsTable).Where("user_id = ?", idUser).Find(&transactions)
+	db.connection.Preload(TransactionsTable).Where("player_id = ?", playerId).Find(&transactions)
+	return transactions
+}
+
+func (db *transactionConnection) GetRaceTransactions(raceId uint64) []entity.Transaction {
+	var transactions []entity.Transaction
+	db.connection.Preload(TransactionsTable).Where("race_id = ?", raceId).Find(&transactions)
 	return transactions
 }
 

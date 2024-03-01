@@ -2,6 +2,7 @@ package storage
 
 const (
 	ErrorUndefinedUser         = "Пользователь не найден"
+	ErrorUndefinedPlayer       = "Игрок не найден"
 	ErrorUndefinedGame         = "Игра не найдена"
 	ErrorGameIsFull            = "Игра переполнена игроками, уточняйте информацию у администратора"
 	ErrorUndefinedLobby        = "Лобби не найдено"
