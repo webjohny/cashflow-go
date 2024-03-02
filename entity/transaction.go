@@ -19,10 +19,10 @@ type TransactionData struct {
 
 type Transaction struct {
 	ID              uint64           `gorm:"primary_key:auto_increment" json:"id"`
-	PlayerID        *uint64          `gorm:"index" json:"user_id"`
-	RaceID          *uint64          `gorm:"index" json:"race_id"`
+	PlayerID        *uint64          `gorm:"index" json:"user_id,omitempty"`
+	RaceID          *uint64          `gorm:"index" json:"race_id,omitempty"`
 	TransactionType string           `json:"transaction_type"`
 	Details         string           `json:"description"`
-	Data            *TransactionData `json:"data"`
-	CreatedAt       *string          `json:"created_at"`
+	Data            *TransactionData `gorm:"serializer:json" json:"data,omitempty"`
+	CreatedAt       string           `json:"created_at"`
 }

@@ -47,16 +47,16 @@ type RaceOptions struct {
 
 type Race struct {
 	ID                uint64               `gorm:"primary_key:auto_increment" json:"id"`
-	Responses         []RaceResponse       `json:"responses"`
+	Responses         []RaceResponse       `gorm:"serializer:json" json:"responses"`
 	ParentID          uint64               `gorm:"index" json:"parent_id"`
 	Status            string               `json:"status"`
-	CurrentPlayer     *RacePlayer          `json:"current_player"`
-	CurrentCard       *Card                `json:"current_card"`
-	Notifications     []RaceNotification   `json:"notifications"`
-	BankruptedPlayers []RaceBankruptPlayer `json:"bankrupted_players"`
-	Logs              []RaceLog            `json:"logs"`
-	Dice              []int                `json:"dice"`
-	Options           RaceOptions          `json:"options"`
+	CurrentPlayer     *RacePlayer          `gorm:"serializer:json" json:"current_player,omitempty"`
+	CurrentCard       *Card                `gorm:"serializer:json" json:"current_card,omitempty"`
+	Notifications     []RaceNotification   `gorm:"serializer:json" json:"notifications"`
+	BankruptedPlayers []RaceBankruptPlayer `gorm:"serializer:json" json:"bankrupted_players"`
+	Logs              []RaceLog            `gorm:"serializer:json" json:"logs"`
+	Dice              []int                `gorm:"serializer:json" json:"dice"`
+	Options           RaceOptions          `gorm:"serializer:json" json:"options"`
 	CreatedAt         string               `json:"created_at"`
 }
 
@@ -70,15 +70,3 @@ func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
 		}
 	}
 }
-
-//numId: 22
-//players: "[{"username":"webjohny","responded":true},{"username":"webtoolteam","responded":false}]"
-//maxPlayers: 6
-//status: "started"
-//currentPlayer: "webjohny"
-//notifications: "[]"
-//logs: "[]"
-//bankruptedPlayers: []
-//createdAt: 1705974096391
-//dice: [...]
-//options: "{"enterAfterGameStarting":false}"

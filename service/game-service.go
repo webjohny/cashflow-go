@@ -40,7 +40,7 @@ func (service *gameService) GetGame(raceId uint64, lobbyId uint64, username stri
 		response.Lobby = lobby
 		response.Hash = helper.CreateHashByJson(lobby)
 	} else if raceId > 0 {
-		bigRace := player.OnBigRace
+		bigRace := player.OnBigRace == 1
 
 		if isBigRace != nil {
 			bigRace = *isBigRace

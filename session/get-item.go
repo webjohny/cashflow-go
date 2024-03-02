@@ -4,16 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetItem[T comparable](ctx *gin.Context, key string) T {
+func GetItem[T comparable](ctx *gin.Context, key string) *T {
 	store := GetStore(ctx)
 
 	value, ok := store.Get(key)
 
-	if ok {
-		return value.(T)
+	if ok && value != nil {
+		val := value.(T)
+		return &val
 	}
 
-	return value.(T)
+	return nil
 }
 
 func SetItem(ctx *gin.Context, key string, value interface{}) {

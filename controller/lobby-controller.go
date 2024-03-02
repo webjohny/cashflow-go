@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/session"
@@ -27,7 +28,12 @@ func NewLobbyController(lobbyService service.LobbyService) LobbyController {
 func (c *lobbyController) CreateLobby(ctx *gin.Context) {
 	username := session.GetItem[string](ctx, "username")
 
-	err, lobby := c.lobbyService.CreateLobby(username)
+	var err error
+	var lobby *entity.Lobby
+
+	if username != nil {
+		err, lobby = c.lobbyService.CreateLobby(*username)
+	}
 
 	session.SetItem(ctx, "lobbyId", lobby.ID)
 
@@ -41,7 +47,9 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 	var err error
 	var response request.Response
 
-	err = c.lobbyService.Join(uint64(lobbyId), username)
+	if username != nil {
+		err = c.lobbyService.Join(uint64(lobbyId), *username)
+	}
 
 	if err == nil {
 		session.SetItem(ctx, "lobbyId", uint64(lobbyId))
@@ -58,7 +66,9 @@ func (c *lobbyController) Leave(ctx *gin.Context) {
 	var err error
 	var response request.Response
 
-	err = c.lobbyService.Leave(uint64(lobbyId), username)
+	if username != nil {
+		err = c.lobbyService.Leave(uint64(lobbyId), *username)
+	}
 
 	if err == nil {
 		session.DeleteItem(ctx, "lobbyId")

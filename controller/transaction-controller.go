@@ -14,7 +14,6 @@ import (
 )
 
 type TransactionContoller interface {
-	All(context *gin.Context)
 	Insert(context *gin.Context)
 	Update(context *gin.Context)
 	Delete(context *gin.Context)
@@ -30,14 +29,6 @@ func NewTransactionController(trxServ service.TransactionService, jwtServ servic
 		transactionService: trxServ,
 		jwtService:         jwtServ,
 	}
-}
-
-func (c *transactionController) All(context *gin.Context) {
-	authHeader := context.GetHeader("Authorization")
-	userID := c.getUserIDByToken(authHeader)
-	trx := c.transactionService.All(userID)
-	res := request.BuildResponse(true, "OK!", trx)
-	context.JSON(http.StatusOK, res)
 }
 
 func (c *transactionController) Insert(context *gin.Context) {

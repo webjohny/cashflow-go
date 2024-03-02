@@ -5,12 +5,14 @@ import (
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/session"
+	"log"
 	"strconv"
 )
 
 type GameController interface {
 	Start(ctx *gin.Context)
 	GetGame(ctx *gin.Context)
+	TestSession(ctx *gin.Context)
 }
 
 type gameController struct {
@@ -35,9 +37,24 @@ func (c *gameController) GetGame(ctx *gin.Context) {
 		*bigRace = bigRaceQuery == "true"
 	}
 
-	err, game := c.gameService.GetGame(uint64(raceId), uint64(lobbyId), username, bigRace)
+	var err error
+	var response interface{}
 
-	request.FinalResponse(ctx, err, game)
+	if username != nil {
+		err, response = c.gameService.GetGame(uint64(raceId), uint64(lobbyId), *username, bigRace)
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *gameController) TestSession(ctx *gin.Context) {
+	session.SetItem(ctx, "username", "webjohny")
+	session.SetItem(ctx, "raceId", 1)
+
+	get := session.GetItem[string](ctx, "username")
+	log.Println(&get)
+
+	request.FinalResponse(ctx, nil, request.SuccessResponse())
 }
 
 func (c *gameController) Start(ctx *gin.Context) {

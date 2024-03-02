@@ -33,7 +33,12 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	err, response := c.cardService.Prepare(raceId, family, actionType, username)
+	var err error
+	var response interface{}
+
+	if raceId != nil && username != nil {
+		err, response = c.cardService.Prepare(*raceId, family, actionType, *username)
+	}
 
 	request.FinalResponse(ctx, err, response)
 }
@@ -44,7 +49,12 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	err, response := c.cardService.Selling(raceId, actionType, username)
+	var err error
+	var response interface{}
+
+	if raceId != nil && username != nil {
+		err, response = c.cardService.Selling(*raceId, actionType, *username)
+	}
 
 	request.FinalResponse(ctx, err, response)
 }
@@ -56,7 +66,12 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	err, response := c.cardService.Accept(raceId, family, actionType, username)
+	var err error
+	var response interface{}
+
+	if raceId != nil && username != nil {
+		err, response = c.cardService.Accept(*raceId, family, actionType, *username)
+	}
 
 	request.FinalResponse(ctx, err, response)
 }
@@ -65,7 +80,12 @@ func (c *cardController) Skip(ctx *gin.Context) {
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	err, response := c.cardService.Skip(raceId, username)
+	var err error
+	var response interface{}
+
+	if raceId != nil && username != nil {
+		err, response = c.cardService.Skip(*raceId, *username)
+	}
 
 	request.FinalResponse(ctx, err, response)
 }
@@ -77,7 +97,12 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 	raceId := session.GetItem[uint64](ctx, "raceId")
 	username := session.GetItem[string](ctx, "username")
 
-	err, response := c.cardService.Purchase(raceId, actionType, username, count)
+	var err error
+	var response interface{}
+
+	if raceId != nil && username != nil {
+		err, response = c.cardService.Purchase(*raceId, actionType, *username, count)
+	}
 
 	request.FinalResponse(ctx, err, response)
 }

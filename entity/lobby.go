@@ -18,10 +18,10 @@ type LobbyPlayer struct {
 
 type Lobby struct {
 	ID         uint64                 `gorm:"primary_key:auto_increment" json:"id"`
-	Players    []LobbyPlayer          `json:"players"`
+	Players    []LobbyPlayer          `gorm:"serializer:json" json:"players"`
 	MaxPlayers int8                   `json:"max_players"`
 	Status     string                 `json:"status"`
-	Options    map[string]interface{} `json:"options"`
+	Options    map[string]interface{} `gorm:"serializer:json" json:"options"`
 	CreatedAt  string                 `json:"created_at"`
 }
 
@@ -47,17 +47,17 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 		Liabilities:     profession.Liabilities,
 		Cash:            0,
 		PassiveIncome:   0,
-		Profession:      uint8(profession.ID),
+		ProfessionId:    uint8(profession.ID),
 		LastPosition:    0,
 		CurrentPosition: 0,
 		DualDiceCount:   0,
 		SkippedTurns:    0,
-		IsRolledDice:    false,
-		CanReRoll:       false,
-		OnBigRace:       false,
-		HasBankrupt:     false,
-		AboutToBankrupt: false,
-		HasMlm:          false,
+		IsRolledDice:    0,
+		CanReRoll:       0,
+		OnBigRace:       0,
+		HasBankrupt:     0,
+		AboutToBankrupt: "",
+		HasMlm:          0,
 	}
 
 	instance.TotalExpenses = instance.CalculateTotalExpenses()

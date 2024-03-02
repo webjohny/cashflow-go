@@ -15,24 +15,26 @@ var (
 	db *gorm.DB = config.SetupDatabaseConnection()
 
 	// Repositories
-	raceRepository   repository.RaceRepository        = repository.NewRaceRepository(db)
-	lobbyRepository  repository.LobbyRepository       = repository.NewLobbyRepository(db)
-	userRepository   repository.UserRepository        = repository.NewUserRepository(db)
-	playerRepository repository.PlayerRepository      = repository.NewPlayerRepository(db)
-	trxRepository    repository.TransactionRepository = repository.NewTransactionRepository(db)
+	raceRepository       repository.RaceRepository        = repository.NewRaceRepository(db)
+	lobbyRepository      repository.LobbyRepository       = repository.NewLobbyRepository(db)
+	userRepository       repository.UserRepository        = repository.NewUserRepository(db)
+	playerRepository     repository.PlayerRepository      = repository.NewPlayerRepository(db)
+	professionRepository repository.ProfessionRepository  = repository.NewProfessionRepository(os.Getenv("PROFESSIONS_PATH"))
+	trxRepository        repository.TransactionRepository = repository.NewTransactionRepository(db)
 
 	// Services
 	jwtService         service.JWTService         = service.NewJWTService()
 	userService        service.UserService        = service.NewUserService(userRepository)
 	transactionService service.TransactionService = service.NewTransactionService(trxRepository)
-	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, transactionService)
+	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, professionRepository, transactionService)
 	authService        service.AuthService        = service.NewAuthService(userRepository)
-	gameService        service.GameService        = service.NewGameService(raceService)
+	gameService        service.GameService        = service.NewGameService(lobbyRepository, raceRepository, playerRepository)
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
 
 	// Controllers
+	gameController  controller.GameController  = controller.NewGameController(gameService)
 	lobbyController controller.LobbyController = controller.NewLobbyController(lobbyService)
 	cardController  controller.CardController  = controller.NewCardController(cardService)
 	authController  controller.AuthController  = controller.NewAuthController(authService, jwtService)
@@ -71,8 +73,15 @@ func main() {
 	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
 	{
 		lobbyRoutes.POST("/create", lobbyController.CreateLobby)
-		lobbyRoutes.GET("/join/:gameId", lobbyController.Join)
-		lobbyRoutes.GET("/leave/:gameId", lobbyController.Leave)
+		lobbyRoutes.GET("/join/:lobbyId", lobbyController.Join)
+		lobbyRoutes.GET("/leave/:lobbyId", lobbyController.Leave)
+		// userRoutes.POST("/picture", userController.SaveFile)
+	}
+
+	gameRoutes := r.Group("api/game")
+	{
+		gameRoutes.GET("", gameController.GetGame)
+		gameRoutes.GET("/test/session", gameController.TestSession)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 

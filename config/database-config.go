@@ -38,7 +38,7 @@ func SetupDatabaseConnection() *gorm.DB {
 	}
 
 	//Isi model / table disini
-	db.AutoMigrate(&entity.User{}, &entity.Race{})
+	db.AutoMigrate(&entity.User{}, &entity.Race{}, &entity.Lobby{}, &entity.Player{}, &entity.Transaction{})
 	return db
 }
 

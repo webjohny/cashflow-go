@@ -144,13 +144,13 @@ func (service *cardService) Selling(raceId uint64, actionType string, username s
 	return nil, nil
 }
 
-func (service *cardService) GetCards() []entity.CardDefault {
+func (service *cardService) GetCards() []entity.Card {
 	data, err := os.ReadFile(os.Getenv("CARDS_PATH"))
 	if err != nil {
 		panic(err)
 	}
 
-	var cards []entity.CardDefault
+	var cards []entity.Card
 
 	err = json.Unmarshal(data, &cards)
 	if err != nil {
@@ -160,7 +160,7 @@ func (service *cardService) GetCards() []entity.CardDefault {
 	return cards
 }
 
-func (service *cardService) GetCard(cardType string) *entity.CardDefault {
+func (service *cardService) GetCard(cardType string) *entity.Card {
 	deals := []string{"smallDeal", "bigDeal"}
 	validTypes := append(deals,
 		"market",
@@ -177,7 +177,7 @@ func (service *cardService) GetCard(cardType string) *entity.CardDefault {
 	)
 
 	if cardType == "deals" {
-		return &entity.CardDefault{
+		return &entity.Card{
 			ID:      "deal",
 			Heading: "Выберите маленькую или большую сделку",
 			Family:  "deal",
@@ -225,9 +225,9 @@ func (service *cardService) GetRatCardType(tilePosition int) string {
 	return ""
 }
 
-func (service *cardService) PickCard(cardType string) entity.CardDefault {
+func (service *cardService) PickCard(cardType string) entity.Card {
 	if helper.Contains([]string{}, cardType) {
-		return entity.CardDefault{}
+		return entity.Card{}
 	}
 
 	cardList := service.GetCards()

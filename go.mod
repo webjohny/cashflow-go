@@ -12,7 +12,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/mashingan/smapping v0.1.19
 	golang.org/x/crypto v0.9.0
-	gorm.io/driver/mysql v1.3.6
+	gorm.io/driver/mysql v1.4.7
 	gorm.io/gorm v1.25.7
 )
 
@@ -46,4 +46,5 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/datatypes v1.2.0 // indirect
 )

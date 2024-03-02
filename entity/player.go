@@ -43,11 +43,11 @@ type Player struct {
 	Username        string            `gorm:"uniqueIndex;type:varchar(255)" json:"username"`
 	Role            string            `json:"role"`
 	Color           string            `json:"color"`
-	Income          PlayerIncome      `json:"income"`
+	Income          PlayerIncome      `gorm:"serializer:json" json:"income"`
 	Babies          uint8             `json:"babies"`
-	Expenses        map[string]int    `json:"expenses"`
-	Assets          PlayerAssets      `json:"assets"`
-	Liabilities     PlayerLiabilities `json:"liabilities"`
+	Expenses        map[string]int    `gorm:"serializer:json" json:"expenses"`
+	Assets          PlayerAssets      `gorm:"serializer:json" json:"assets"`
+	Liabilities     PlayerLiabilities `gorm:"serializer:json" json:"liabilities"`
 	Cash            int               `json:"cash"`
 	TotalIncome     int               `json:"total_income"`
 	TotalExpenses   int               `json:"total_expenses"`
