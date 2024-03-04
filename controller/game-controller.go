@@ -26,7 +26,7 @@ func NewGameController(gameService service.GameService) GameController {
 }
 
 func (c *gameController) GetGame(ctx *gin.Context) {
-	username := session.GetItem[string](ctx, "username")
+	username := ctx.GetString("username")
 	raceId, _ := strconv.Atoi(ctx.Param("raceId"))
 	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
 	bigRaceQuery := ctx.Query("bigRace")
@@ -40,8 +40,8 @@ func (c *gameController) GetGame(ctx *gin.Context) {
 	var err error
 	var response interface{}
 
-	if username != nil {
-		err, response = c.gameService.GetGame(uint64(raceId), uint64(lobbyId), *username, bigRace)
+	if username != "" {
+		err, response = c.gameService.GetGame(uint64(raceId), uint64(lobbyId), username, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -50,9 +50,6 @@ func (c *gameController) GetGame(ctx *gin.Context) {
 func (c *gameController) TestSession(ctx *gin.Context) {
 	session.SetItem(ctx, "username", "webjohny")
 	session.SetItem(ctx, "raceId", 1)
-
-	get := session.GetItem[string](ctx, "username")
-	log.Println(&get)
 
 	request.FinalResponse(ctx, nil, request.SuccessResponse())
 }
@@ -65,8 +62,7 @@ func (c *gameController) Start(ctx *gin.Context) {
 	err, race := c.gameService.Start(uint64(lobbyId))
 
 	if err == nil {
-		session.DeleteItem(ctx, "lobbyId")
-		session.SetItem(ctx, "raceId", race.ID)
+		log.Println(race)
 		response = request.SuccessResponse()
 	}
 

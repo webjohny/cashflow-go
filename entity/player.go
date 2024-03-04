@@ -39,6 +39,7 @@ type PlayerLiabilities struct {
 
 type Player struct {
 	ID              uint64            `gorm:"primary_key:auto_increment" json:"id"`
+	UserId          uint64            `gorm:"index" json:"user_id"`
 	RaceId          uint64            `gorm:"index" gorm:"index" json:"race_id"`
 	Username        string            `gorm:"uniqueIndex;type:varchar(255)" json:"username"`
 	Role            string            `json:"role"`

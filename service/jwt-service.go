@@ -9,17 +9,15 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(UserID string, Email string, Profile string, Jk string, telephone string, pin string, name string) string
+	GenerateToken(ID string, email string, profile string, jk string, name string) string
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
 type jwtCustomClaim struct {
-	UserID  string `json:"userid"`
+	UserId  string `json:"user_id"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Profile string `json:"profile"`
-	Telp    string `json:"telp"`
-	Pin     string `json:"pin"`
 	Jk      string `json:"jk"`
 	jwt.StandardClaims
 }
@@ -29,7 +27,7 @@ type jwtService struct {
 	issuer    string
 }
 
-// NewJWTService method is creates a new instance of JWTService
+// NewJWTService method is created a new instance of JWTService
 func NewJWTService() JWTService {
 	return &jwtService{
 		issuer:    "aminivan",
@@ -45,15 +43,13 @@ func getSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateToken(UserID string, Email string, Profile string, Jk string, Telephone string, Pin string, Name string) string {
+func (j *jwtService) GenerateToken(ID string, email string, profile string, jk string, name string) string {
 	claims := &jwtCustomClaim{
-		UserID,
-		Name,
-		Email,
-		Profile,
-		Telephone,
-		Pin,
-		Jk,
+		ID,
+		name,
+		email,
+		profile,
+		jk,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(0, 3, 0).Unix(),
 			Issuer:    j.issuer,

@@ -46,8 +46,6 @@ func main() {
 	r := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 
-	r.Use(middleware.PreRequest())
-
 	cardRoutes := r.Group("api/card")
 	{
 		cardRoutes.GET("/prepare/:family/:type", cardController.Prepare)
@@ -70,7 +68,7 @@ func main() {
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
-	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
+	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		lobbyRoutes.POST("/create", lobbyController.CreateLobby)
 		lobbyRoutes.GET("/join/:lobbyId", lobbyController.Join)
@@ -78,7 +76,7 @@ func main() {
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
-	gameRoutes := r.Group("api/game")
+	gameRoutes := r.Group("api/game", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		gameRoutes.GET("", gameController.GetGame)
 		gameRoutes.GET("/test/session", gameController.TestSession)

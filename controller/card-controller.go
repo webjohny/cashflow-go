@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
-	"github.com/webjohny/cashflow-go/session"
 	"strconv"
 )
 
@@ -30,14 +29,14 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := session.GetItem[uint64](ctx, "raceId")
-	username := session.GetItem[string](ctx, "username")
+	raceId := ctx.GetUint64("raceId")
+	username := ctx.GetString("username")
 
 	var err error
 	var response interface{}
 
-	if raceId != nil && username != nil {
-		err, response = c.cardService.Prepare(*raceId, family, actionType, *username)
+	if raceId != 0 && username != "" {
+		err, response = c.cardService.Prepare(raceId, family, actionType, username)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -46,14 +45,14 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 func (c *cardController) Selling(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 
-	raceId := session.GetItem[uint64](ctx, "raceId")
-	username := session.GetItem[string](ctx, "username")
+	raceId := ctx.GetUint64("raceId")
+	username := ctx.GetString("username")
 
 	var err error
 	var response interface{}
 
-	if raceId != nil && username != nil {
-		err, response = c.cardService.Selling(*raceId, actionType, *username)
+	if raceId != 0 && username != "" {
+		err, response = c.cardService.Selling(raceId, actionType, username)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -63,28 +62,28 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := session.GetItem[uint64](ctx, "raceId")
-	username := session.GetItem[string](ctx, "username")
+	raceId := ctx.GetUint64("raceId")
+	username := ctx.GetString("username")
 
 	var err error
 	var response interface{}
 
-	if raceId != nil && username != nil {
-		err, response = c.cardService.Accept(*raceId, family, actionType, *username)
+	if raceId != 0 && username != "" {
+		err, response = c.cardService.Accept(raceId, family, actionType, username)
 	}
 
 	request.FinalResponse(ctx, err, response)
 }
 
 func (c *cardController) Skip(ctx *gin.Context) {
-	raceId := session.GetItem[uint64](ctx, "raceId")
-	username := session.GetItem[string](ctx, "username")
+	raceId := ctx.GetUint64("raceId")
+	username := ctx.GetString("username")
 
 	var err error
 	var response interface{}
 
-	if raceId != nil && username != nil {
-		err, response = c.cardService.Skip(*raceId, *username)
+	if raceId != 0 && username != "" {
+		err, response = c.cardService.Skip(raceId, username)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -94,14 +93,14 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 	count, _ := strconv.Atoi(ctx.Query("count"))
 
-	raceId := session.GetItem[uint64](ctx, "raceId")
-	username := session.GetItem[string](ctx, "username")
+	raceId := ctx.GetUint64("raceId")
+	username := ctx.GetString("username")
 
 	var err error
 	var response interface{}
 
-	if raceId != nil && username != nil {
-		err, response = c.cardService.Purchase(*raceId, actionType, *username, count)
+	if raceId != 0 && username != "" {
+		err, response = c.cardService.Purchase(raceId, actionType, username, count)
 	}
 
 	request.FinalResponse(ctx, err, response)

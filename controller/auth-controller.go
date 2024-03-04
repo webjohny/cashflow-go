@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"net/http"
+	"os"
 
 	"strconv"
 
@@ -40,8 +42,8 @@ func (c *authController) Login(ctx *gin.Context) {
 	}
 	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
 	if v, ok := authResult.(entity.User); ok {
-		generatedTokn := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10), v.Email, v.Profile, v.Jk, v.Telephone, v.Pin, v.Name)
-		v.Token = generatedTokn
+		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10), v.Email, v.Profile, v.Jk, v.Name)
+		v.Token = generatedToken
 		response := request.BuildResponse(true, "OK", v)
 		ctx.JSON(http.StatusOK, response)
 		return
@@ -63,10 +65,11 @@ func (c *authController) Register(ctx *gin.Context) {
 		response := request.BuildErrorResponse("Failed to process request", "Duplicate email", request.EmptyObj{})
 		ctx.JSON(http.StatusConflict, response)
 	} else {
+		registerDTO.Jk = helper.CreateHash(registerDTO.Email + strconv.Itoa(int(registerDTO.ID)) + os.Getenv("SECRET"))
 		createdUser := c.authService.CreateUser(registerDTO)
-		token := c.jwtService.GenerateToken(strconv.FormatUint(createdUser.ID, 10), createdUser.Email, createdUser.Profile, createdUser.Jk, createdUser.Telephone, createdUser.Pin, createdUser.Name)
+		token := c.jwtService.GenerateToken(strconv.FormatUint(createdUser.ID, 10), createdUser.Email, createdUser.Profile, createdUser.Jk, createdUser.Name)
 		createdUser.Token = token
-		response := request.BuildResponse(true, "OK!", createdUser)
+		response := request.BuildResponse(true, "OK", createdUser)
 		ctx.JSON(http.StatusCreated, response)
 	}
 }
