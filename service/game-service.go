@@ -35,6 +35,7 @@ func (service *gameService) GetGame(raceId uint64, lobbyId uint64, username stri
 		Username: username,
 		You:      *player,
 	}
+
 	if lobbyId > 0 {
 		lobby := service.lobbyRepository.FindLobbyById(lobbyId)
 		response.Lobby = lobby

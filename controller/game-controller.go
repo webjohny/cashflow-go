@@ -4,15 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
-	"github.com/webjohny/cashflow-go/session"
 	"log"
-	"strconv"
 )
 
 type GameController interface {
 	Start(ctx *gin.Context)
 	GetGame(ctx *gin.Context)
-	TestSession(ctx *gin.Context)
 }
 
 type gameController struct {
@@ -27,8 +24,8 @@ func NewGameController(gameService service.GameService) GameController {
 
 func (c *gameController) GetGame(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	raceId, _ := strconv.Atoi(ctx.Param("raceId"))
-	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+	raceId := uint64(ctx.GetInt("raceId"))
+	lobbyId := uint64(ctx.GetInt("lobbyId"))
 	bigRaceQuery := ctx.Query("bigRace")
 
 	var bigRace *bool
@@ -41,25 +38,18 @@ func (c *gameController) GetGame(ctx *gin.Context) {
 	var response interface{}
 
 	if username != "" {
-		err, response = c.gameService.GetGame(uint64(raceId), uint64(lobbyId), username, bigRace)
+		err, response = c.gameService.GetGame(raceId, lobbyId, username, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
 }
 
-func (c *gameController) TestSession(ctx *gin.Context) {
-	session.SetItem(ctx, "username", "webjohny")
-	session.SetItem(ctx, "raceId", 1)
-
-	request.FinalResponse(ctx, nil, request.SuccessResponse())
-}
-
 func (c *gameController) Start(ctx *gin.Context) {
-	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+	lobbyId := uint64(ctx.GetInt("lobbyId"))
 
 	var response request.Response
 
-	err, race := c.gameService.Start(uint64(lobbyId))
+	err, race := c.gameService.Start(lobbyId)
 
 	if err == nil {
 		log.Println(race)

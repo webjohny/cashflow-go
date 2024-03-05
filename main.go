@@ -79,7 +79,6 @@ func main() {
 	gameRoutes := r.Group("api/game", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		gameRoutes.GET("", gameController.GetGame)
-		gameRoutes.GET("/test/session", gameController.TestSession)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 

@@ -57,18 +57,18 @@ func (db *playerConnection) FindPlayerById(ID uint64) *entity.Player {
 	return player
 }
 
-func (db *playerConnection) FindPlayerByUsername(Username string) *entity.Player {
+func (db *playerConnection) FindPlayerByUsername(username string) *entity.Player {
 	var player *entity.Player
 
-	db.connection.Preload(PlayerTable).Find(&player, Username)
+	db.connection.Preload(PlayerTable).Find(&player, "`username` = ?", username).Find(&player)
 
 	return player
 }
 
-func (db *playerConnection) FindPlayerByUsernameAndRaceId(RaceId uint64, Username string) *entity.Player {
+func (db *playerConnection) FindPlayerByUsernameAndRaceId(raceId uint64, username string) *entity.Player {
 	var player *entity.Player
 
-	db.connection.Preload(PlayerTable).Find(&player, Username).Find(&player, RaceId)
+	db.connection.Preload(PlayerTable).Where("`username` = ? AND `race_id` = ?", username, raceId).Find(&player)
 
 	return player
 }

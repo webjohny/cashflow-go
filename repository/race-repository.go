@@ -53,8 +53,7 @@ func (db *raceConnection) FindRaceById(ID uint64, IsBigRace bool) *entity.Race {
 	if !IsBigRace {
 		db.connection.Preload(RaceTable).Find(&race, ID)
 	} else {
-		ParentID := ID
-		db.connection.Preload(RaceTable).Find(&race, ParentID).Find(&race, IsBigRace)
+		db.connection.Preload(RaceTable).Where("parent_id = ? AND is_big_race = ?", ID, IsBigRace).Find(&race)
 	}
 	return race
 }

@@ -29,7 +29,7 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := ctx.GetUint64("raceId")
+	raceId := uint64(ctx.GetInt("raceId"))
 	username := ctx.GetString("username")
 
 	var err error
@@ -45,7 +45,7 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 func (c *cardController) Selling(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 
-	raceId := ctx.GetUint64("raceId")
+	raceId := uint64(ctx.GetInt("raceId"))
 	username := ctx.GetString("username")
 
 	var err error
@@ -62,7 +62,7 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := ctx.GetUint64("raceId")
+	raceId := uint64(ctx.GetInt("raceId"))
 	username := ctx.GetString("username")
 
 	var err error
@@ -76,7 +76,7 @@ func (c *cardController) Accept(ctx *gin.Context) {
 }
 
 func (c *cardController) Skip(ctx *gin.Context) {
-	raceId := ctx.GetUint64("raceId")
+	raceId := uint64(ctx.GetInt("raceId"))
 	username := ctx.GetString("username")
 
 	var err error
@@ -93,7 +93,7 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 	count, _ := strconv.Atoi(ctx.Query("count"))
 
-	raceId := ctx.GetUint64("raceId")
+	raceId := uint64(ctx.GetInt("raceId"))
 	username := ctx.GetString("username")
 
 	var err error

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
-	"strconv"
 )
 
 type PlayerController interface {
@@ -23,7 +22,7 @@ func NewPlayerController(playerService service.PlayerService) PlayerController {
 
 func (c *playerController) GetRacePlayer(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	raceId, _ := strconv.Atoi(ctx.Param("raceId"))
+	raceId := uint64(ctx.GetInt("raceId"))
 
 	var err error
 	var response interface{}
