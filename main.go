@@ -68,7 +68,7 @@ func main() {
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
-	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
+	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
 	{
 		lobbyRoutes.POST("/create", lobbyController.CreateLobby)
 		lobbyRoutes.GET("/join/:lobbyId", lobbyController.Join)

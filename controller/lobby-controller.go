@@ -5,6 +5,7 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
+	"strconv"
 )
 
 type LobbyController interface {
@@ -38,7 +39,7 @@ func (c *lobbyController) CreateLobby(ctx *gin.Context) {
 
 func (c *lobbyController) Join(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	lobbyId := uint64(ctx.GetInt("lobbyId"))
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
 
 	var err error
 	var response request.Response
@@ -56,7 +57,7 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 
 func (c *lobbyController) Leave(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	lobbyId := uint64(ctx.GetInt("lobbyId"))
+	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
 
 	var err error
 	var response request.Response

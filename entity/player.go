@@ -1,15 +1,20 @@
 package entity
 
-import "math"
+import (
+	"gorm.io/datatypes"
+	"math"
+)
 
 var PlayerRoles = struct {
-	GUEST string
-	OWNER string
-	ADMIN string
+	Guest    string
+	WaitList string
+	Owner    string
+	Admin    string
 }{
-	GUEST: "guest",
-	OWNER: "owner",
-	ADMIN: "admin",
+	Guest:    "guest",
+	WaitList: "wait_list",
+	Owner:    "owner",
+	Admin:    "admin",
 }
 
 type PlayerIncome struct {
@@ -65,7 +70,7 @@ type Player struct {
 	HasBankrupt     uint8             `json:"has_bankrupt"`
 	AboutToBankrupt string            `json:"about_to_bankrupt"`
 	HasMlm          uint8             `json:"has_mlm"`
-	CreatedAt       string            `json:"created_at"`
+	CreatedAt       datatypes.Date    `json:"created_at"`
 }
 
 func (e *Player) FindStocks(symbol string) (int, *CardStocks) {

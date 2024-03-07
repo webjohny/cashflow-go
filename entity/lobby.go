@@ -1,19 +1,25 @@
 package entity
 
+import (
+	"github.com/webjohny/cashflow-go/helper"
+	"gorm.io/datatypes"
+)
+
 var LobbyStatus = struct {
-	NEW       string
-	STARTED   string
-	CANCELLED string
+	New       string
+	Started   string
+	Cancelled string
 }{
-	NEW:       "new",
-	STARTED:   "started",
-	CANCELLED: "cancelled",
+	New:       "new",
+	Started:   "started",
+	Cancelled: "cancelled",
 }
 
 type LobbyPlayer struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	Color    string `json:"color"`
+	WaitList bool   `json:"wait_list"`
 }
 
 type Lobby struct {
@@ -22,7 +28,7 @@ type Lobby struct {
 	MaxPlayers int8                   `json:"max_players"`
 	Status     string                 `json:"status"`
 	Options    map[string]interface{} `gorm:"serializer:json" json:"options"`
-	CreatedAt  string                 `json:"created_at"`
+	CreatedAt  datatypes.Date         `json:"created_at"`
 }
 
 func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profession) Player {
@@ -72,20 +78,28 @@ func (l *Lobby) AddPlayer(username string, role string) {
 		l.Players = make([]LobbyPlayer, 0)
 	}
 	if !l.IsPlayerAlreadyJoined(username) {
-		l.Players = append(l.Players, LobbyPlayer{Username: username, Role: role})
+		l.Players = append(l.Players, LobbyPlayer{Username: username, Role: role, Color: helper.PickColor()})
 	}
 }
 
+func (l *Lobby) CountPlayers() int {
+	return len(l.Players)
+}
+
+func (l *Lobby) AddWaitList(username string) {
+	l.AddPlayer(username, PlayerRoles.WaitList)
+}
+
 func (l *Lobby) AddGuest(username string) {
-	l.AddPlayer(username, PlayerRoles.GUEST)
+	l.AddPlayer(username, PlayerRoles.Guest)
 }
 
 func (l *Lobby) AddOwner(username string) {
-	l.AddPlayer(username, PlayerRoles.OWNER)
+	l.AddPlayer(username, PlayerRoles.Owner)
 }
 
 func (l *Lobby) AddAdmin(username string) {
-	l.AddPlayer(username, PlayerRoles.ADMIN)
+	l.AddPlayer(username, PlayerRoles.Admin)
 }
 
 func (l *Lobby) GetPlayer(username string) *LobbyPlayer {
@@ -103,7 +117,11 @@ func (l *Lobby) IsFull() bool {
 }
 
 func (l *Lobby) IsStarted() bool {
-	return l.Status == LobbyStatus.STARTED
+	return l.Status == LobbyStatus.Started
+}
+
+func (l *Lobby) IsGameStarted() bool {
+	return l.Status == LobbyStatus.Started && l.Options["enabled_wait_list"] != nil && l.Options["enabled_wait_list"] == true
 }
 
 func (l *Lobby) IsPlayerAlreadyJoined(username string) bool {
@@ -125,7 +143,7 @@ func (l *Lobby) AvailableToStart() bool {
 
 	for i := 0; i < len(l.Players); i++ {
 		player := l.Players[i]
-		if player.Role != PlayerRoles.ADMIN {
+		if player.Role != PlayerRoles.Admin {
 			count++
 		}
 	}

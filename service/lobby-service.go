@@ -5,6 +5,8 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
+	"gorm.io/datatypes"
+	"time"
 )
 
 type LobbyService interface {
@@ -12,6 +14,8 @@ type LobbyService interface {
 	Join(ID uint64, username string) error
 	Leave(ID uint64, username string) error
 }
+
+const LobbyMaxPlayers = 6
 
 type lobbyService struct {
 	lobbyRepository repository.LobbyRepository
@@ -26,9 +30,10 @@ func NewLobbyService(lobbyRepository repository.LobbyRepository) LobbyService {
 func (service *lobbyService) CreateLobby(username string) (error, *entity.Lobby) {
 	lobby := &entity.Lobby{
 		Players:    make([]entity.LobbyPlayer, 0),
-		MaxPlayers: 0,
-		Status:     entity.LobbyStatus.STARTED,
-		Options:    nil,
+		MaxPlayers: LobbyMaxPlayers,
+		Status:     entity.LobbyStatus.New,
+		Options:    make(map[string]interface{}),
+		CreatedAt:  datatypes.Date(time.Now()),
 	}
 	lobby.AddOwner(username)
 	instance := service.lobbyRepository.InsertLobby(lobby)
@@ -48,14 +53,18 @@ func (service *lobbyService) Join(ID uint64, username string) error {
 			return fmt.Errorf(storage.ErrorGameIsFull)
 		}
 
-		if lobby.IsStarted() {
-			return fmt.Errorf(storage.ErrorGameIsFull)
+		if lobby.IsGameStarted() {
+			return fmt.Errorf(storage.ErrorGameIsStarted)
 		}
 
 		player := lobby.GetPlayer(username)
 
 		if player != nil {
-			lobby.AddGuest(username)
+			if lobby.IsGameStarted() {
+				lobby.AddWaitList(username)
+			} else {
+				lobby.AddGuest(username)
+			}
 		}
 	} else {
 		return fmt.Errorf(storage.ErrorUndefinedLobby)
@@ -69,6 +78,11 @@ func (service *lobbyService) Leave(ID uint64, username string) error {
 
 	if lobby != nil {
 		lobby.RemovePlayer(username)
+
+		if lobby.CountPlayers() == 0 {
+			service.lobbyRepository.DeleteLobby(lobby)
+		}
+
 		return nil
 	}
 

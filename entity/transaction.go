@@ -1,5 +1,7 @@
 package entity
 
+import "gorm.io/datatypes"
+
 var TransactionType = struct {
 	PLAYER string
 	RACE   string
@@ -24,5 +26,5 @@ type Transaction struct {
 	TransactionType string           `json:"transaction_type"`
 	Details         string           `json:"description"`
 	Data            *TransactionData `gorm:"serializer:json" json:"data,omitempty"`
-	CreatedAt       string           `json:"created_at"`
+	CreatedAt       datatypes.Date   `json:"created_at"`
 }

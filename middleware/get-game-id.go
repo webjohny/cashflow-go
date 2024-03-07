@@ -10,13 +10,11 @@ import (
 
 func GetGameId() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		req := ctx.Request
-
-		if req.Header.Get("X-Race-ID") != "" {
-			raceId, _ := strconv.Atoi(req.Header.Get("X-Race-ID"))
+		if ctx.Query("raceId") != "" {
+			raceId, _ := strconv.Atoi(ctx.Query("raceId"))
 			ctx.Set("raceId", raceId)
-		} else if req.Header.Get("X-Lobby-ID") != "" {
-			lobbyId, _ := strconv.Atoi(req.Header.Get("X-Lobby-ID"))
+		} else if ctx.Query("lobbyId") != "" {
+			lobbyId, _ := strconv.Atoi(ctx.Query("lobbyId"))
 			ctx.Set("lobbyId", lobbyId)
 		} else {
 			request.FinalResponse(ctx, errors.New(storage.ErrorUndefinedGame), nil)

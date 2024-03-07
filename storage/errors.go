@@ -5,6 +5,7 @@ const (
 	ErrorUndefinedPlayer       = "Игрок не найден"
 	ErrorUndefinedGame         = "Игра не найдена"
 	ErrorGameIsFull            = "Игра переполнена игроками, уточняйте информацию у администратора"
+	ErrorGameIsStarted         = "Игра уже стартовала"
 	ErrorUndefinedLobby        = "Лобби не найдено"
 	ErrorHaveNoDefinedCard     = "Карточка не доступна"
 	ErrorYouHaveNoBabies       = "У Вас нету детей"

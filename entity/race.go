@@ -1,5 +1,7 @@
 package entity
 
+import "gorm.io/datatypes"
+
 var RaceStatus = struct {
 	STARTED   string
 	LOBBY     string
@@ -57,7 +59,7 @@ type Race struct {
 	Logs              []RaceLog            `gorm:"serializer:json" json:"logs"`
 	Dice              []int                `gorm:"serializer:json" json:"dice"`
 	Options           RaceOptions          `gorm:"serializer:json" json:"options"`
-	CreatedAt         string               `json:"created_at"`
+	CreatedAt         datatypes.Date       `json:"created_at"`
 }
 
 func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
