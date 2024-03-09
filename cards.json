@@ -1576,7 +1576,7 @@
       "type": "goldCoins",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
-      "description": "Wealthy collector is looking for gold coins. Cash offer of $500 for each coin.",
+      "description": "financey collector is looking for gold coins. Cash offer of $500 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
       "cost": 500
     },
@@ -1787,7 +1787,7 @@
       "type": "goldCoins",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
-      "description": "Wealthy collector is looking for gold coins. Cash offer of $500 for each coin.",
+      "description": "financey collector is looking for gold coins. Cash offer of $500 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
       "cost": 500
     },
@@ -1796,7 +1796,7 @@
       "type": "goldCoins",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
-      "description": "Wealthy collector is looking for gold coins. Cash offer of $1,000 for each coin.",
+      "description": "financey collector is looking for gold coins. Cash offer of $1,000 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
       "cost": 1000
     },

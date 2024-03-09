@@ -32,13 +32,15 @@ var (
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
+	financeService     service.FinanceService     = service.NewFinanceService(raceService)
 
 	// Controllers
-	gameController  controller.GameController  = controller.NewGameController(gameService)
-	lobbyController controller.LobbyController = controller.NewLobbyController(lobbyService)
-	cardController  controller.CardController  = controller.NewCardController(cardService)
-	authController  controller.AuthController  = controller.NewAuthController(authService, jwtService)
-	userController  controller.UserController  = controller.NewUserController(userService, jwtService)
+	gameController    controller.GameController    = controller.NewGameController(gameService)
+	lobbyController   controller.LobbyController   = controller.NewLobbyController(lobbyService)
+	financeController controller.FinanceController = controller.NewFinanceController(financeService)
+	cardController    controller.CardController    = controller.NewCardController(cardService)
+	authController    controller.AuthController    = controller.NewAuthController(authService, jwtService)
+	userController    controller.UserController    = controller.NewUserController(userService, jwtService)
 )
 
 func main() {
@@ -79,7 +81,15 @@ func main() {
 	gameRoutes := r.Group("api/game", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		gameRoutes.GET("", gameController.GetGame)
+		gameRoutes.POST("/start", gameController.Start)
 		// userRoutes.POST("/picture", userController.SaveFile)
+	}
+
+	financeRoutes := r.Group("api/finance", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
+	{
+		financeRoutes.POST("/send/money", financeController.SendMoney)
+		financeRoutes.POST("/send/assets", financeController.SendAssets)
+		financeRoutes.POST("/loan/take", financeController.TakeLoan)
 	}
 
 	// cdnRoutes := r.Group("api/cdn")
