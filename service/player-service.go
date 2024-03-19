@@ -7,11 +7,13 @@ import (
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"math"
+	"strconv"
 )
 
 type PlayerService interface {
-	GetPlayerByUsername(username string) *entity.Player
-	GetRacePlayer(raceId uint64, username string) (error, *dto.RacePlayerResponseDTO)
+	GetPlayerByUsername(username string) entity.Player
+	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
+	GetRacePlayer(raceId uint64, username string) (error, dto.RacePlayerResponseDTO)
 	Payday(player entity.Player)
 	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
@@ -38,6 +40,7 @@ type PlayerService interface {
 	TakeLoan(player entity.Player, amount int) error
 	PayLoan(player entity.Player, actionType string, amount int) error
 	UpdateCash(player entity.Player, amount int, details string)
+	SetTransaction(ID uint64, currentCash int, cash int, amount int, details string)
 }
 
 type playerService struct {
@@ -54,14 +57,18 @@ func NewPlayerService(playerRepo repository.PlayerRepository, professionRepo rep
 	}
 }
 
-func (service *playerService) GetPlayerByUsername(username string) *entity.Player {
+func (service *playerService) GetPlayerByUsername(username string) entity.Player {
 	return service.playerRepository.FindPlayerByUsername(username)
 }
 
-func (service *playerService) GetRacePlayer(raceId uint64, username string) (error, *dto.RacePlayerResponseDTO) {
+func (service *playerService) GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player {
+	return service.playerRepository.FindPlayerByUsernameAndRaceId(raceId, username)
+}
+
+func (service *playerService) GetRacePlayer(raceId uint64, username string) (error, dto.RacePlayerResponseDTO) {
 	player := service.playerRepository.FindPlayerByUsernameAndRaceId(raceId, username)
 
-	if player != nil {
+	if player.ID != 0 {
 		profession := service.professionRepository.FindProfessionById(uint64(player.ProfessionId))
 		transactionsQuery := service.transactionService.GetPlayerTransactions(player.ID)
 
@@ -77,7 +84,7 @@ func (service *playerService) GetRacePlayer(raceId uint64, username string) (err
 			})
 		}
 
-		return nil, &dto.RacePlayerResponseDTO{
+		return nil, dto.RacePlayerResponseDTO{
 			Username: player.Username,
 			Role:     player.Role,
 			Color:    player.Color,
@@ -93,7 +100,7 @@ func (service *playerService) GetRacePlayer(raceId uint64, username string) (err
 				PassiveIncome: player.PassiveIncome,
 				Cash:          player.Cash,
 			},
-			Profession:      *profession,
+			Profession:      profession,
 			IsRolledDice:    player.IsRolledDice == 1,
 			LastPosition:    player.LastPosition,
 			Transactions:    transactions,
@@ -108,7 +115,7 @@ func (service *playerService) GetRacePlayer(raceId uint64, username string) (err
 		}
 	}
 
-	return fmt.Errorf(storage.ErrorUndefinedPlayer), nil
+	return fmt.Errorf(storage.ErrorUndefinedPlayer), dto.RacePlayerResponseDTO{}
 }
 
 func (service *playerService) Payday(player entity.Player) {
@@ -158,10 +165,10 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 
 	key, stock := player.FindStocks(card.Symbol)
 
-	if stock != nil {
+	if stock.ID != "" {
 		totalCount := count + *stock.Count
 		*stock.Count = totalCount
-		player.Assets.Stocks[key] = *stock
+		player.Assets.Stocks[key] = stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
 	}
@@ -195,7 +202,7 @@ func (service *playerService) SellGold(card entity.CardPreciousMetals, player en
 func (service *playerService) SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error {
 	_, stock := player.FindStocks(card.Symbol)
 
-	if stock != nil || *stock.Count < count {
+	if stock.ID != "" || *stock.Count < count {
 		return fmt.Errorf(storage.ErrorNotFoundStocks)
 	}
 
@@ -216,7 +223,7 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 func (service *playerService) SellRealEstate(card entity.CardRealEstate, player entity.Player) error {
 	realEstate := player.FindRealEstate(card.ID)
 
-	if realEstate == nil {
+	if realEstate.ID == "" {
 		return fmt.Errorf(storage.ErrorNotFoundAssets)
 	}
 
@@ -237,9 +244,9 @@ func (service *playerService) SellRealEstate(card entity.CardRealEstate, player 
 func (service *playerService) DecreaseStocks(card entity.CardStocks, player entity.Player) error {
 	key, stock := player.FindStocks(card.Symbol)
 
-	if stock != nil {
+	if stock.ID != "" {
 		*stock.Count = int(math.Floor(float64(*stock.Count / *card.Decrease)))
-		player.Assets.Stocks[key] = *stock
+		player.Assets.Stocks[key] = stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
 	}
@@ -250,9 +257,9 @@ func (service *playerService) DecreaseStocks(card entity.CardStocks, player enti
 func (service *playerService) IncreaseStocks(card entity.CardStocks, player entity.Player) error {
 	key, stock := player.FindStocks(card.Symbol)
 
-	if stock != nil {
+	if stock.ID != "" {
 		*stock.Count = int(math.Floor(float64(*stock.Count * *card.Increase)))
-		player.Assets.Stocks[key] = *stock
+		player.Assets.Stocks[key] = stock
 	} else {
 		player.Assets.Stocks = append(player.Assets.Stocks, card)
 	}
@@ -409,6 +416,11 @@ func (service *playerService) TakeLoan(player entity.Player, amount int) error {
 
 	player.Liabilities.BankLoan += amount
 	player.Expenses["bankLoanPayment"] = player.Liabilities.BankLoan / 10
+
+	go service.SetTransaction(player.ID, player.Cash, player.Cash, amount, fmt.Sprintf(
+		"Взял(а) в кредит $%s",
+		strconv.Itoa(amount),
+	))
 
 	return nil
 }

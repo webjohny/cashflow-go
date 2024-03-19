@@ -12,8 +12,8 @@ type Die struct {
 }
 
 // NewDie creates a new Die instance with the given number of sides and face
-func NewDie(numberOfSides, face int) *Die {
-	return &Die{
+func NewDie(numberOfSides, face int) Die {
+	return Die{
 		numberOfSides: numberOfSides,
 		face:          face,
 	}

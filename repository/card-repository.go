@@ -8,7 +8,7 @@ import (
 
 type CardRepository interface {
 	All() []entity.Card
-	FindCardById(ID string) *entity.Card
+	FindCardById(ID string) entity.Card
 }
 
 type cardConnection struct {
@@ -37,14 +37,14 @@ func (db *cardConnection) All() []entity.Card {
 	return cards
 }
 
-func (db *cardConnection) FindCardById(ID string) *entity.Card {
+func (db *cardConnection) FindCardById(ID string) entity.Card {
 	cards := db.All()
 
 	for i := 0; i < len(cards); i++ {
 		if cards[i].ID == ID {
-			return &cards[i]
+			return cards[i]
 		}
 	}
 
-	return nil
+	return entity.Card{}
 }

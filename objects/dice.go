@@ -3,16 +3,16 @@ package objects
 type Dice struct {
 	numberOfSides int
 	numberOfDice  int
-	dice          []*Die
+	dice          []Die
 }
 
 // NewDice creates a new Dice instance with the given number of sides, number of dice, and face
-func NewDice(numberOfSides int, numberOfDice int, face int) *Dice {
-	dice := make([]*Die, numberOfDice)
+func NewDice(numberOfSides int, numberOfDice int, face int) Dice {
+	dice := make([]Die, numberOfDice)
 	for i := range dice {
 		dice[i] = NewDie(numberOfSides, face)
 	}
-	return &Dice{
+	return Dice{
 		numberOfSides: numberOfSides,
 		numberOfDice:  numberOfDice,
 		dice:          dice,

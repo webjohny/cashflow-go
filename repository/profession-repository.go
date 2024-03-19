@@ -8,7 +8,7 @@ import (
 
 type ProfessionRepository interface {
 	All() []entity.Profession
-	FindProfessionById(ID uint64) *entity.Profession
+	FindProfessionById(ID uint64) entity.Profession
 }
 
 type professionConnection struct {
@@ -37,14 +37,14 @@ func (db *professionConnection) All() []entity.Profession {
 	return professions
 }
 
-func (db *professionConnection) FindProfessionById(ID uint64) *entity.Profession {
+func (db *professionConnection) FindProfessionById(ID uint64) entity.Profession {
 	professions := db.All()
 
 	for i := 0; i < len(professions); i++ {
 		if professions[i].ID == ID {
-			return &professions[i]
+			return professions[i]
 		}
 	}
 
-	return nil
+	return entity.Profession{}
 }

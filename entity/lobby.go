@@ -19,7 +19,6 @@ type LobbyPlayer struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	Color    string `json:"color"`
-	WaitList bool   `json:"wait_list"`
 }
 
 type Lobby struct {
@@ -74,9 +73,6 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 }
 
 func (l *Lobby) AddPlayer(username string, role string) {
-	if l.Players == nil {
-		l.Players = make([]LobbyPlayer, 0)
-	}
 	if !l.IsPlayerAlreadyJoined(username) {
 		l.Players = append(l.Players, LobbyPlayer{Username: username, Role: role, Color: helper.PickColor()})
 	}
@@ -102,14 +98,14 @@ func (l *Lobby) AddAdmin(username string) {
 	l.AddPlayer(username, PlayerRoles.Admin)
 }
 
-func (l *Lobby) GetPlayer(username string) *LobbyPlayer {
+func (l *Lobby) GetPlayer(username string) LobbyPlayer {
 	for _, player := range l.Players {
 		if player.Username == username {
-			return &player
+			return player
 		}
 	}
 
-	return nil
+	return LobbyPlayer{}
 }
 
 func (l *Lobby) IsFull() bool {
@@ -121,7 +117,7 @@ func (l *Lobby) IsStarted() bool {
 }
 
 func (l *Lobby) IsGameStarted() bool {
-	return l.Status == LobbyStatus.Started && l.Options["enabled_wait_list"] != nil && l.Options["enabled_wait_list"] == true
+	return l.IsStarted() && l.Options["enabled_wait_list"] != nil && l.Options["enabled_wait_list"] == true
 }
 
 func (l *Lobby) IsPlayerAlreadyJoined(username string) bool {

@@ -10,7 +10,7 @@ import (
 )
 
 type GameService interface {
-	Start(lobbyId uint64) (error, *entity.Race)
+	Start(lobbyId uint64) (error, entity.Race)
 	GetGame(raceId uint64, lobbyId uint64, username string, isBigRace *bool) (error, dto.GetGameResponseDTO)
 }
 
@@ -33,12 +33,12 @@ func (service *gameService) GetGame(raceId uint64, lobbyId uint64, username stri
 
 	response := dto.GetGameResponseDTO{
 		Username: username,
-		You:      *player,
+		You:      player,
 	}
 
 	if lobbyId > 0 {
 		lobby := service.lobbyRepository.FindLobbyById(lobbyId)
-		response.Lobby = lobby
+		response.Lobby = &lobby
 		response.Hash = helper.CreateHashByJson(lobby)
 	} else if raceId > 0 {
 		bigRace := player.OnBigRace == 1
@@ -48,22 +48,22 @@ func (service *gameService) GetGame(raceId uint64, lobbyId uint64, username stri
 		}
 
 		race := service.raceRepository.FindRaceById(raceId, bigRace)
-		response.Race = race
+		response.Race = &race
 		response.Hash = helper.CreateHashByJson(race)
 	}
 
 	return nil, response
 }
 
-func (service *gameService) Start(lobbyId uint64) (error, *entity.Race) {
+func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
 
-	if lobby == nil {
-		return fmt.Errorf(storage.ErrorUndefinedLobby), nil
+	if lobby.ID == 0 {
+		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Race{}
 	}
 
 	if !lobby.AvailableToStart() {
-		return fmt.Errorf(storage.ErrorInsufficientPlayers), nil
+		return fmt.Errorf(storage.ErrorInsufficientPlayers), entity.Race{}
 	}
 
 	race := service.raceRepository.InsertRace(&entity.Race{
@@ -90,5 +90,5 @@ func (service *gameService) Start(lobbyId uint64) (error, *entity.Race) {
 		})
 	}
 
-	return nil, &race
+	return nil, race
 }

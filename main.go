@@ -32,7 +32,7 @@ var (
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService)
-	financeService     service.FinanceService     = service.NewFinanceService(raceService)
+	financeService     service.FinanceService     = service.NewFinanceService(raceService, playerService)
 
 	// Controllers
 	gameController    controller.GameController    = controller.NewGameController(gameService)

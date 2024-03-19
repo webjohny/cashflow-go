@@ -73,14 +73,14 @@ type Player struct {
 	CreatedAt       datatypes.Date    `json:"created_at"`
 }
 
-func (e *Player) FindStocks(symbol string) (int, *CardStocks) {
+func (e *Player) FindStocks(symbol string) (int, CardStocks) {
 	for i := 0; i < len(e.Assets.Stocks); i++ {
 		if symbol == e.Assets.Stocks[i].Symbol {
-			return i, &e.Assets.Stocks[i]
+			return i, e.Assets.Stocks[i]
 		}
 	}
 
-	return -1, nil
+	return -1, CardStocks{}
 }
 
 func (e *Player) ChangeDiceStatus(status bool) {
@@ -125,55 +125,55 @@ func (e *Player) HasBusiness() bool {
 	return len(e.Assets.Business) > 0
 }
 
-func (e *Player) FindBusiness(id string) *CardBusiness {
+func (e *Player) FindBusiness(id string) CardBusiness {
 	for i := 0; i < len(e.Assets.Business); i++ {
 		if id == e.Assets.Business[i].ID {
-			return &e.Assets.Business[i]
+			return e.Assets.Business[i]
 		}
 	}
 
-	return nil
+	return CardBusiness{}
 }
 
-func (e *Player) FindRealEstate(id string) *CardRealEstate {
+func (e *Player) FindRealEstate(id string) CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
-			return &e.Assets.RealEstates[i]
+			return e.Assets.RealEstates[i]
 		}
 	}
 
-	return nil
+	return CardRealEstate{}
 }
 
-func (e *Player) FindPreciousMetals(symbol string) (int, *CardPreciousMetals) {
+func (e *Player) FindPreciousMetals(symbol string) (int, CardPreciousMetals) {
 	for i := 0; i < len(e.Assets.PreciousMetals); i++ {
 		if symbol == e.Assets.PreciousMetals[i].Symbol {
-			return i, &e.Assets.PreciousMetals[i]
+			return i, e.Assets.PreciousMetals[i]
 		}
 	}
 
-	return -1, nil
+	return -1, CardPreciousMetals{}
 }
 
-func (e *Player) RemovePreciousMetals(symbol string) *CardPreciousMetals {
+func (e *Player) RemovePreciousMetals(symbol string) CardPreciousMetals {
 	index, _ := e.FindPreciousMetals(symbol)
 	if index >= 0 && index < len(e.Assets.PreciousMetals) {
 		e.Assets.PreciousMetals = append(e.Assets.PreciousMetals[:index], e.Assets.PreciousMetals[index+1:]...)
 	}
 
-	return nil
+	return CardPreciousMetals{}
 }
 
-func (e *Player) RemoveStocks(symbol string) *CardPreciousMetals {
+func (e *Player) RemoveStocks(symbol string) CardPreciousMetals {
 	index, _ := e.FindStocks(symbol)
 	if index >= 0 && index < len(e.Assets.Stocks) {
 		e.Assets.Stocks = append(e.Assets.Stocks[:index], e.Assets.Stocks[index+1:]...)
 	}
 
-	return nil
+	return CardPreciousMetals{}
 }
 
-func (e *Player) RemoveRealEstate(id string) *CardRealEstate {
+func (e *Player) RemoveRealEstate(id string) CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
 			e.Assets.RealEstates = append(e.Assets.RealEstates[:i], e.Assets.RealEstates[i+1:]...)
@@ -190,10 +190,10 @@ func (e *Player) RemoveRealEstate(id string) *CardRealEstate {
 		}
 	}
 
-	return nil
+	return CardRealEstate{}
 }
 
-func (e *Player) RemoveBusiness(id string) *CardBusiness {
+func (e *Player) RemoveBusiness(id string) CardBusiness {
 	for i := 0; i < len(e.Assets.Business); i++ {
 		if id == e.Assets.Business[i].ID {
 			e.Assets.Business = append(e.Assets.Business[:i], e.Assets.Business[i+1:]...)
@@ -210,7 +210,7 @@ func (e *Player) RemoveBusiness(id string) *CardBusiness {
 		}
 	}
 
-	return nil
+	return CardBusiness{}
 }
 
 func (e *Player) SplitStocks(card string) {

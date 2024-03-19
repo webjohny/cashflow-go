@@ -26,9 +26,10 @@ type RaceService interface {
 	SkipAction(raceId uint64, username string, actionType string) error
 	PaydayAction(raceId uint64, username string, actionType string) error
 	MarketAction(raceId uint64, username string, actionType string) error
-	GetRaceAndPlayer(raceId uint64, username string) (error, *entity.Race, *entity.Player)
-	GetInjectedRace(ctx *gin.Context) *entity.Race
-	GetRaceByRaceId(raceId uint64) *entity.Race
+	GetRaceAndPlayer(raceId uint64, username string) (error, entity.Race, entity.Player)
+	GetInjectedRace(ctx *gin.Context) entity.Race
+	GetRaceByRaceId(raceId uint64) entity.Race
+	SetTransaction(ID uint64, player entity.Player, details string)
 }
 
 type raceService struct {
@@ -45,16 +46,16 @@ func NewRaceService(raceRepo repository.RaceRepository, playerService PlayerServ
 	}
 }
 
-func (service *raceService) GetRaceAndPlayer(raceId uint64, username string) (error, *entity.Race, *entity.Player) {
+func (service *raceService) GetRaceAndPlayer(raceId uint64, username string) (error, entity.Race, entity.Player) {
 	race := service.GetRaceByRaceId(raceId)
-	player := service.playerService.GetPlayerByUsername(username)
+	player := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
 
-	if player == nil {
-		return fmt.Errorf(storage.ErrorUndefinedUser), nil, nil
-	} else if race == nil {
-		return fmt.Errorf(storage.ErrorUndefinedGame), nil, nil
+	if player.ID == 0 {
+		return fmt.Errorf(storage.ErrorUndefinedUser), entity.Race{}, entity.Player{}
+	} else if race.ID == 0 {
+		return fmt.Errorf(storage.ErrorUndefinedGame), entity.Race{}, entity.Player{}
 	} else if race.CurrentCard == nil {
-		return fmt.Errorf(storage.ErrorHaveNoDefinedCard), nil, nil
+		return fmt.Errorf(storage.ErrorHaveNoDefinedCard), entity.Race{}, entity.Player{}
 	}
 
 	return nil, race, player
@@ -76,12 +77,12 @@ func (service *raceService) BusinessAction(raceId uint64, username string, actio
 		Rule:        race.CurrentCard.Rule,
 		Cost:        *race.CurrentCard.Cost,
 		CashFlow:    race.CurrentCard.CashFlow,
-	}, *player)
+	}, player)
 
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtBusiness)
+	go service.SetTransaction(race.ID, player, storage.MessageYouBoughtBusiness)
 
 	return err
 }
@@ -106,12 +107,12 @@ func (service *raceService) RealEstateAction(raceId uint64, username string, act
 		DownPayment: race.CurrentCard.DownPayment,
 		Value:       *race.CurrentCard.Value,
 		Plus:        *race.CurrentCard.Plus,
-	}, *player)
+	}, player)
 
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtRealEstate)
+	go service.SetTransaction(race.ID, player, storage.MessageYouBoughtRealEstate)
 
 	return err
 }
@@ -129,12 +130,12 @@ func (service *raceService) DreamAction(raceId uint64, username string, actionTy
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
 		Cost:        *race.CurrentCard.Cost,
-	}, *player)
+	}, player)
 
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtDream)
+	go service.SetTransaction(race.ID, player, storage.MessageYouBoughtDream)
 
 	return err
 }
@@ -161,15 +162,15 @@ func (service *raceService) RiskBusinessAction(raceId uint64, username string, a
 		Dices:       *race.CurrentCard.Dices,
 		ExtraDices:  *race.CurrentCard.ExtraDices,
 		Symbol:      race.CurrentCard.Symbol,
-	}, *player, rolledDice)
+	}, player, rolledDice)
 
 	if err == nil {
 		if status {
-			go service.SetTransaction(race.ID, *player, storage.MessageSuccessRiskDeal)
+			go service.SetTransaction(race.ID, player, storage.MessageSuccessRiskDeal)
 			//this.setTransactionState('risk', player.username, messages.SUCCESS_RISK_DEAL, { type: 'success', timeout: 1000 });
 			//this.#log.addLog(player, `Рискованный бизнес - ${this.#card.symbol} за $${this.#card.cost}`);
 		} else {
-			go service.SetTransaction(race.ID, *player, storage.MessageFailRiskDeal)
+			go service.SetTransaction(race.ID, player, storage.MessageFailRiskDeal)
 			//this.setTransactionState('risk', player.username, messages.FAIL_RISK_DEAL, { type: 'warning', timeout: 1000 });
 		}
 
@@ -203,15 +204,15 @@ func (service *raceService) RiskStocksAction(raceId uint64, username string, act
 		Dices:       *race.CurrentCard.Dices,
 		ExtraDices:  *race.CurrentCard.ExtraDices,
 		Symbol:      race.CurrentCard.Symbol,
-	}, *player, rolledDice)
+	}, player, rolledDice)
 
 	if err == nil {
 		if status {
-			go service.SetTransaction(race.ID, *player, storage.MessageSuccessRiskStocksDeal)
+			go service.SetTransaction(race.ID, player, storage.MessageSuccessRiskStocksDeal)
 			//this.setTransactionState('risk', player.username, messages.SUCCESS_RISK_DEAL, { type: 'success', timeout: 1000 });
 			//this.#log.addLog(player, `Рискованный бизнес - ${this.#card.symbol} за $${this.#card.cost}`);
 		} else {
-			go service.SetTransaction(race.ID, *player, storage.MessageFailRiskStocksDeal)
+			go service.SetTransaction(race.ID, player, storage.MessageFailRiskStocksDeal)
 			//this.setTransactionState('risk', player.username, messages.FAIL_RISK_DEAL, { type: 'warning', timeout: 1000 });
 		}
 
@@ -245,17 +246,17 @@ func (service *raceService) StocksAction(raceId uint64, username string, actionT
 	}
 
 	if race.CurrentCard.Increase != nil {
-		err = service.playerService.IncreaseStocks(cardStocks, *player)
+		err = service.playerService.IncreaseStocks(cardStocks, player)
 	} else if race.CurrentCard.Decrease != nil {
-		err = service.playerService.DecreaseStocks(cardStocks, *player)
+		err = service.playerService.DecreaseStocks(cardStocks, player)
 	} else {
-		err = service.playerService.BuyStocks(cardStocks, *player, count, true)
+		err = service.playerService.BuyStocks(cardStocks, player, count, true)
 	}
 
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	go service.SetTransaction(race.ID, *player, storage.MessageYouBoughtStocks)
+	go service.SetTransaction(race.ID, player, storage.MessageYouBoughtStocks)
 
 	return err
 }
@@ -307,7 +308,7 @@ func (service *raceService) MarketAction(raceId uint64, username string, actionT
 
 	switch actionType {
 	case "damage":
-		err = service.playerService.PayDamages(cardMarket, *player)
+		err = service.playerService.PayDamages(cardMarket, player)
 
 		//player.payDamages(this.#card);
 		//
@@ -346,9 +347,9 @@ func (service *raceService) PaydayAction(raceId uint64, username string, actionT
 	}
 
 	if actionType == "payday" {
-		service.playerService.Payday(*player)
+		service.playerService.Payday(player)
 	} else if actionType == "cashFlowDay" {
-		service.playerService.CashFlowDay(*player)
+		service.playerService.CashFlowDay(player)
 	}
 
 	//const status = this.#currentPlayer.payday();
@@ -363,7 +364,7 @@ func (service *raceService) PaydayAction(raceId uint64, username string, actionT
 	return nil
 }
 
-func (service *raceService) GetInjectedRace(ctx *gin.Context) *entity.Race {
+func (service *raceService) GetInjectedRace(ctx *gin.Context) entity.Race {
 	raceId := ctx.MustGet("race_id").(string)
 	var queryDTO dto.QueryBigRaceDTO
 	errDTO := ctx.ShouldBind(&queryDTO)
@@ -371,19 +372,19 @@ func (service *raceService) GetInjectedRace(ctx *gin.Context) *entity.Race {
 	if errDTO != nil {
 		res := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
-		return nil
+		return entity.Race{}
 	}
 
 	id, err := strconv.Atoi(raceId)
 
 	if err != nil {
-		return nil
+		return entity.Race{}
 	}
 
 	return service.raceRepository.FindRaceById(uint64(id), queryDTO.IsBigRace)
 }
 
-func (service *raceService) GetRaceByRaceId(raceId uint64) *entity.Race {
+func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {
 	return service.raceRepository.FindRaceById(raceId, false)
 }
 

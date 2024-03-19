@@ -28,7 +28,7 @@ func (c *lobbyController) CreateLobby(ctx *gin.Context) {
 	username := ctx.GetString("username")
 
 	var err error
-	var lobby *entity.Lobby
+	var lobby entity.Lobby
 
 	if username != "" {
 		err, lobby = c.lobbyService.CreateLobby(username)
@@ -45,7 +45,7 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 	var response request.Response
 
 	if username != "" {
-		err = c.lobbyService.Join(uint64(lobbyId), username)
+		err, _ = c.lobbyService.Join(uint64(lobbyId), username)
 	}
 
 	if err == nil {
@@ -63,7 +63,7 @@ func (c *lobbyController) Leave(ctx *gin.Context) {
 	var response request.Response
 
 	if username != "" {
-		err = c.lobbyService.Leave(uint64(lobbyId), username)
+		err, _ = c.lobbyService.Leave(uint64(lobbyId), username)
 	}
 
 	if err == nil {

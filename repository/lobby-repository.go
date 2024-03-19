@@ -10,7 +10,7 @@ type LobbyRepository interface {
 	UpdateLobby(b *entity.Lobby) entity.Lobby
 	All() []entity.Lobby
 	DeleteLobby(b *entity.Lobby)
-	FindLobbyById(ID uint64) *entity.Lobby
+	FindLobbyById(ID uint64) entity.Lobby
 }
 
 const LobbyTable = "lobbies"
@@ -47,8 +47,8 @@ func (db *lobbyConnection) DeleteLobby(b *entity.Lobby) {
 	db.connection.Delete(&b)
 }
 
-func (db *lobbyConnection) FindLobbyById(ID uint64) *entity.Lobby {
-	var lobby *entity.Lobby
+func (db *lobbyConnection) FindLobbyById(ID uint64) entity.Lobby {
+	var lobby entity.Lobby
 
 	db.connection.Preload(LobbyTable).Find(&lobby, ID)
 

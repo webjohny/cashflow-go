@@ -160,7 +160,7 @@ func (service *cardService) GetCards() []entity.Card {
 	return cards
 }
 
-func (service *cardService) GetCard(cardType string) *entity.Card {
+func (service *cardService) GetCard(cardType string) entity.Card {
 	deals := []string{"smallDeal", "bigDeal"}
 	validTypes := append(deals,
 		"market",
@@ -177,7 +177,7 @@ func (service *cardService) GetCard(cardType string) *entity.Card {
 	)
 
 	if cardType == "deals" {
-		return &entity.Card{
+		return entity.Card{
 			ID:      "deal",
 			Heading: "Выберите маленькую или большую сделку",
 			Family:  "deal",
@@ -189,10 +189,10 @@ func (service *cardService) GetCard(cardType string) *entity.Card {
 		card := service.PickCard(cardType)
 		card.Family = service.GetFamily(deals, cardType)
 		card.Name = cardType
-		return &card
+		return card
 	}
 
-	return nil
+	return entity.Card{}
 }
 
 func (service *cardService) GetFamily(deals []string, dealType string) string {

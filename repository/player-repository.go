@@ -8,11 +8,11 @@ import (
 type PlayerRepository interface {
 	InsertPlayer(b *entity.Player) entity.Player
 	UpdatePlayer(b *entity.Player) entity.Player
-	All(idUser string) []entity.Player
+	AllByRaceId(raceId uint64) []entity.Player
 	DeletePlayer(b *entity.Player)
-	FindPlayerById(ID uint64) *entity.Player
-	FindPlayerByUsername(username string) *entity.Player
-	FindPlayerByUsernameAndRaceId(raceId uint64, username string) *entity.Player
+	FindPlayerById(ID uint64) entity.Player
+	FindPlayerByUsername(username string) entity.Player
+	FindPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
 }
 
 const PlayerTable = "players"
@@ -33,9 +33,9 @@ func (db *playerConnection) InsertPlayer(b *entity.Player) entity.Player {
 	return *b
 }
 
-func (db *playerConnection) All(idUser string) []entity.Player {
+func (db *playerConnection) AllByRaceId(raceId uint64) []entity.Player {
 	var players []entity.Player
-	db.connection.Preload(PlayerTable).Where("user_id = ?", idUser).Find(&players)
+	db.connection.Preload(PlayerTable).Where("race_id = ?", raceId).Find(&players)
 	return players
 }
 
@@ -49,24 +49,24 @@ func (db *playerConnection) DeletePlayer(b *entity.Player) {
 	db.connection.Delete(&b)
 }
 
-func (db *playerConnection) FindPlayerById(ID uint64) *entity.Player {
-	var player *entity.Player
+func (db *playerConnection) FindPlayerById(ID uint64) entity.Player {
+	var player entity.Player
 
 	db.connection.Preload(PlayerTable).Find(&player, ID)
 
 	return player
 }
 
-func (db *playerConnection) FindPlayerByUsername(username string) *entity.Player {
-	var player *entity.Player
+func (db *playerConnection) FindPlayerByUsername(username string) entity.Player {
+	var player entity.Player
 
 	db.connection.Preload(PlayerTable).Find(&player, "`username` = ?", username).Find(&player)
 
 	return player
 }
 
-func (db *playerConnection) FindPlayerByUsernameAndRaceId(raceId uint64, username string) *entity.Player {
-	var player *entity.Player
+func (db *playerConnection) FindPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player {
+	var player entity.Player
 
 	db.connection.Preload(PlayerTable).Where("`username` = ? AND `race_id` = ?", username, raceId).Find(&player)
 

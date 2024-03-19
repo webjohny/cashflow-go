@@ -28,7 +28,7 @@ func (c *playerController) GetRacePlayer(ctx *gin.Context) {
 	var response interface{}
 
 	if username != "" {
-		err, response = c.playerService.GetRacePlayer(uint64(raceId), username)
+		err, response = c.playerService.GetRacePlayer(raceId, username)
 	}
 
 	request.FinalResponse(ctx, err, response)
