@@ -4,6 +4,7 @@ const (
 	MessageTransactionConfirmed          = "Транзакция подтверждена"
 	MessageGoldCoinsHaveBeenSold         = "Золотые монеты были успешно проданы"
 	MessageRealEstateHasBeenSold         = "Недвижимость была успешно продана"
+	MessageStocksHaveBeenSold            = "Акции была успешно продана"
 	MessageGoldHasBeenSold               = "Золото было успешно продано"
 	MessageFailLostMLM                   = "Ваша МЛМ структура обрушилась..."
 	MessagePaydayMessage                 = "Сегодня день зарплаты, поздравляем!"

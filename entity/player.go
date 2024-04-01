@@ -91,6 +91,24 @@ func (e *Player) ChangeDiceStatus(status bool) {
 	}
 }
 
+func (e *Player) Move(steps int) {
+	e.LastPosition = e.CurrentPosition
+
+	if e.OnBigRace == 1 {
+		e.CurrentPosition = uint8((int(e.CurrentPosition) + steps) % 46)
+
+		if e.CurrentPosition == 0 {
+			e.CurrentPosition = 46
+		}
+	} else {
+		e.CurrentPosition = uint8((int(e.CurrentPosition) + steps) % 24)
+
+		if e.CurrentPosition == 0 {
+			e.CurrentPosition = 24
+		}
+	}
+}
+
 func (e *Player) IncrementDualDiceCount() {
 	e.DualDiceCount += 3
 }

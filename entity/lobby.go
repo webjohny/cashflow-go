@@ -16,6 +16,7 @@ var LobbyStatus = struct {
 }
 
 type LobbyPlayer struct {
+	ID       uint64 `json:"id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
 	Color    string `json:"color"`
@@ -72,9 +73,9 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 	return instance
 }
 
-func (l *Lobby) AddPlayer(username string, role string) {
+func (l *Lobby) AddPlayer(userId uint64, username string, role string) {
 	if !l.IsPlayerAlreadyJoined(username) {
-		l.Players = append(l.Players, LobbyPlayer{Username: username, Role: role, Color: helper.PickColor()})
+		l.Players = append(l.Players, LobbyPlayer{ID: userId, Username: username, Role: role, Color: helper.PickColor()})
 	}
 }
 
@@ -82,25 +83,25 @@ func (l *Lobby) CountPlayers() int {
 	return len(l.Players)
 }
 
-func (l *Lobby) AddWaitList(username string) {
-	l.AddPlayer(username, PlayerRoles.WaitList)
+func (l *Lobby) AddWaitList(userId uint64, username string) {
+	l.AddPlayer(userId, username, PlayerRoles.WaitList)
 }
 
-func (l *Lobby) AddGuest(username string) {
-	l.AddPlayer(username, PlayerRoles.Guest)
+func (l *Lobby) AddGuest(userId uint64, username string) {
+	l.AddPlayer(userId, username, PlayerRoles.Guest)
 }
 
-func (l *Lobby) AddOwner(username string) {
-	l.AddPlayer(username, PlayerRoles.Owner)
+func (l *Lobby) AddOwner(userId uint64, username string) {
+	l.AddPlayer(userId, username, PlayerRoles.Owner)
 }
 
-func (l *Lobby) AddAdmin(username string) {
-	l.AddPlayer(username, PlayerRoles.Admin)
+func (l *Lobby) AddAdmin(userId uint64, username string) {
+	l.AddPlayer(userId, username, PlayerRoles.Admin)
 }
 
-func (l *Lobby) GetPlayer(username string) LobbyPlayer {
+func (l *Lobby) GetPlayer(userId uint64) LobbyPlayer {
 	for _, player := range l.Players {
-		if player.Username == username {
+		if player.ID == userId {
 			return player
 		}
 	}
@@ -117,7 +118,7 @@ func (l *Lobby) IsStarted() bool {
 }
 
 func (l *Lobby) IsGameStarted() bool {
-	return l.IsStarted() && l.Options["enabled_wait_list"] != nil && l.Options["enabled_wait_list"] == true
+	return l.IsStarted() && l.Options["enable_wait_list"] != nil && l.Options["enable_wait_list"] == true
 }
 
 func (l *Lobby) IsPlayerAlreadyJoined(username string) bool {
@@ -144,7 +145,7 @@ func (l *Lobby) AvailableToStart() bool {
 		}
 	}
 
-	return count < 2
+	return count <= 2
 }
 
 func (l *Lobby) RemovePlayer(username string) {

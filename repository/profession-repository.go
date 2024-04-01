@@ -3,12 +3,14 @@ package repository
 import (
 	"encoding/json"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"os"
 )
 
 type ProfessionRepository interface {
 	All() []entity.Profession
 	FindProfessionById(ID uint64) entity.Profession
+	PickProfession(excluded *[]int) entity.Profession
 }
 
 type professionConnection struct {
@@ -47,4 +49,18 @@ func (db *professionConnection) FindProfessionById(ID uint64) entity.Profession 
 	}
 
 	return entity.Profession{}
+}
+
+func (db *professionConnection) PickProfession(excluded *[]int) entity.Profession {
+	professions := db.All()
+
+	if excluded != nil {
+		for i := 0; i < len(professions); i++ {
+			if helper.ContainsInt(*excluded, int(professions[i].ID)) {
+				professions = append(professions[:i], professions[i+1:]...)
+			}
+		}
+	}
+
+	return professions[helper.Random(len(professions)-1)]
 }

@@ -11,9 +11,6 @@ import (
 )
 
 type PlayerService interface {
-	GetPlayerByUsername(username string) entity.Player
-	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
-	GetRacePlayer(raceId uint64, username string) (error, dto.RacePlayerResponseDTO)
 	Payday(player entity.Player)
 	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
@@ -25,7 +22,7 @@ type PlayerService interface {
 	BuyStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
 	SellGold(card entity.CardPreciousMetals, player entity.Player, count int) error
 	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
-	SellRealEstate(card entity.CardRealEstate, player entity.Player) error
+	SellRealEstate(ID string, card entity.CardRealEstate, player entity.Player) error
 	DecreaseStocks(card entity.CardStocks, player entity.Player) error
 	IncreaseStocks(card entity.CardStocks, player entity.Player) error
 	Charity(player entity.Player) error
@@ -35,12 +32,19 @@ type PlayerService interface {
 	MoveToBigRace(player entity.Player) error
 	PayDamages(card entity.CardMarket, player entity.Player) error
 	AddGoldCoins(card entity.CardPreciousMetals, player entity.Player) error
-	SellRealEstates(player entity.Player) (error, int)
+	SellAllProperties(player entity.Player) (error, int)
 	SellBusiness(player entity.Player) (error, int)
 	TakeLoan(player entity.Player, amount int) error
 	PayLoan(player entity.Player, actionType string, amount int) error
 	UpdateCash(player entity.Player, amount int, details string)
 	SetTransaction(ID uint64, currentCash int, cash int, amount int, details string)
+	GetPlayerByUsername(username string) entity.Player
+	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
+	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player
+	GetAllPlayersByRaceId(raceId uint64) []entity.Player
+	GetRacePlayer(raceId uint64, userId uint64) (error, dto.RacePlayerResponseDTO)
+	InsertPlayer(b *entity.Player) (error, entity.Player)
+	UpdatePlayer(b *entity.Player) (error, entity.Player)
 }
 
 type playerService struct {
@@ -57,6 +61,14 @@ func NewPlayerService(playerRepo repository.PlayerRepository, professionRepo rep
 	}
 }
 
+func (service *playerService) InsertPlayer(b *entity.Player) (error, entity.Player) {
+	return service.playerRepository.InsertPlayer(b)
+}
+
+func (service *playerService) UpdatePlayer(b *entity.Player) (error, entity.Player) {
+	return service.playerRepository.UpdatePlayer(b)
+}
+
 func (service *playerService) GetPlayerByUsername(username string) entity.Player {
 	return service.playerRepository.FindPlayerByUsername(username)
 }
@@ -65,8 +77,16 @@ func (service *playerService) GetPlayerByUsernameAndRaceId(raceId uint64, userna
 	return service.playerRepository.FindPlayerByUsernameAndRaceId(raceId, username)
 }
 
-func (service *playerService) GetRacePlayer(raceId uint64, username string) (error, dto.RacePlayerResponseDTO) {
-	player := service.playerRepository.FindPlayerByUsernameAndRaceId(raceId, username)
+func (service *playerService) GetAllPlayersByRaceId(raceId uint64) []entity.Player {
+	return service.playerRepository.AllByRaceId(raceId)
+}
+
+func (service *playerService) GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player {
+	return service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
+}
+
+func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error, dto.RacePlayerResponseDTO) {
+	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
 
 	if player.ID != 0 {
 		profession := service.professionRepository.FindProfessionById(uint64(player.ProfessionId))
@@ -220,8 +240,8 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 	return nil
 }
 
-func (service *playerService) SellRealEstate(card entity.CardRealEstate, player entity.Player) error {
-	realEstate := player.FindRealEstate(card.ID)
+func (service *playerService) SellRealEstate(ID string, card entity.CardRealEstate, player entity.Player) error {
+	realEstate := player.FindRealEstate(ID)
 
 	if realEstate.ID == "" {
 		return fmt.Errorf(storage.ErrorNotFoundAssets)
@@ -373,7 +393,7 @@ func (service *playerService) AddGoldCoins(card entity.CardPreciousMetals, playe
 	return nil
 }
 
-func (service *playerService) SellRealEstates(player entity.Player) (error, int) {
+func (service *playerService) SellAllProperties(player entity.Player) (error, int) {
 	var totalCash int
 
 	if !player.HasRealEstates() {

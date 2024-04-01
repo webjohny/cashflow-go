@@ -24,7 +24,7 @@ func NewFinanceController(financeService service.FinanceService) FinanceControll
 }
 
 func (c *financeController) SendMoney(ctx *gin.Context) {
-	raceId := uint64(ctx.GetInt("raceId"))
+	raceId := request.GetRaceId(ctx)
 	username := ctx.GetString("username")
 
 	var sendMoneyBodyDTO dto.SendMoneyBodyDTO
@@ -43,7 +43,7 @@ func (c *financeController) SendMoney(ctx *gin.Context) {
 }
 
 func (c *financeController) SendAssets(ctx *gin.Context) {
-	raceId := uint64(ctx.GetInt("raceId"))
+	raceId := request.GetRaceId(ctx)
 	username := ctx.GetString("username")
 
 	var sendAssetsBodyDTO dto.SendAssetsBodyDTO
@@ -62,7 +62,7 @@ func (c *financeController) SendAssets(ctx *gin.Context) {
 }
 
 func (c *financeController) TakeLoan(ctx *gin.Context) {
-	raceId := uint64(ctx.GetInt("raceId"))
+	raceId := request.GetRaceId(ctx)
 	username := ctx.GetString("username")
 
 	var takeLoanBodyDTO dto.TakeLoanBodyDTO

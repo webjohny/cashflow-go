@@ -5,11 +5,10 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
-	"strconv"
 )
 
 type LobbyController interface {
-	CreateLobby(ctx *gin.Context)
+	Create(ctx *gin.Context)
 	Join(ctx *gin.Context)
 	Leave(ctx *gin.Context)
 }
@@ -24,51 +23,44 @@ func NewLobbyController(lobbyService service.LobbyService) LobbyController {
 	}
 }
 
-func (c *lobbyController) CreateLobby(ctx *gin.Context) {
+func (c *lobbyController) Create(ctx *gin.Context) {
+	userId := request.GetUserId(ctx)
 	username := ctx.GetString("username")
 
 	var err error
 	var lobby entity.Lobby
 
-	if username != "" {
-		err, lobby = c.lobbyService.CreateLobby(username)
+	if userId != 0 {
+		err, lobby = c.lobbyService.Create(username, userId)
 	}
 
 	request.FinalResponse(ctx, err, lobby)
 }
 
 func (c *lobbyController) Join(ctx *gin.Context) {
+	userId := request.GetUserId(ctx)
 	username := ctx.GetString("username")
-	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+	lobbyId := request.GetLobbyId(ctx)
 
 	var err error
-	var response request.Response
+	var player entity.LobbyPlayer
 
-	if username != "" {
-		err, _ = c.lobbyService.Join(uint64(lobbyId), username)
+	if userId != 0 {
+		err, player = c.lobbyService.Join(lobbyId, username, userId)
 	}
 
-	if err == nil {
-		response = request.SuccessResponse()
-	}
-
-	request.FinalResponse(ctx, err, response)
+	request.FinalResponse(ctx, err, player)
 }
 
 func (c *lobbyController) Leave(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	lobbyId, _ := strconv.Atoi(ctx.Param("lobbyId"))
+	lobbyId := request.GetLobbyId(ctx)
 
 	var err error
-	var response request.Response
 
 	if username != "" {
-		err, _ = c.lobbyService.Leave(uint64(lobbyId), username)
+		err, _ = c.lobbyService.Leave(lobbyId, username)
 	}
 
-	if err == nil {
-		response = request.SuccessResponse()
-	}
-
-	request.FinalResponse(ctx, err, response)
+	request.FinalResponse(ctx, err, nil)
 }

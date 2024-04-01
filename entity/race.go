@@ -1,6 +1,9 @@
 package entity
 
-import "gorm.io/datatypes"
+import (
+	"github.com/webjohny/cashflow-go/objects"
+	"gorm.io/datatypes"
+)
 
 var RaceStatus = struct {
 	STARTED   string
@@ -34,6 +37,7 @@ type RaceResponse struct {
 
 type RacePlayer struct {
 	ID       uint64 `json:"id,omitempty"`
+	UserId   uint64 `json:"user_id,omitempty"`
 	Username string `json:"username"`
 }
 
@@ -44,7 +48,7 @@ type RaceBankruptPlayer struct {
 }
 
 type RaceOptions struct {
-	EnterAfterGameStarting bool `json:"enter_after_game_starting"`
+	EnableWaitList bool `json:"enable_wait_list"`
 }
 
 type Race struct {
@@ -52,8 +56,8 @@ type Race struct {
 	Responses         []RaceResponse       `gorm:"serializer:json" json:"responses"`
 	ParentID          uint64               `gorm:"index" json:"parent_id"`
 	Status            string               `json:"status"`
-	CurrentPlayer     *RacePlayer          `gorm:"serializer:json" json:"current_player,omitempty"`
-	CurrentCard       *Card                `gorm:"serializer:json" json:"current_card,omitempty"`
+	CurrentPlayer     RacePlayer           `gorm:"serializer:json" json:"current_player,omitempty"`
+	CurrentCard       Card                 `gorm:"serializer:json" json:"current_card,omitempty"`
 	Notifications     []RaceNotification   `gorm:"serializer:json" json:"notifications"`
 	BankruptedPlayers []RaceBankruptPlayer `gorm:"serializer:json" json:"bankrupted_players"`
 	Logs              []RaceLog            `gorm:"serializer:json" json:"logs"`
@@ -71,4 +75,41 @@ func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
 			}
 		}
 	}
+}
+
+func (r *Race) GetDice() objects.Dice {
+	dice := 1
+
+	if len(r.Dice) > 0 {
+		dice = r.Dice[0]
+	}
+
+	return objects.NewDice(dice, 2, 6)
+}
+
+func (r *Race) NextPlayer() {
+	players := r.Responses
+	username := r.CurrentPlayer.Username
+
+	var next RaceResponse
+
+	for i, player := range players {
+		if player.Username == username {
+			nextIndex := (i + 1) % len(players)
+			next = players[nextIndex]
+		}
+	}
+
+	r.CurrentPlayer.ID = next.ID
+	r.CurrentPlayer.Username = next.Username
+}
+
+func (r *Race) CalculateTotalSteps(diceValues []int, diceCount int) int {
+	totalCount := diceValues[0]
+
+	if diceCount == 2 {
+		totalCount += diceValues[1]
+	}
+
+	return totalCount
 }

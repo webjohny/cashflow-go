@@ -32,6 +32,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 
 			c.Set("userId", claims["user_id"])
 			c.Set("username", claims["profile"])
+
 			log.Println("Claim[userid]", claims["username"])
 			log.Println("Claim[issuer] : ", claims["issuer"])
 		} else {

@@ -21,14 +21,14 @@ func NewPlayerController(playerService service.PlayerService) PlayerController {
 }
 
 func (c *playerController) GetRacePlayer(ctx *gin.Context) {
-	username := ctx.GetString("username")
-	raceId := uint64(ctx.GetInt("raceId"))
+	userId := request.GetUserId(ctx)
+	raceId := request.GetRaceId(ctx)
 
 	var err error
 	var response interface{}
 
-	if username != "" {
-		err, response = c.playerService.GetRacePlayer(raceId, username)
+	if userId != 0 {
+		err, response = c.playerService.GetRacePlayer(raceId, userId)
 	}
 
 	request.FinalResponse(ctx, err, response)

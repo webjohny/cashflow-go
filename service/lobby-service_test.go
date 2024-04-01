@@ -39,7 +39,7 @@ func TestCreatingLobby(t *testing.T) {
 			Players: []entity.LobbyPlayer{{
 				Username: userOwner.Username,
 				Role:     userOwner.Role,
-				Color:    l.GetPlayer(userOwner.Username).Color,
+				Color:    l.GetPlayer(userOwner.ID).Color,
 			}},
 			MaxPlayers: lobbyDefault.MaxPlayers,
 			Status:     lobbyDefault.Status,
@@ -49,14 +49,14 @@ func TestCreatingLobby(t *testing.T) {
 	}
 
 	t.Run("Creating a Lobby", func(t *testing.T) {
-		err, lobby := lobbyService.CreateLobby(userOwner.Username)
+		err, lobby := lobbyService.Create(userOwner.Username, userOwner.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, lobby, entity.Lobby{
 			ID: lobbyDefault.ID,
 			Players: []entity.LobbyPlayer{{
 				Username: userOwner.Username,
 				Role:     userOwner.Role,
-				Color:    lobby.GetPlayer(userOwner.Username).Color,
+				Color:    lobby.GetPlayer(userOwner.ID).Color,
 			}},
 			MaxPlayers: lobbyDefault.MaxPlayers,
 			Status:     lobbyDefault.Status,
@@ -104,7 +104,7 @@ func TestJoinToLobby(t *testing.T) {
 			Players: []entity.LobbyPlayer{{
 				Username: userOwner.Username,
 				Role:     userOwner.Role,
-				Color:    l.GetPlayer(userOwner.Username).Color,
+				Color:    l.GetPlayer(userOwner.ID).Color,
 			}},
 			MaxPlayers: lobbyDefault.MaxPlayers,
 			Status:     lobbyDefault.Status,
@@ -114,7 +114,7 @@ func TestJoinToLobby(t *testing.T) {
 	}
 
 	t.Run("Joining new guest to Lobby", func(t *testing.T) {
-		err, lobby := lobbyService.CreateLobby(userOwner.Username)
+		err, lobby := lobbyService.Create(userOwner.Username, userOwner.ID)
 
 		joinLobby := entity.Lobby{
 			ID:         1,
@@ -122,24 +122,22 @@ func TestJoinToLobby(t *testing.T) {
 			Players:    lobby.Players,
 		}
 
+		var lobbyPlayer entity.LobbyPlayer
+
 		if lobby.ID != 0 {
 			lobbyRepo.FindLobbyByIdFunc = func(ID uint64) entity.Lobby {
 				return joinLobby
 			}
 
-			err, lobby = lobbyService.Join(lobby.ID, userGuest1.Username)
+			err, lobbyPlayer = lobbyService.Join(lobby.ID, userGuest1.Username, userGuest1.ID)
 		}
 
 		assert.NoError(t, err)
-		assert.Contains(t, lobby.Players, entity.LobbyPlayer{
-			Username: userGuest1.Username,
-			Role:     userGuest1.Role,
-			Color:    lobby.GetPlayer(userGuest1.Username).Color,
-		})
+		assert.Contains(t, lobby.Players, lobbyPlayer)
 	})
 
 	t.Run("Joining wait list to Lobby", func(t *testing.T) {
-		err, lobby := lobbyService.CreateLobby(userOwner.Username)
+		err, lobby := lobbyService.Create(userOwner.Username, userOwner.ID)
 
 		joinLobby := entity.Lobby{
 			ID:         1,
@@ -147,23 +145,21 @@ func TestJoinToLobby(t *testing.T) {
 			Players:    lobby.Players,
 			Status:     entity.LobbyStatus.Started,
 			Options: map[string]interface{}{
-				"enabled_wait_list": true,
+				"enable_wait_list": true,
 			},
 		}
+
+		var lobbyPlayer entity.LobbyPlayer
 
 		if lobby.ID != 0 {
 			lobbyRepo.FindLobbyByIdFunc = func(ID uint64) entity.Lobby {
 				return joinLobby
 			}
 
-			err, lobby = lobbyService.Join(lobby.ID, userWL1.Username)
+			err, lobbyPlayer = lobbyService.Join(lobby.ID, userWL1.Username, userWL1.ID)
 		}
 
 		assert.NoError(t, err)
-		assert.Contains(t, lobby.Players, entity.LobbyPlayer{
-			Username: userWL1.Username,
-			Role:     userWL1.Role,
-			Color:    lobby.GetPlayer(userWL1.Username).Color,
-		})
+		assert.Contains(t, lobby.Players, lobbyPlayer)
 	})
 }

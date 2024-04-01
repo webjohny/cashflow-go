@@ -52,5 +52,5 @@ func FinalResponse(ctx *gin.Context, err error, response interface{}) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	ctx.JSON(http.StatusOK, response)
+	ctx.JSON(http.StatusOK, SuccessResponse(response))
 }

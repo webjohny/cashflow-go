@@ -109,7 +109,137 @@ func TestStartGame(t *testing.T) {
 		// Get game
 		err, raceResponse := gameService.GetGame(ratRace.ID, 0, userOwner.Username, nil)
 
+		playerRepo.FindPlayerByUsernameFunc = func(username string) entity.Player {
+			return entity.Player{
+				UserId:          0,
+				RaceId:          0,
+				Username:        userGuest1.Username,
+				Role:            userGuest1.Role,
+				Color:           userGuest1.Color,
+				Income:          entity.PlayerIncome{},
+				Babies:          0,
+				Expenses:        make(map[string]int),
+				Assets:          entity.PlayerAssets{},
+				Liabilities:     entity.PlayerLiabilities{},
+				Cash:            0,
+				TotalIncome:     0,
+				TotalExpenses:   0,
+				CashFlow:        0,
+				PassiveIncome:   0,
+				ProfessionId:    0,
+				LastPosition:    0,
+				CurrentPosition: 0,
+				DualDiceCount:   0,
+				SkippedTurns:    0,
+				IsRolledDice:    0,
+				CanReRoll:       0,
+				OnBigRace:       0,
+				HasBankrupt:     0,
+				AboutToBankrupt: "",
+				HasMlm:          0,
+			}
+		}
+
+		raceRepo.FindRaceByIdFunc = func(ID uint64, IsBigRace bool) entity.Race {
+			return entity.Race{
+				Responses: make([]entity.RaceResponse, 0),
+				ParentID:  0,
+				Status:    entity.RaceStatus.STARTED,
+				CurrentPlayer: &entity.RacePlayer{
+					ID:       1,
+					Username: userGuest1.Username,
+				},
+				CurrentCard:       nil,
+				Notifications:     make([]entity.RaceNotification, 0),
+				BankruptedPlayers: make([]entity.RaceBankruptPlayer, 0),
+				Logs:              make([]entity.RaceLog, 0),
+				Dice:              make([]int, 0),
+				Options: entity.RaceOptions{
+					EnableWaitList: false,
+				},
+			}
+		}
+
 		assert.NoError(t, err)
-		assert.Equal(t, raceResponse, dto.GetGameResponseDTO{})
+		assert.Equal(t, raceResponse, dto.GetGameResponseDTO{
+			Username: userOwner.Username,
+			You: entity.Player{
+				ID:       0,
+				UserId:   0,
+				RaceId:   0,
+				Username: userGuest1.Username,
+				Role:     userGuest1.Role,
+				Color:    userGuest1.Color,
+				Income: entity.PlayerIncome{
+					RealEstates: []entity.CardRealEstate{},
+					Business:    []entity.CardBusiness{},
+					Salary:      0,
+				},
+				Babies:   0,
+				Expenses: nil,
+				Assets: entity.PlayerAssets{
+					Dreams:         nil,
+					PreciousMetals: nil,
+					RealEstates:    nil,
+					Business:       nil,
+					Stocks:         nil,
+					Savings:        0,
+				},
+				Liabilities: entity.PlayerLiabilities{
+					RealEstates:    nil,
+					Business:       nil,
+					BankLoan:       0,
+					HomeMortgage:   0,
+					SchoolLoans:    0,
+					CarLoans:       0,
+					CreditCardDebt: 0,
+				},
+				Cash:            0,
+				TotalIncome:     0,
+				TotalExpenses:   0,
+				CashFlow:        0,
+				PassiveIncome:   0,
+				ProfessionId:    0,
+				LastPosition:    0,
+				CurrentPosition: 0,
+				DualDiceCount:   0,
+				SkippedTurns:    0,
+				IsRolledDice:    0,
+				CanReRoll:       0,
+				OnBigRace:       0,
+				HasBankrupt:     0,
+				AboutToBankrupt: "",
+				HasMlm:          0,
+				CreatedAt:       datatypes.Date{},
+			},
+			Hash:    "",
+			Players: nil,
+			Race: &entity.Race{
+				ID:        1,
+				Responses: nil,
+				ParentID:  0,
+				Status:    entity.RaceStatus.STARTED,
+				CurrentPlayer: &entity.RacePlayer{
+					ID:       1,
+					Username: userGuest1.Username,
+				},
+				CurrentCard:       nil,
+				Notifications:     make([]entity.RaceNotification, 0),
+				BankruptedPlayers: make([]entity.RaceBankruptPlayer, 0),
+				Logs:              make([]entity.RaceLog, 0),
+				Dice:              make([]int, 0),
+				Options: entity.RaceOptions{
+					EnableWaitList: false,
+				},
+			},
+			Lobby: &entity.Lobby{
+				ID:         0,
+				Players:    nil,
+				MaxPlayers: 0,
+				Status:     "",
+				Options:    nil,
+				CreatedAt:  datatypes.Date{},
+			},
+		})
 	})
 }

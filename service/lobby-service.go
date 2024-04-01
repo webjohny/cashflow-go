@@ -10,8 +10,8 @@ import (
 )
 
 type LobbyService interface {
-	CreateLobby(username string) (error, entity.Lobby)
-	Join(ID uint64, username string) (error, entity.Lobby)
+	Create(username string, userId uint64) (error, entity.Lobby)
+	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	Leave(ID uint64, username string) (error, entity.Lobby)
 }
 
@@ -27,7 +27,7 @@ func NewLobbyService(lobbyRepository repository.LobbyRepository) LobbyService {
 	}
 }
 
-func (service *lobbyService) CreateLobby(username string) (error, entity.Lobby) {
+func (service *lobbyService) Create(username string, userId uint64) (error, entity.Lobby) {
 	lobby := &entity.Lobby{
 		Players:    make([]entity.LobbyPlayer, 0),
 		MaxPlayers: LobbyMaxPlayers,
@@ -35,7 +35,7 @@ func (service *lobbyService) CreateLobby(username string) (error, entity.Lobby) 
 		Options:    make(map[string]interface{}),
 		CreatedAt:  datatypes.Date(time.Now()),
 	}
-	lobby.AddOwner(username)
+	lobby.AddOwner(userId, username)
 	instance := service.lobbyRepository.InsertLobby(lobby)
 
 	if instance.ID == 0 {
@@ -45,32 +45,37 @@ func (service *lobbyService) CreateLobby(username string) (error, entity.Lobby) 
 	return nil, instance
 }
 
-func (service *lobbyService) Join(ID uint64, username string) (error, entity.Lobby) {
+func (service *lobbyService) Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer) {
+	var player entity.LobbyPlayer
 	lobby := service.lobbyRepository.FindLobbyById(ID)
 
 	if lobby.ID != 0 {
 		if lobby.IsFull() {
-			return fmt.Errorf(storage.ErrorGameIsFull), entity.Lobby{}
+			return fmt.Errorf(storage.ErrorGameIsFull), entity.LobbyPlayer{}
 		}
 
 		if !lobby.IsGameStarted() && lobby.IsStarted() {
-			return fmt.Errorf(storage.ErrorGameIsStarted), entity.Lobby{}
+			return fmt.Errorf(storage.ErrorGameIsStarted), entity.LobbyPlayer{}
 		}
 
-		player := lobby.GetPlayer(username)
+		player = lobby.GetPlayer(userId)
 
-		if player.Username == "" {
+		if player.ID == 0 {
 			if lobby.IsGameStarted() {
-				lobby.AddWaitList(username)
+				//@toDo add waitlist in game
+				//game.AddWaitList()
+				lobby.AddWaitList(userId, username)
 			} else if !lobby.IsStarted() {
-				lobby.AddGuest(username)
+				lobby.AddGuest(userId, username)
 			}
+
+			player = lobby.GetPlayer(userId)
 		}
 	} else {
-		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Lobby{}
+		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.LobbyPlayer{}
 	}
 
-	return nil, lobby
+	return nil, player
 }
 
 func (service *lobbyService) Leave(ID uint64, username string) (error, entity.Lobby) {

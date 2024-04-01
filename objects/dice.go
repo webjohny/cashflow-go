@@ -7,7 +7,7 @@ type Dice struct {
 }
 
 // NewDice creates a new Dice instance with the given number of sides, number of dice, and face
-func NewDice(numberOfSides int, numberOfDice int, face int) Dice {
+func NewDice(face int, numberOfDice int, numberOfSides int) Dice {
 	dice := make([]Die, numberOfDice)
 	for i := range dice {
 		dice[i] = NewDie(numberOfSides, face)
