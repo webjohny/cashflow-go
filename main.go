@@ -103,8 +103,8 @@ func main() {
 	{
 		cardRoutes.GET("/type", cardController.Type)
 		cardRoutes.GET("/reset-transaction", cardController.ResetTransaction)
-		cardRoutes.POST("/prepare/:family/:type", cardController.Prepare)
-		cardRoutes.POST("/skip/:family/:type", cardController.Skip)
+		cardRoutes.GET("/prepare/:family/:type", cardController.Prepare)
+		cardRoutes.GET("/skip/:family/:type", cardController.Skip)
 		cardRoutes.POST("/sell/:family/:type", cardController.Selling)
 		cardRoutes.POST("/buy/:family/:type", cardController.Purchase)
 		cardRoutes.POST("/ok/:family/:type", cardController.Accept)

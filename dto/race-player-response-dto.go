@@ -24,6 +24,8 @@ type RacePlayerTransactionsResponseDTO struct {
 }
 
 type RacePlayerResponseDTO struct {
+	ID              uint64                              `json:"id"`
+	UserId          uint64                              `json:"userId"`
 	Username        string                              `json:"username"`
 	Role            string                              `json:"role"`
 	Color           string                              `json:"color"`

@@ -32,6 +32,26 @@ type Card struct {
 	ExtraDices           *int             `json:"extra_dices,omitempty"`
 }
 
+func (c *Card) MultiUserFlow() bool {
+	multiFlows := map[string]map[string]bool{
+		"deal": {
+			"stock": true,
+		},
+		"market": {
+			"goldCoins":  true,
+			"realEstate": true,
+		},
+	}
+
+	if _, ok := multiFlows[c.Family]; ok {
+		if _, okType := multiFlows[c.Family][c.Type]; okType {
+			return multiFlows[c.Family][c.Type]
+		}
+	}
+
+	return false
+}
+
 type CardDoodad struct {
 	ID            string `json:"id"`
 	Type          string `json:"type"`
@@ -50,12 +70,34 @@ type CardRealEstate struct {
 	Heading     string  `json:"heading"`
 	Description string  `json:"description"`
 	Rule        *string `json:"rule"`
-	Plus        bool    `json:"plus"`
 	Cost        int     `json:"cost"`
-	Value       int     `json:"value"`
 	Mortgage    *int    `json:"mortgage"`
 	DownPayment *int    `json:"down_payment"`
 	CashFlow    *int    `json:"cash_flow"`
+}
+
+type CardMarketRealEstate struct {
+	ID          string   `json:"id"`
+	Type        string   `json:"type"`
+	Heading     string   `json:"heading"`
+	Symbol      string   `json:"symbol"`
+	Description string   `json:"description"`
+	Rule        string   `json:"rule"`
+	Plus        bool     `json:"plus"`
+	SubRule     []string `json:"sub_rule"`
+	Value       int      `json:"value"`
+}
+
+type CardMarketDamage struct {
+	ID                   string   `json:"id"`
+	Type                 string   `json:"type"`
+	Heading              string   `json:"heading"`
+	Symbol               string   `json:"symbol"`
+	Description          string   `json:"description"`
+	Rule                 string   `json:"rule"`
+	SubRule              []string `json:"sub_rule"`
+	Cost                 int      `json:"cost"`
+	ApplicableToEveryOne bool     `json:"applicable_to_every_one"`
 }
 
 type CardBusiness struct {
@@ -161,6 +203,7 @@ type CardMarket struct {
 	SubRule              []string `json:"sub_rule"`
 	Success              *[]int   `json:"success"`
 	Cost                 *int     `json:"cost"`
+	Value                *int     `json:"value"`
 	ApplicableToEveryOne *bool    `json:"applicable_to_every_one"`
 }
 

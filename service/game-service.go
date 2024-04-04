@@ -50,11 +50,12 @@ func (service *gameService) GetGame(raceId uint64, lobbyId uint64, userId uint64
 
 	if lobbyId > 0 {
 		lobby := service.lobbyRepository.FindLobbyById(lobbyId)
-		response.Lobby = &lobby
+		//response.Lobby = &lobby
 		response.Hash = helper.CreateHashByJson(lobby)
 	} else if raceId > 0 {
-		race := service.raceService.GetRaceByRaceId(raceId, isBigRace)
-		response.Race = &race
+		race := service.raceService.GetFormattedRaceResponse(raceId, isBigRace)
+		response.CurrentPlayer = &race.CurrentPlayer
+		//response.Race = &race
 		response.Hash = helper.CreateHashByJson(race)
 	}
 
@@ -266,6 +267,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 	}
 
 	race.CurrentPlayer = players[helper.Random(len(players)-1)]
+	race.Responses = service.createResponses(race.ID)
 
 	err, _ = service.raceService.UpdateRace(&race)
 

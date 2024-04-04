@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
+	"github.com/webjohny/cashflow-go/storage"
 	"log"
 	"strconv"
 )
@@ -60,6 +62,10 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 
 	if raceId != 0 && userId != 0 {
 		err, response = c.cardService.Prepare(raceId, family, actionType, userId, bigRace)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -78,6 +84,10 @@ func (c *cardController) Selling(ctx *gin.Context) {
 
 	if raceId != 0 && userId != 0 {
 		err, response = c.cardService.Selling(raceId, actionType, userId, value, bigRace)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -96,6 +106,10 @@ func (c *cardController) Accept(ctx *gin.Context) {
 
 	if raceId != 0 && userId != 0 {
 		err, response = c.cardService.Accept(raceId, family, actionType, userId, bigRace)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -111,6 +125,10 @@ func (c *cardController) Skip(ctx *gin.Context) {
 
 	if raceId != 0 && userId != 0 {
 		err, response = c.cardService.Skip(raceId, userId, bigRace)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -129,6 +147,10 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 
 	if raceId != 0 && userId != 0 {
 		err, response = c.cardService.Purchase(raceId, actionType, userId, count, bigRace)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, response)

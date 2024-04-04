@@ -69,6 +69,8 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 				lobby.AddGuest(userId, username)
 			}
 
+			_ = service.lobbyRepository.UpdateLobby(&lobby)
+
 			player = lobby.GetPlayer(userId)
 		}
 	} else {

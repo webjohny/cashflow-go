@@ -9,6 +9,7 @@ import (
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/storage"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -32,6 +33,7 @@ type RaceService interface {
 	GetRaceAndPlayer(raceId uint64, userId uint64, isBigRace bool) (error, entity.Race, entity.Player)
 	GetInjectedRace(ctx *gin.Context) entity.Race
 	GetRaceByRaceId(raceId uint64, isBigRace bool) entity.Race
+	GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO
 	SetTransaction(ID uint64, player entity.Player, details string)
 	InsertRace(b *entity.Race) (error, entity.Race)
 	UpdateRace(b *entity.Race) (error, entity.Race)
@@ -105,6 +107,8 @@ func (service *raceService) RealEstateAction(raceId uint64, userId uint64, isBig
 		return err
 	}
 
+	log.Println(race.CurrentCard)
+
 	err = service.playerService.BuyRealEstate(entity.CardRealEstate{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
@@ -116,8 +120,6 @@ func (service *raceService) RealEstateAction(raceId uint64, userId uint64, isBig
 		CashFlow:    race.CurrentCard.CashFlow,
 		Mortgage:    race.CurrentCard.Mortgage,
 		DownPayment: race.CurrentCard.DownPayment,
-		Value:       *race.CurrentCard.Value,
-		Plus:        *race.CurrentCard.Plus,
 	}, player)
 
 	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
@@ -201,19 +203,15 @@ func (service *raceService) SellRealEstate(raceId uint64, userId uint64, realEst
 		return err
 	}
 
-	err = service.playerService.SellRealEstate(realEstateId, entity.CardRealEstate{
+	err = service.playerService.SellRealEstate(realEstateId, entity.CardMarketRealEstate{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
 		Symbol:      race.CurrentCard.Symbol,
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
-		Rule:        race.CurrentCard.Rule,
-		Plus:        *race.CurrentCard.Plus,
-		Cost:        *race.CurrentCard.Cost,
+		Rule:        *race.CurrentCard.Rule,
 		Value:       *race.CurrentCard.Value,
-		Mortgage:    race.CurrentCard.Mortgage,
-		DownPayment: race.CurrentCard.DownPayment,
-		CashFlow:    race.CurrentCard.CashFlow,
+		Plus:        *race.CurrentCard.Plus,
 	}, player)
 
 	if err == nil {
@@ -507,6 +505,26 @@ func (service *raceService) GetInjectedRace(ctx *gin.Context) entity.Race {
 
 func (service *raceService) GetRaceByRaceId(raceId uint64, isBigRace bool) entity.Race {
 	return service.raceRepository.FindRaceById(raceId, isBigRace)
+}
+
+func (service *raceService) GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO {
+	race := service.GetRaceByRaceId(raceId, isBigRace)
+	_, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId)
+
+	response := dto.GetRaceResponseDTO{
+		Players:       nil,
+		TurnResponses: race.Responses,
+		Status:        race.Status,
+		DiceValues:    race.Dice,
+		CurrentPlayer: player,
+		GameId:        race.ID,
+		IsTurnEnded:   false,
+		Logs:          race.Logs,
+		Notifications: race.Notifications,
+		Transaction:   entity.TransactionData{},
+	}
+
+	return response
 }
 
 func (service *raceService) SetTransaction(ID uint64, player entity.Player, details string) {

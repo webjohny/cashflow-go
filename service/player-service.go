@@ -22,7 +22,7 @@ type PlayerService interface {
 	BuyStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
 	SellGold(card entity.CardPreciousMetals, player entity.Player, count int) error
 	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
-	SellRealEstate(ID string, card entity.CardRealEstate, player entity.Player) error
+	SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error
 	DecreaseStocks(card entity.CardStocks, player entity.Player) error
 	IncreaseStocks(card entity.CardStocks, player entity.Player) error
 	Charity(player entity.Player) error
@@ -43,6 +43,7 @@ type PlayerService interface {
 	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player
 	GetAllPlayersByRaceId(raceId uint64) []entity.Player
 	GetRacePlayer(raceId uint64, userId uint64) (error, dto.RacePlayerResponseDTO)
+	GetFormattedPlayerResponse(player entity.Player) dto.RacePlayerResponseDTO
 	InsertPlayer(b *entity.Player) (error, entity.Player)
 	UpdatePlayer(b *entity.Player) (error, entity.Player)
 }
@@ -89,53 +90,59 @@ func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error
 	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
 
 	if player.ID != 0 {
-		profession := service.professionRepository.FindProfessionById(uint64(player.ProfessionId))
-		transactionsQuery := service.transactionService.GetPlayerTransactions(player.ID)
-
-		var transactions []dto.RacePlayerTransactionsResponseDTO
-
-		for i := 0; i < len(transactionsQuery); i++ {
-			transactions = append(transactions, dto.RacePlayerTransactionsResponseDTO{
-				CurrentCash: *transactionsQuery[i].Data.CurrentCash,
-				Cash:        *transactionsQuery[i].Data.Cash,
-				Amount:      *transactionsQuery[i].Data.Amount,
-				TxType:      *transactionsQuery[i].Data.TxType,
-				Details:     transactionsQuery[i].Details,
-			})
-		}
-
-		return nil, dto.RacePlayerResponseDTO{
-			Username: player.Username,
-			Role:     player.Role,
-			Color:    player.Color,
-			Profile: dto.RacePlayerProfileResponseDTO{
-				Income:        player.Income,
-				Babies:        player.Babies,
-				Expenses:      player.Expenses,
-				Assets:        player.Assets,
-				Liabilities:   player.Liabilities,
-				TotalIncome:   player.TotalIncome,
-				TotalExpenses: player.TotalExpenses,
-				CashFlow:      player.CashFlow,
-				PassiveIncome: player.PassiveIncome,
-				Cash:          player.Cash,
-			},
-			Profession:      profession,
-			IsRolledDice:    player.IsRolledDice == 1,
-			LastPosition:    player.LastPosition,
-			Transactions:    transactions,
-			CurrentPosition: player.CurrentPosition,
-			DualDiceCount:   player.DualDiceCount == 1,
-			SkippedTurns:    player.SkippedTurns == 1,
-			CanReRoll:       player.CanReRoll == 1,
-			OnBigRace:       player.OnBigRace == 1,
-			HasBankrupt:     player.DualDiceCount == 1,
-			AboutToBankrupt: player.AboutToBankrupt,
-			HasMlm:          player.DualDiceCount == 1,
-		}
+		return nil, service.GetFormattedPlayerResponse(player)
 	}
 
 	return fmt.Errorf(storage.ErrorUndefinedPlayer), dto.RacePlayerResponseDTO{}
+}
+
+func (service *playerService) GetFormattedPlayerResponse(player entity.Player) dto.RacePlayerResponseDTO {
+	profession := service.professionRepository.FindProfessionById(uint64(player.ProfessionId))
+	transactionsQuery := service.transactionService.GetPlayerTransactions(player.ID)
+
+	var transactions []dto.RacePlayerTransactionsResponseDTO
+
+	for i := 0; i < len(transactionsQuery); i++ {
+		transactions = append(transactions, dto.RacePlayerTransactionsResponseDTO{
+			CurrentCash: *transactionsQuery[i].Data.CurrentCash,
+			Cash:        *transactionsQuery[i].Data.Cash,
+			Amount:      *transactionsQuery[i].Data.Amount,
+			TxType:      *transactionsQuery[i].Data.TxType,
+			Details:     transactionsQuery[i].Details,
+		})
+	}
+
+	return dto.RacePlayerResponseDTO{
+		ID:       player.ID,
+		UserId:   player.UserId,
+		Username: player.Username,
+		Role:     player.Role,
+		Color:    player.Color,
+		Profile: dto.RacePlayerProfileResponseDTO{
+			Income:        player.Income,
+			Babies:        player.Babies,
+			Expenses:      player.Expenses,
+			Assets:        player.Assets,
+			Liabilities:   player.Liabilities,
+			TotalIncome:   player.TotalIncome,
+			TotalExpenses: player.TotalExpenses,
+			CashFlow:      player.CashFlow,
+			PassiveIncome: player.PassiveIncome,
+			Cash:          player.Cash,
+		},
+		Profession:      profession,
+		IsRolledDice:    player.IsRolledDice == 1,
+		LastPosition:    player.LastPosition,
+		Transactions:    transactions,
+		CurrentPosition: player.CurrentPosition,
+		DualDiceCount:   player.DualDiceCount == 1,
+		SkippedTurns:    player.SkippedTurns == 1,
+		CanReRoll:       player.CanReRoll == 1,
+		OnBigRace:       player.OnBigRace == 1,
+		HasBankrupt:     player.DualDiceCount == 1,
+		AboutToBankrupt: player.AboutToBankrupt,
+		HasMlm:          player.DualDiceCount == 1,
+	}
 }
 
 func (service *playerService) Payday(player entity.Player) {
@@ -240,7 +247,7 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 	return nil
 }
 
-func (service *playerService) SellRealEstate(ID string, card entity.CardRealEstate, player entity.Player) error {
+func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error {
 	realEstate := player.FindRealEstate(ID)
 
 	if realEstate.ID == "" {
