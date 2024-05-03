@@ -1,5 +1,5 @@
 package dto
 
 type RollDiceResponseDto struct {
-	DiceValues []int `json:"diceValues"`
+	DiceValues []int `json:"dice_values"`
 }

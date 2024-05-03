@@ -18,28 +18,28 @@ var PlayerRoles = struct {
 }
 
 type PlayerIncome struct {
-	RealEstates []CardRealEstate `json:"real_estates"`
+	RealEstates []CardRealEstate `json:"realEstates"`
 	Business    []CardBusiness   `json:"business"`
 	Salary      int              `json:"salary"`
 }
 
 type PlayerAssets struct {
 	Dreams         []CardDream          `json:"dreams"`
-	PreciousMetals []CardPreciousMetals `json:"precious_metals"`
-	RealEstates    []CardRealEstate     `json:"real_estates"`
+	PreciousMetals []CardPreciousMetals `json:"preciousMetals"`
+	RealEstates    []CardRealEstate     `json:"realEstates"`
 	Business       []CardBusiness       `json:"business"`
 	Stocks         []CardStocks         `json:"stocks"`
 	Savings        int                  `json:"savings"`
 }
 
 type PlayerLiabilities struct {
-	RealEstates    []CardRealEstate `json:"real_estates"`
+	RealEstates    []CardRealEstate `json:"realEstates"`
 	Business       []CardBusiness   `json:"business"`
-	BankLoan       int              `json:"bank_loan"`
-	HomeMortgage   int              `json:"home_mortgage"`
-	SchoolLoans    int              `json:"school_loans"`
-	CarLoans       int              `json:"car_loans"`
-	CreditCardDebt int              `json:"credit_card_debt"`
+	BankLoan       int              `json:"bankLoan"`
+	HomeMortgage   int              `json:"homeMortgage"`
+	SchoolLoans    int              `json:"schoolLoans"`
+	CarLoans       int              `json:"carLoans"`
+	CreditCardDebt int              `json:"creditCardDebt"`
 }
 
 type Player struct {
@@ -60,6 +60,7 @@ type Player struct {
 	CashFlow        int               `json:"cash_flow"`
 	PassiveIncome   int               `json:"passive_income"`
 	ProfessionId    uint8             `json:"profession_id"`
+	Profession      Profession        `gorm:"-" sql:"-" json:"profession"`
 	LastPosition    uint8             `json:"last_position"`
 	CurrentPosition uint8             `json:"current_position"`
 	DualDiceCount   uint8             `json:"dual_dice_count"`
@@ -81,6 +82,10 @@ func (e *Player) FindStocks(symbol string) (int, CardStocks) {
 	}
 
 	return -1, CardStocks{}
+}
+
+func (e *Player) BornBaby() {
+	e.Babies++
 }
 
 func (e *Player) ChangeDiceStatus(status bool) {
@@ -111,6 +116,15 @@ func (e *Player) Move(steps int) {
 
 func (e *Player) IncrementDualDiceCount() {
 	e.DualDiceCount += 3
+}
+
+func (e *Player) CreateResponse() RaceResponse {
+	return RaceResponse{
+		ID:        e.ID,
+		UserId:    e.UserId,
+		Username:  e.Username,
+		Responded: false,
+	}
 }
 
 func (e *Player) DecrementDualDiceCount() {

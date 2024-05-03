@@ -10,6 +10,20 @@ var TransactionType = struct {
 	RACE:   "race",
 }
 
+var TxTypes = struct {
+	Stocks     string
+	RealEstate string
+	Dream      string
+	Other      string
+	Business   string
+}{
+	Stocks:     "stocks",
+	RealEstate: "realEstate",
+	Dream:      "dream",
+	Other:      "other",
+	Business:   "business",
+}
+
 type TransactionData struct {
 	CurrentCash *int    `json:"current_cash"`
 	Cash        *int    `json:"cash"`

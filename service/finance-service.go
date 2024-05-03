@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/logger"
 	"github.com/webjohny/cashflow-go/storage"
 	"strconv"
 )
@@ -26,6 +27,13 @@ func NewFinanceService(raceService RaceService, playerService PlayerService) Fin
 }
 
 func (service *financeService) SendMoney(raceId uint64, username string, amount int, receiverUsername string) error {
+	logger.Info("FinanceService.SendMoney", map[string]interface{}{
+		"raceId":           raceId,
+		"username":         username,
+		"amount":           amount,
+		"receiverUsername": receiverUsername,
+	})
+
 	sender := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
 	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
 
@@ -61,7 +69,7 @@ func (service *financeService) SendMoney(raceId uint64, username string, amount 
 		),
 	)
 
-	go service.raceService.SetTransaction(raceId, sender, fmt.Sprintf(
+	go service.raceService.SetTransaction(raceId, sender, "", fmt.Sprintf(
 		"%s перевёл $%s игроку %s",
 		helper.CamelToCapitalize(username),
 		strconv.Itoa(amount),
@@ -72,6 +80,14 @@ func (service *financeService) SendMoney(raceId uint64, username string, amount 
 }
 
 func (service *financeService) SendAssets(raceId uint64, username string, amount int, receiverUsername string, asset string) error {
+	logger.Info("FinanceService.SendAssets", map[string]interface{}{
+		"raceId":           raceId,
+		"username":         username,
+		"amount":           amount,
+		"receiverUsername": receiverUsername,
+		"asset":            asset,
+	})
+
 	sender := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
 	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
 
@@ -116,7 +132,7 @@ func (service *financeService) SendAssets(raceId uint64, username string, amount
 					helper.CamelToCapitalize(receiverUsername),
 				)
 
-				err = service.playerService.BuyStocks(stocks, sender, amount, false)
+				err = service.playerService.BuyStocks(stocks, sender, false)
 			}
 		}
 	}
@@ -124,23 +140,33 @@ func (service *financeService) SendAssets(raceId uint64, username string, amount
 	if err == nil {
 		go service.playerService.SetTransaction(sender.ID, sender.Cash, sender.Cash, amount, transactionSenderMessage)
 		go service.playerService.SetTransaction(receiver.ID, receiver.Cash, receiver.Cash, amount, transactionReceiverMessage)
-		go service.raceService.SetTransaction(raceId, sender, transactionMessage)
+		go service.raceService.SetTransaction(raceId, sender, "", transactionMessage)
 	}
 
 	return err
 }
 
 func (service *financeService) TakeLoan(raceId uint64, username string, amount int) error {
+	logger.Info("FinanceService.TakeLoan", map[string]interface{}{
+		"raceId":   raceId,
+		"username": username,
+		"amount":   amount,
+	})
+
 	player := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
 
 	if player.ID == 0 {
 		return fmt.Errorf(storage.ErrorUndefinedPlayer)
 	}
 
+	if amount%1000 != 0 {
+		return fmt.Errorf(storage.ErrorWrongAmountForTakingLoan)
+	}
+
 	err := service.playerService.TakeLoan(player, amount)
 
 	if err == nil {
-		go service.raceService.SetTransaction(raceId, player, fmt.Sprintf(
+		go service.raceService.SetTransaction(raceId, player, "", fmt.Sprintf(
 			"%s взял в кредит $%s",
 			helper.CamelToCapitalize(username),
 			strconv.Itoa(amount),

@@ -31,6 +31,7 @@ type RaceLog struct {
 
 type RaceResponse struct {
 	ID        uint64 `json:"id,omitempty"`
+	UserId    uint64 `json:"user_id,omitempty"`
 	Username  string `json:"username"`
 	Responded bool   `json:"responded"`
 }
@@ -70,7 +71,7 @@ func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
 	if len(r.Responses) > 0 {
 		playerId := ID | currentPlayerID
 		for i := 0; i < len(r.Responses); i++ {
-			if playerId == r.Responses[i].ID {
+			if playerId == r.Responses[i].UserId {
 				r.Responses[i].Responded = true
 			}
 		}

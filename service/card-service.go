@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/logger"
 	"github.com/webjohny/cashflow-go/storage"
+	"log"
 	"os"
 	"strconv"
 )
@@ -68,6 +70,13 @@ func NewCardService(gameService GameService, raceService RaceService) CardServic
 }
 
 func (service *cardService) Prepare(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{}) {
+	logger.Info("CardService.Prepare", map[string]interface{}{
+		"raceId":     raceId,
+		"family":     family,
+		"actionType": actionType,
+		"userId":     userId,
+	})
+
 	if family == "deal" {
 		err, card := service.GetCard(actionType, raceId, userId, isBigRace)
 
@@ -81,18 +90,41 @@ func (service *cardService) Prepare(raceId uint64, family string, actionType str
 }
 
 func (service *cardService) Accept(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{}) {
+	logger.Info("CardService.Accept", map[string]interface{}{
+		"raceId":     raceId,
+		"family":     family,
+		"actionType": actionType,
+		"userId":     userId,
+	})
+
 	var err error
 	var response interface{}
 
 	if family == "payday" {
 		err = service.raceService.PaydayAction(raceId, userId, actionType, isBigRace)
 	} else if family == "market" && actionType == "damage" {
-		err = service.raceService.MarketAction(raceId, userId, actionType, isBigRace)
+		err = service.raceService.MarketAction(raceId, userId, actionType)
+	} else if family == "charity" {
+		err = service.raceService.CharityAction(raceId, userId, isBigRace)
+	} else if family == "doodad" {
+		err = service.raceService.DoodadAction(raceId, userId)
+	} else if family == "baby" {
+		err = service.raceService.BabyAction(raceId, userId)
+	} else if family == "downsized" {
+		err = service.raceService.DownsizedAction(raceId, userId)
+	} else {
+		err = service.raceService.SkipAction(raceId, userId, isBigRace)
 	}
+
 	return err, response
 }
 
 func (service *cardService) Skip(raceId uint64, userId uint64, isBigRace bool) (error, interface{}) {
+	logger.Info("CardService.Skip", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
 	var err error
 	var response interface{}
 
@@ -102,6 +134,11 @@ func (service *cardService) Skip(raceId uint64, userId uint64, isBigRace bool) (
 }
 
 func (service *cardService) Purchase(raceId uint64, actionType string, userId uint64, count int, isBigRace bool) (error, interface{}) {
+	logger.Info("CardService.Purchase", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
 	var err error
 	var response interface{}
 
@@ -115,19 +152,19 @@ func (service *cardService) Purchase(raceId uint64, actionType string, userId ui
 		break
 
 	case "dream":
-		err = service.raceService.DreamAction(raceId, userId, isBigRace)
+		err = service.raceService.DreamAction(raceId, userId)
 		break
 
 	case "riskBusiness":
-		err, response = service.raceService.RiskBusinessAction(raceId, userId, isBigRace)
+		err, response = service.raceService.RiskBusinessAction(raceId, userId)
 		break
 
 	case "riskStocks":
-		err, response = service.raceService.RiskStocksAction(raceId, userId, isBigRace)
+		err, response = service.raceService.RiskStocksAction(raceId, userId)
 		break
 
 	case "stocks":
-		err = service.raceService.StocksAction(raceId, userId, count, isBigRace)
+		err = service.raceService.StocksAction(raceId, userId, count)
 		break
 
 	case "lottery":
@@ -135,7 +172,7 @@ func (service *cardService) Purchase(raceId uint64, actionType string, userId ui
 		break
 
 	case "goldCoins":
-		err = service.raceService.GoldCoinsAction(raceId, userId, isBigRace)
+		err = service.raceService.GoldCoinsAction(raceId, userId)
 		break
 
 	case "mlm":
@@ -151,6 +188,13 @@ func (service *cardService) Purchase(raceId uint64, actionType string, userId ui
 }
 
 func (service *cardService) Selling(raceId uint64, actionType string, userId uint64, value string, isBigRace bool) (error, interface{}) {
+	logger.Info("CardService.Selling", map[string]interface{}{
+		"raceId":     raceId,
+		"userId":     userId,
+		"actionType": actionType,
+		"value":      value,
+	})
+
 	var err error
 	var response interface{}
 
@@ -160,7 +204,7 @@ func (service *cardService) Selling(raceId uint64, actionType string, userId uin
 			return fmt.Errorf(storage.ErrorIsNotValidRealEstate), nil
 		}
 
-		err = service.raceService.SellRealEstate(raceId, userId, value, isBigRace)
+		err = service.raceService.SellRealEstate(raceId, userId, value)
 		break
 	case "stock":
 		count, _ := strconv.Atoi(value)
@@ -169,7 +213,7 @@ func (service *cardService) Selling(raceId uint64, actionType string, userId uin
 			return fmt.Errorf(storage.ErrorIsNotValidCountValue), nil
 		}
 
-		err = service.raceService.SellStocks(raceId, userId, count, isBigRace)
+		err = service.raceService.SellStocks(raceId, userId, count)
 		break
 	case "goldCoins":
 		count, _ := strconv.Atoi(value)
@@ -178,7 +222,7 @@ func (service *cardService) Selling(raceId uint64, actionType string, userId uin
 			return fmt.Errorf(storage.ErrorIsNotValidCountValue), nil
 		}
 
-		err = service.raceService.SellGoldCoins(raceId, userId, count, isBigRace)
+		err = service.raceService.SellGoldCoins(raceId, userId, count)
 		break
 	case "skip":
 		err = service.raceService.SkipAction(raceId, userId, isBigRace)
@@ -189,6 +233,12 @@ func (service *cardService) Selling(raceId uint64, actionType string, userId uin
 }
 
 func (service *cardService) GetCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card) {
+	logger.Info("CardService.GetCard", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+		"action": action,
+	})
+
 	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, isBigRace)
 
 	if err != nil {
@@ -219,6 +269,8 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 }
 
 func (service *cardService) GetCards() map[string][]entity.Card {
+	logger.Info("CardService.GetCards", nil)
+
 	data, err := os.ReadFile(os.Getenv("CARDS_PATH"))
 	if err != nil {
 		panic(err)
@@ -235,6 +287,10 @@ func (service *cardService) GetCards() map[string][]entity.Card {
 }
 
 func (service *cardService) getCardByTile(cardType string) entity.Card {
+	logger.Info("CardService.getCardByTile", map[string]interface{}{
+		"cardType": cardType,
+	})
+
 	deals := []string{"smallDeal", "bigDeal"}
 	validTypes := append(deals,
 		"market",
@@ -263,6 +319,7 @@ func (service *cardService) getCardByTile(cardType string) entity.Card {
 		card := service.getPickCard(cardType)
 		card.Family = service.getFamily(deals, cardType)
 		card.Name = cardType
+		log.Println(card.DownPayment, card.CashFlow)
 		return card
 	}
 
@@ -270,6 +327,10 @@ func (service *cardService) getCardByTile(cardType string) entity.Card {
 }
 
 func (service *cardService) getFamily(deals []string, dealType string) string {
+	logger.Info("CardService.getFamily", map[string]interface{}{
+		"dealType": dealType,
+	})
+
 	if helper.Contains(deals, dealType) {
 		dealType = "deal"
 	}
@@ -300,10 +361,15 @@ func (service *cardService) getRatCardType(tilePosition int) string {
 }
 
 func (service *cardService) getPickCard(cardType string) entity.Card {
+	logger.Info("CardService.getPickCard", map[string]interface{}{
+		"cardType": cardType,
+	})
+
 	if helper.Contains([]string{}, cardType) {
 		return entity.Card{}
 	}
 
 	cardList := service.GetCards()
+	log.Println(len(cardList[cardType]))
 	return cardList[cardType][helper.Random(len(cardList[cardType])-1)]
 }

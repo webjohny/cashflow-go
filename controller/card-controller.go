@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
@@ -40,7 +41,11 @@ func (c *cardController) Type(ctx *gin.Context) {
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
+	if userId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedPlayer)
+	} else if raceId == 0 {
+		err = fmt.Errorf(storage.ErrorUndefinedGame)
+	} else {
 		err, response = c.cardService.GetCard("", raceId, userId, bigRace)
 	}
 
@@ -60,12 +65,12 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
-		err, response = c.cardService.Prepare(raceId, family, actionType, userId, bigRace)
-	} else if raceId == 0 {
+	if raceId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = fmt.Errorf(storage.ErrorUndefinedPlayer)
+	} else {
+		err, response = c.cardService.Prepare(raceId, family, actionType, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -77,17 +82,23 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	raceId := request.GetRaceId(ctx)
 	userId := request.GetUserId(ctx)
 	bigRace := request.GetBigRace(ctx)
-	value := ctx.Query("value")
+
+	var body dto.CardActionDTO
+
+	if err := ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
 
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
-		err, response = c.cardService.Selling(raceId, actionType, userId, value, bigRace)
-	} else if raceId == 0 {
+	if raceId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedUser)
+	} else {
+		err, response = c.cardService.Selling(raceId, actionType, userId, body.Value, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -104,12 +115,12 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
-		err, response = c.cardService.Accept(raceId, family, actionType, userId, bigRace)
-	} else if raceId == 0 {
+	if raceId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedUser)
+	} else {
+		err, response = c.cardService.Accept(raceId, family, actionType, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -123,12 +134,12 @@ func (c *cardController) Skip(ctx *gin.Context) {
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
-		err, response = c.cardService.Skip(raceId, userId, bigRace)
-	} else if raceId == 0 {
+	if raceId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedUser)
+	} else {
+		err, response = c.cardService.Skip(raceId, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -136,21 +147,29 @@ func (c *cardController) Skip(ctx *gin.Context) {
 
 func (c *cardController) Purchase(ctx *gin.Context) {
 	actionType := ctx.Param("type")
-	count, _ := strconv.Atoi(ctx.Query("count"))
 
 	raceId := request.GetRaceId(ctx)
 	userId := request.GetUserId(ctx)
 	bigRace := request.GetBigRace(ctx)
 
+	var body dto.CardActionDTO
+
+	if err := ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	value, _ := strconv.Atoi(body.Value)
+
 	var err error
 	var response interface{}
 
-	if raceId != 0 && userId != 0 {
-		err, response = c.cardService.Purchase(raceId, actionType, userId, count, bigRace)
-	} else if raceId == 0 {
+	if raceId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
 		err = fmt.Errorf(storage.ErrorUndefinedUser)
+	} else {
+		err, response = c.cardService.Purchase(raceId, actionType, userId, value, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)

@@ -13,6 +13,7 @@ import (
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -43,12 +44,16 @@ var (
 
 	// Controllers
 	gameController    controller.GameController    = controller.NewGameController(gameService)
+	playerController  controller.PlayerController  = controller.NewPlayerController(playerService)
 	lobbyController   controller.LobbyController   = controller.NewLobbyController(lobbyService)
 	financeController controller.FinanceController = controller.NewFinanceController(financeService)
 	cardController    controller.CardController    = controller.NewCardController(cardService)
 	authController    controller.AuthController    = controller.NewAuthController(authService, jwtService)
 	userController    controller.UserController    = controller.NewUserController(userService, jwtService)
 )
+
+var LogInfo *log.Logger
+var LogError *log.Logger
 
 var globalToken string
 
@@ -90,21 +95,22 @@ func switchUser(ctx *gin.Context) {
 	}
 }
 
-func resetToken() {
-
+func init() {
+	LogError = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime)
 }
 
 func main() {
 	defer config.CloseDatabaseConnection(db)
 	r := gin.Default()
-	gin.SetMode(gin.ReleaseMode)
+	//gin.ReleaseMode
+	gin.SetMode("debug")
 
 	cardRoutes := r.Group("api/card", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		cardRoutes.GET("/type", cardController.Type)
 		cardRoutes.GET("/reset-transaction", cardController.ResetTransaction)
-		cardRoutes.GET("/prepare/:family/:type", cardController.Prepare)
-		cardRoutes.GET("/skip/:family/:type", cardController.Skip)
+		cardRoutes.POST("/prepare/:family/:type", cardController.Prepare)
+		cardRoutes.POST("/skip/:family/:type", cardController.Skip)
 		cardRoutes.POST("/sell/:family/:type", cardController.Selling)
 		cardRoutes.POST("/buy/:family/:type", cardController.Purchase)
 		cardRoutes.POST("/ok/:family/:type", cardController.Accept)
@@ -126,19 +132,24 @@ func main() {
 
 	lobbyRoutes := r.Group("api/lobby", middleware.AuthorizeJWT(jwtService))
 	{
+		lobbyRoutes.GET("/:lobbyId", lobbyController.GetLobby)
 		lobbyRoutes.POST("/create", lobbyController.Create)
 		lobbyRoutes.GET("/join/:lobbyId", lobbyController.Join)
 		lobbyRoutes.GET("/leave/:lobbyId", lobbyController.Leave)
+		lobbyRoutes.GET("/cancel/:lobbyId", lobbyController.Cancel)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
 	gameRoutes := r.Group("api/game", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
-		gameRoutes.GET("", gameController.GetGame)
+		gameRoutes.GET("/:raceId", gameController.GetGame)
+		gameRoutes.GET("/cancel/:raceId", gameController.Cancel)
+		gameRoutes.GET("/reset/:raceId", gameController.Reset)
 		gameRoutes.POST("/start/:lobbyId", gameController.Start)
 		gameRoutes.GET("/roll-dice/:dice", gameController.RollDice)
 		gameRoutes.GET("/re-roll-dice", gameController.RollDice)
 		gameRoutes.GET("/change-turn", gameController.ChangeTurn)
+		gameRoutes.GET("/get/tiles", gameController.GetTiles)
 	}
 
 	financeRoutes := r.Group("api/finance", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
@@ -146,6 +157,11 @@ func main() {
 		financeRoutes.POST("/send/money", financeController.SendMoney)
 		financeRoutes.POST("/send/assets", financeController.SendAssets)
 		financeRoutes.POST("/loan/take", financeController.TakeLoan)
+	}
+
+	playerRoutes := r.Group("api/player", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
+	{
+		playerRoutes.GET("/info", playerController.GetRacePlayer)
 	}
 
 	// cdnRoutes := r.Group("api/cdn")

@@ -2,10 +2,14 @@ package service
 
 import (
 	"fmt"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/logger"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/datatypes"
+	"log"
 	"time"
 )
 
@@ -13,6 +17,8 @@ type LobbyService interface {
 	Create(username string, userId uint64) (error, entity.Lobby)
 	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	Leave(ID uint64, username string) (error, entity.Lobby)
+	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
+	GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO
 }
 
 const LobbyMaxPlayers = 6
@@ -27,7 +33,34 @@ func NewLobbyService(lobbyRepository repository.LobbyRepository) LobbyService {
 	}
 }
 
+func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO {
+	logger.Info("LobbyService.GetLobby", map[string]interface{}{
+		"lobbyId": lobbyId,
+		"userId":  userId,
+	})
+
+	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
+	player := lobby.GetPlayer(userId)
+
+	response := dto.GetLobbyResponseDTO{
+		Username: player.Username,
+		You:      lobby.GetPlayer(userId),
+		Players:  lobby.Players,
+		Status:   lobby.Status,
+		LobbyId:  lobby.ID,
+		GameId:   lobby.GameId,
+		Hash:     helper.CreateHashByJson(lobby),
+	}
+
+	return response
+}
+
 func (service *lobbyService) Create(username string, userId uint64) (error, entity.Lobby) {
+	logger.Info("LobbyService.Create", map[string]interface{}{
+		"username": username,
+		"userId":   userId,
+	})
+
 	lobby := &entity.Lobby{
 		Players:    make([]entity.LobbyPlayer, 0),
 		MaxPlayers: LobbyMaxPlayers,
@@ -46,8 +79,16 @@ func (service *lobbyService) Create(username string, userId uint64) (error, enti
 }
 
 func (service *lobbyService) Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer) {
+	logger.Info("LobbyService.Join", map[string]interface{}{
+		"lobbyId":  ID,
+		"username": username,
+		"userId":   userId,
+	})
+
 	var player entity.LobbyPlayer
 	lobby := service.lobbyRepository.FindLobbyById(ID)
+
+	log.Println("LobbyService.Join:", ID, username, userId)
 
 	if lobby.ID != 0 {
 		if lobby.IsFull() {
@@ -60,12 +101,17 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 
 		player = lobby.GetPlayer(userId)
 
+		log.Println("LobbyService.Join: exists lobby", ID, userId, player)
+
 		if player.ID == 0 {
 			if lobby.IsGameStarted() {
+				log.Println("LobbyService.Join.Waitlist:", ID, userId)
 				//@toDo add waitlist in game
 				//game.AddWaitList()
 				lobby.AddWaitList(userId, username)
 			} else if !lobby.IsStarted() {
+				log.Println("LobbyService.Join.Guest:", ID, userId)
+
 				lobby.AddGuest(userId, username)
 			}
 
@@ -81,14 +127,48 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 }
 
 func (service *lobbyService) Leave(ID uint64, username string) (error, entity.Lobby) {
+	logger.Info("LobbyService.Leave", map[string]interface{}{
+		"lobbyId":  ID,
+		"username": username,
+	})
+
 	lobby := service.lobbyRepository.FindLobbyById(ID)
 
+	log.Println("LobbyService.Leave:", lobby.ID, ID, username)
+
 	if lobby.ID != 0 {
+		log.Println("LobbyService.Leave: exists lobby", lobby.CountPlayers(), ID, username)
+
 		lobby.RemovePlayer(username)
 
 		if lobby.CountPlayers() == 0 {
 			service.lobbyRepository.DeleteLobby(&lobby)
 		}
+
+		_ = service.lobbyRepository.UpdateLobby(&lobby)
+
+		return nil, lobby
+	}
+
+	return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Lobby{}
+}
+
+func (service *lobbyService) Cancel(ID uint64, userId uint64) (error, entity.Lobby) {
+	logger.Info("LobbyService.Cancel", map[string]interface{}{
+		"lobbyId": ID,
+		"userId":  userId,
+	})
+
+	lobby := service.lobbyRepository.FindLobbyById(ID)
+
+	if lobby.ID != 0 {
+		logger.Info("LobbyService.Cancel exists lobby", map[string]interface{}{
+			"countPlayers": lobby.CountPlayers(),
+			"lobbyId":      ID,
+			"userId":       userId,
+		})
+
+		service.lobbyRepository.CancelLobby(&lobby)
 
 		return nil, lobby
 	}

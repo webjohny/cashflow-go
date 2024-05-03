@@ -23,7 +23,7 @@ type Card struct {
 	Decrease             *int             `json:"decrease,omitempty"`
 	OnlyYou              *bool            `json:"only_you,omitempty"`
 	Range                *[]int           `json:"range,omitempty"`
-	SubRule              *[]string        `json:"subRule,omitempty"`
+	SubRule              *[]string        `json:"sub_rule,omitempty"`
 	ApplicableToEveryOne *bool            `json:"applicable_to_every_one,omitempty"`
 	Percent              *int             `json:"percent,omitempty"`
 	Success              *[]int           `json:"success,omitempty"`

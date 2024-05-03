@@ -15,7 +15,7 @@
       "heading": "Кэш-флоу день",
       "description": "Кэш-Флоу день! Вам начислены дивиденды от инвестиций.",
       "type": "notification",
-      "alertType": "success",
+      "alert_type": "success",
       "symbol": "cashFlowDay"
     }
   ],
@@ -25,15 +25,23 @@
       "type": "risk",
       "dices": [
         {
-          "dices": [4,5,6],
-          "cashFlow": 75000
+          "dices": [
+            4,
+            5,
+            6
+          ],
+          "cash_flow": 75000
         },
         {
-          "dices": [1,2,3],
-          "cashFlow": 0
+          "dices": [
+            1,
+            2,
+            3
+          ],
+          "cash_flow": 0
         }
       ],
-      "extraDices": 1,
+      "extra_dices": 1,
       "symbol": "Gasoline",
       "heading": "Нефтяной танкер",
       "description": "Популярный невтяной танкер на окраине города.",
@@ -46,7 +54,7 @@
       "heading": "McDonalds в центре Нью-Йорка",
       "description": "Популярный франчайз в центре самого популярного мегаполиса в мире.",
       "cost": 5000,
-      "cashFlow": 25000
+      "cash_flow": 25000
     },
     {
       "id": "bigRealEstate3",
@@ -55,19 +63,27 @@
       "cost": 50000,
       "dices": [
         {
-          "dices": [5,6],
-          "costPerOne": 1
+          "dices": [
+            5,
+            6
+          ],
+          "cost_per_one": 1
         },
         {
-          "dices": [1,2,3,4],
-          "costPerOne": 0
+          "dices": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "cost_per_one": 0
         }
       ],
-      "extraDices": 1,
+      "extra_dices": 1,
       "symbol": "Crypto",
       "heading": "Криптовалюта",
       "description": "Купите токены новой криптокомпании по цене 0.1$.",
-      "costPerOne": 0.1
+      "cost_per_one": 0.1
     }
   ],
   "business": [
@@ -78,7 +94,7 @@
       "heading": "McDonalds в центре Нью-Йорка",
       "description": "Популярный франчайз в центре самого популярного мегаполиса в мире.",
       "cost": 5000,
-      "cashFlow": 25000
+      "cash_flow": 25000
     }
   ],
   "dream": [
@@ -114,7 +130,7 @@
       "type": "bankrupt"
     }
   ],
-  "otherSmallDeal": [
+  "other_smallDeal": [
     {
       "id": "appleIncrease",
       "type": "stock",
@@ -122,7 +138,7 @@
       "heading": "Акции Apple летят to the moon...",
       "description": "Успешные продажи новой линейки iPhone роизвели фурор на рынке смартфонов и компания приняла решение разделить акции.",
       "rule": "Все у кого есть акции этой компании удваивают их количество.",
-      "multiplyX": 2
+      "multiply_x": 2
     },
     {
       "id": "appleDecrease",
@@ -131,10 +147,10 @@
       "heading": "Акции Apple летят вниз...",
       "description": "Безуспешные попытки продажи новой линейки iPhone.",
       "rule": "Все у кого есть акции этой компании делят их на пополам.",
-      "divideX": 2
+      "divide_x": 2
     }
   ],
-  "smallDeal": [
+  "smallOtherDeal": [
     {
       "id": "realEstateS1",
       "type": "realEstate",
@@ -144,8 +160,8 @@
       "rule": "Используй ты эту возможность, или продай другому игроку",
       "cost": 45000,
       "mortgage": 43000,
-      "downPayment": 300,
-      "cashFlow": 220
+      "down_payment": 300,
+      "cash_flow": 220
     },
     {
       "id": "realEstateS12",
@@ -156,8 +172,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 45000,
       "mortgage": 43000,
-      "downPayment": 2000,
-      "cashFlow": 250
+      "down_payment": 2000,
+      "cash_flow": 250
     },
     {
       "id": "realEstateS6",
@@ -168,8 +184,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 40000,
       "mortgage": 35000,
-      "downPayment": 5000,
-      "cashFlow": 220
+      "down_payment": 5000,
+      "cash_flow": 220
     },
     {
       "id": "realEstateS4",
@@ -180,8 +196,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 55000,
       "mortgage": 50000,
-      "downPayment": 5000,
-      "cashFlow": 160
+      "down_payment": 5000,
+      "cash_flow": 160
     },
     {
       "id": "realEstateS3",
@@ -192,8 +208,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 40000,
       "mortgage": 36000,
-      "downPayment": 4000,
-      "cashFlow": 140
+      "down_payment": 4000,
+      "cash_flow": 140
     },
     {
       "id": "realEstateS5",
@@ -204,8 +220,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 40000,
       "mortgage": 39000,
-      "downPayment": 1000,
-      "cashFlow": 0
+      "down_payment": 1000,
+      "cash_flow": 0
     },
     {
       "id": "realEstateS11",
@@ -216,8 +232,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 50000,
       "mortgage": 46000,
-      "downPayment": 4000,
-      "cashFlow": 200
+      "down_payment": 4000,
+      "cash_flow": 200
     },
     {
       "id": "realEstateS7",
@@ -228,8 +244,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 50000,
       "mortgage": 48000,
-      "downPayment": 2000,
-      "cashFlow": 200
+      "down_payment": 2000,
+      "cash_flow": 200
     },
     {
       "id": "realEstateS10",
@@ -240,8 +256,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 65000,
       "mortgage": 60000,
-      "downPayment": 5000,
-      "cashFlow": 160
+      "down_payment": 5000,
+      "cash_flow": 160
     },
     {
       "id": "realEstateS8",
@@ -252,8 +268,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 50000,
       "mortgage": 47000,
-      "downPayment": 3000,
-      "cashFlow": 100
+      "down_payment": 3000,
+      "cash_flow": 100
     },
     {
       "id": "realEstateS9",
@@ -264,9 +280,11 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 30000,
       "mortgage": 29000,
-      "downPayment": 1000,
-      "cashFlow": 0
-    },
+      "down_payment": 1000,
+      "cash_flow": 0
+    }
+  ],
+  "smallDeal": [
     {
       "id": "apple10",
       "type": "stock",
@@ -275,7 +293,7 @@
       "description": "Низкий спрос на продукцию Apple Vision Pro. разработка не оправдала надежд.",
       "rule": "Только ты можешь купить по этой цене. Каждый может продать.",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         200
@@ -289,7 +307,7 @@
       "description": "Powerhouse market drives fund's price up to record high",
       "rule": "Only you may buy as many units as you want at this price. Everyone may sell at this price",
       "price": 40,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         20,
         30
@@ -303,7 +321,7 @@
       "description": "Brilliant young fund manager. Everyone believes he has the Midas touch",
       "rule": "Only you may buy as many units as you want at this price. Everyone may sell at this price",
       "price": 30,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         20,
         30
@@ -317,7 +335,7 @@
       "description": "Lower interest rates drive market and fund to strong showing.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price",
       "price": 20,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         20,
         30
@@ -331,7 +349,7 @@
       "description": "Weak showing in job growth causes lack of consumer confidence. Shares fall with public opinion.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         20,
         30
@@ -345,7 +363,7 @@
       "description": "Weak earnings report leads to weak price of mutual fund.",
       "rule": "Only you may buy as many units as you want at this price. Everyone may sell at this price",
       "price": 5,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         20,
         30
@@ -359,7 +377,7 @@
       "description": "Booming market leads to record share price of this electronics seller!",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 40,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -373,7 +391,7 @@
       "description": "Low interest rates lead to favorable share price for this electronics seller.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 30,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -387,7 +405,7 @@
       "description": "Weak market leads to sagging share price for this electronics seller.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -401,7 +419,7 @@
       "description": "New product flops and tough losses are reported! Share price drops.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -415,7 +433,7 @@
       "description": "Record interest rates lead to substandard share price for this electronics seller",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 5,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -429,7 +447,7 @@
       "description": "Booming market raises share price of this longtime pharmaceutical company.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 40,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         5,
         30
@@ -443,7 +461,7 @@
       "description": "Low inflation leads to high share price for this long time pharmaceutical company.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 30,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         5,
         30
@@ -457,7 +475,7 @@
       "description": "Inflation worries cause poor share price for this longtime pharmaceutical company.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 20,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         5,
         30
@@ -471,7 +489,7 @@
       "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         5,
         40
@@ -485,7 +503,7 @@
       "description": "Interest rates cripple share price of this longtime pharmaceutical company.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 5,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         5,
         30
@@ -499,7 +517,7 @@
       "description": "Box office hit by children's division causes record share price.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 40,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -513,7 +531,7 @@
       "description": "Strong demand for company's library of old movies leads to good share price.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 30,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -527,7 +545,7 @@
       "description": "New director of movie acquisitions brings revived prospects for share price.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 20,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -541,7 +559,7 @@
       "description": "Movie buyer fired after third mega-flop! Shares sink. Chairman's bonus canceled.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 10,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -555,7 +573,7 @@
       "description": "Newest theme park is a huge flop, reports record losses. Share price hits all-time low.",
       "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
       "price": 5,
-      "onlyYou": true,
+      "only_you": true,
       "range": [
         10,
         30
@@ -589,7 +607,7 @@
       "lottery": "money",
       "description": "Sister-in-law is downsized.Needs $5,000 to make house payment. She promises to pay you back $10,000 after she finds a new job.",
       "rule": "If you choose to help. Pay $5,000 and roll 1 die:",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3, She never pays you back and you're out $5,000",
         "Die = 4-6, She pays you back $10,000, but family get-togethers are still awkward"
       ],
@@ -617,7 +635,7 @@
       "lottery": "money",
       "description": "You have a chance to invest in a Multi-Level-Marketing opportunity. Company is looking to spread the reach of their newest venture.",
       "rule": "If you choose to buy-in, pay $500 and KEEP THIS CARD:\nEvery PayDay, roll 1 die:",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3, No returns this month, but keep trying.",
         "Die = 4-6, Your sweat equity paid off! Collect $500."
       ],
@@ -641,7 +659,7 @@
       "lottery": "money",
       "description": "You have a chance to invest in a Multi-Level-Marketing opportunity. Company is looking to spread the reach of their newest venture.",
       "rule": "If you choose to buy-in, pay $500 and KEEP THIS CARD:\nEvery PayDay, roll 1 die:",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3, No returns this month, but keep trying.",
         "Die = 4-6, Your sweat equity paid off! Collect $500."
       ],
@@ -668,8 +686,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 320000,
       "mortgage": 280000,
-      "downPayment": 40000,
-      "cashFlow": 1700
+      "down_payment": 40000,
+      "cash_flow": 1700
     },
     {
       "id": "realEstateB5",
@@ -680,8 +698,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 360000,
       "mortgage": 328000,
-      "downPayment": 32000,
-      "cashFlow": 1800
+      "down_payment": 32000,
+      "cash_flow": 1800
     },
     {
       "id": "realEstateB32",
@@ -692,8 +710,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 250000,
       "mortgage": 210000,
-      "downPayment": 40000,
-      "cashFlow": 2000
+      "down_payment": 40000,
+      "cash_flow": 2000
     },
     {
       "id": "realEstateB8",
@@ -704,8 +722,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 240000,
       "mortgage": 200000,
-      "downPayment": 40000,
-      "cashFlow": 1800
+      "down_payment": 40000,
+      "cash_flow": 1800
     },
     {
       "id": "realEstateB2",
@@ -716,8 +734,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 350000,
       "mortgage": 330000,
-      "downPayment": 20000,
-      "cashFlow": 1000
+      "down_payment": 20000,
+      "cash_flow": 1000
     },
     {
       "id": "realEstateB14",
@@ -728,8 +746,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 275000,
       "mortgage": 259000,
-      "downPayment": 16000,
-      "cashFlow": 900
+      "down_payment": 16000,
+      "cash_flow": 900
     },
     {
       "id": "realEstateB3",
@@ -740,8 +758,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 275000,
       "mortgage": 260000,
-      "downPayment": 15000,
-      "cashFlow": 800
+      "down_payment": 15000,
+      "cash_flow": 800
     },
     {
       "id": "realEstateB17",
@@ -752,8 +770,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 225000,
       "mortgage": 211000,
-      "downPayment": 14000,
-      "cashFlow": 750
+      "down_payment": 14000,
+      "cash_flow": 750
     },
     {
       "id": "realEstateB18",
@@ -764,8 +782,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 300000,
       "mortgage": 288000,
-      "downPayment": 12000,
-      "cashFlow": 800
+      "down_payment": 12000,
+      "cash_flow": 800
     },
     {
       "id": "realEstateB19",
@@ -776,8 +794,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 300000,
       "mortgage": 280000,
-      "downPayment": 20000,
-      "cashFlow": 1000
+      "down_payment": 20000,
+      "cash_flow": 1000
     },
     {
       "id": "realEstateB29",
@@ -788,8 +806,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 270000,
       "mortgage": 255000,
-      "downPayment": 15000,
-      "cashFlow": 800
+      "down_payment": 15000,
+      "cash_flow": 800
     },
     {
       "id": "realEstateB31",
@@ -800,8 +818,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 325000,
       "mortgage": 307000,
-      "downPayment": 18000,
-      "cashFlow": 900
+      "down_payment": 18000,
+      "cash_flow": 900
     },
     {
       "id": "realEstateB4",
@@ -812,8 +830,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 280000,
       "mortgage": 264000,
-      "downPayment": 16000,
-      "cashFlow": 1000
+      "down_payment": 16000,
+      "cash_flow": 1000
     },
     {
       "id": "realEstateB9",
@@ -824,8 +842,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 370000,
       "mortgage": 360000,
-      "downPayment": 10000,
-      "cashFlow": 900
+      "down_payment": 10000,
+      "cash_flow": 900
     },
     {
       "id": "realEstateB10",
@@ -836,8 +854,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 290000,
       "mortgage": 275000,
-      "downPayment": 15000,
-      "cashFlow": 800
+      "down_payment": 15000,
+      "cash_flow": 800
     },
     {
       "id": "realEstateB23",
@@ -848,8 +866,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 225000,
       "mortgage": 210000,
-      "downPayment": 15000,
-      "cashFlow": 700
+      "down_payment": 15000,
+      "cash_flow": 700
     },
     {
       "id": "realEstateB30",
@@ -860,8 +878,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 300000,
       "mortgage": 280000,
-      "downPayment": 20000,
-      "cashFlow": 1100
+      "down_payment": 20000,
+      "cash_flow": 1100
     },
     {
       "id": "realEstateB16",
@@ -872,8 +890,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 340000,
       "mortgage": 308000,
-      "downPayment": 32000,
-      "cashFlow": 1400
+      "down_payment": 32000,
+      "cash_flow": 1400
     },
     {
       "id": "realEstateB20",
@@ -884,8 +902,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 575000,
       "mortgage": 500000,
-      "downPayment": 75000,
-      "cashFlow": 3600
+      "down_payment": 75000,
+      "cash_flow": 3600
     },
     {
       "id": "realEstateB27",
@@ -896,8 +914,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 550000,
       "mortgage": 500000,
-      "downPayment": 50000,
-      "cashFlow": 2400
+      "down_payment": 50000,
+      "cash_flow": 2400
     },
     {
       "id": "realEstateB22",
@@ -908,8 +926,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 350000,
       "mortgage": 300000,
-      "downPayment": 50000,
-      "cashFlow": 3000
+      "down_payment": 50000,
+      "cash_flow": 3000
     },
     {
       "id": "realEstateB24",
@@ -920,8 +938,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 1200000,
       "mortgage": 1000000,
-      "downPayment": 200000,
-      "cashFlow": 11000
+      "down_payment": 200000,
+      "cash_flow": 11000
     },
     {
       "id": "realEstateB11",
@@ -932,8 +950,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 500000,
       "mortgage": 400000,
-      "downPayment": 100000,
-      "cashFlow": 5000
+      "down_payment": 100000,
+      "cash_flow": 5000
     },
     {
       "id": "realEstateB21",
@@ -944,8 +962,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 350000,
       "mortgage": 300000,
-      "downPayment": 50000,
-      "cashFlow": 2500
+      "down_payment": 50000,
+      "cash_flow": 2500
     },
     {
       "id": "realEstateB12",
@@ -956,8 +974,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 260000,
       "mortgage": 248000,
-      "downPayment": 12000,
-      "cashFlow": 600
+      "down_payment": 12000,
+      "cash_flow": 600
     },
     {
       "id": "realEstateB15",
@@ -968,8 +986,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 245000,
       "mortgage": 233000,
-      "downPayment": 12000,
-      "cashFlow": 800
+      "down_payment": 12000,
+      "cash_flow": 800
     },
     {
       "id": "realEstateB25",
@@ -980,8 +998,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 170000,
       "mortgage": 152000,
-      "downPayment": 18000,
-      "cashFlow": 900
+      "down_payment": 18000,
+      "cash_flow": 900
     },
     {
       "id": "realEstateB28",
@@ -992,8 +1010,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 260000,
       "mortgage": 250000,
-      "downPayment": 10000,
-      "cashFlow": 1100
+      "down_payment": 10000,
+      "cash_flow": 1100
     },
     {
       "id": "realEstateB33",
@@ -1004,8 +1022,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 250000,
       "mortgage": 234000,
-      "downPayment": 16000,
-      "cashFlow": 900
+      "down_payment": 16000,
+      "cash_flow": 900
     },
     {
       "id": "realEstateB26",
@@ -1016,8 +1034,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 125000,
       "mortgage": 100000,
-      "downPayment": 25000,
-      "cashFlow": 1800
+      "down_payment": 25000,
+      "cash_flow": 1800
     },
     {
       "id": "realEstateB38",
@@ -1028,8 +1046,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 180000,
       "mortgage": 160000,
-      "downPayment": 20000,
-      "cashFlow": 1600
+      "down_payment": 20000,
+      "cash_flow": 1600
     },
     {
       "id": "realEstateB13",
@@ -1040,8 +1058,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 150000,
       "mortgage": 120000,
-      "downPayment": 30000,
-      "cashFlow": 2500
+      "down_payment": 30000,
+      "cash_flow": 2500
     },
     {
       "id": "realEstateB34",
@@ -1052,8 +1070,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 20000,
       "mortgage": 0,
-      "downPayment": 20000,
-      "cashFlow": 1200
+      "down_payment": 20000,
+      "cash_flow": 1200
     },
     {
       "id": "realEstateB35",
@@ -1064,8 +1082,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 30000,
       "mortgage": 0,
-      "downPayment": 30000,
-      "cashFlow": 1700
+      "down_payment": 30000,
+      "cash_flow": 1700
     },
     {
       "id": "realEstateB7",
@@ -1076,8 +1094,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 30000,
       "mortgage": 0,
-      "downPayment": 30000,
-      "cashFlow": 1500
+      "down_payment": 30000,
+      "cash_flow": 1500
     },
     {
       "id": "realEstateB39",
@@ -1088,8 +1106,8 @@
       "rule": "Use this yourself or sell to another player",
       "cost": 25000,
       "mortgage": 0,
-      "downPayment": 25000,
-      "cashFlow": 1300
+      "down_payment": 25000,
+      "cash_flow": 1300
     }
   ],
   "doodad": [
@@ -1100,7 +1118,7 @@
       "description": "PAY $1,500",
       "cost": 1500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad2",
@@ -1109,7 +1127,7 @@
       "description": "Pay $500",
       "cost": 500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad5",
@@ -1118,7 +1136,7 @@
       "description": "Pay $300",
       "cost": 300,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad6",
@@ -1127,7 +1145,7 @@
       "description": "PAY $2,500",
       "cost": 2500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad7",
@@ -1136,7 +1154,7 @@
       "description": "Spend $2,000",
       "cost": 2000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad8",
@@ -1145,7 +1163,7 @@
       "description": "Pay $500",
       "cost": 500,
       "rule": "If you have child",
-      "isConditional": true
+      "is_conditional": true
     },
     {
       "id": "doodad9",
@@ -1154,7 +1172,7 @@
       "description": "Spend $500",
       "cost": 500,
       "rule": "If you have child",
-      "isConditional": true
+      "is_conditional": true
     },
     {
       "id": "doodad10",
@@ -1163,7 +1181,7 @@
       "description": "PAY $5,000",
       "cost": 5000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad11",
@@ -1172,7 +1190,7 @@
       "description": "Pay $1,000",
       "cost": 1000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad12",
@@ -1181,7 +1199,7 @@
       "description": "PAY $700",
       "cost": 700,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad13",
@@ -1190,7 +1208,7 @@
       "description": "PAY $1,000",
       "cost": 1000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad14",
@@ -1199,7 +1217,7 @@
       "description": "Pay $400",
       "cost": 400,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad15",
@@ -1208,7 +1226,7 @@
       "description": "PAY $2,500",
       "cost": 2500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad16",
@@ -1217,7 +1235,7 @@
       "description": "PAY $800",
       "cost": 800,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad17",
@@ -1226,7 +1244,7 @@
       "description": "Pay $100",
       "cost": 100,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad18",
@@ -1235,7 +1253,7 @@
       "description": "PAY $700",
       "cost": 700,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad19",
@@ -1244,7 +1262,7 @@
       "description": "Pay $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad20",
@@ -1253,7 +1271,7 @@
       "description": "PAY $600",
       "cost": 600,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad21",
@@ -1262,7 +1280,7 @@
       "description": "PAY $700",
       "cost": 700,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad22",
@@ -1271,7 +1289,7 @@
       "description": "Pay $800",
       "cost": 800,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad23",
@@ -1280,7 +1298,7 @@
       "description": "PAY $500",
       "cost": 500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad24",
@@ -1289,7 +1307,7 @@
       "description": "PAY $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad25",
@@ -1298,7 +1316,7 @@
       "description": "Pay $300",
       "cost": 300,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad26",
@@ -1307,7 +1325,7 @@
       "description": "PAY $7,500",
       "cost": 7500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad27",
@@ -1316,7 +1334,7 @@
       "description": "PAY $500",
       "cost": 500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad28",
@@ -1325,7 +1343,7 @@
       "description": "PAY $600",
       "cost": 600,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad29",
@@ -1334,7 +1352,7 @@
       "description": "PAY $800",
       "cost": 800,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad30",
@@ -1343,7 +1361,7 @@
       "description": "PAY $4000",
       "cost": 4000,
       "rule": "If you have child",
-      "isConditional": true
+      "is_conditional": true
     },
     {
       "id": "doodad31",
@@ -1352,7 +1370,7 @@
       "description": "PAY $5,000",
       "cost": 5000,
       "rule": "If you have child",
-      "isConditional": true
+      "is_conditional": true
     },
     {
       "id": "doodad32",
@@ -1361,7 +1379,7 @@
       "description": "Pay $300",
       "cost": 300,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad33",
@@ -1370,7 +1388,7 @@
       "description": "PAY $500",
       "cost": 500,
       "rule": "If you have child",
-      "isConditional": true
+      "is_conditional": true
     },
     {
       "id": "doodad34",
@@ -1379,7 +1397,7 @@
       "description": "PAY $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad35",
@@ -1388,7 +1406,7 @@
       "description": "Pay $1000",
       "cost": 1000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad36",
@@ -1397,7 +1415,7 @@
       "description": "PAY $1,500",
       "cost": 1500,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad37",
@@ -1406,7 +1424,7 @@
       "description": "PAY $3000",
       "cost": 3000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad38",
@@ -1415,7 +1433,7 @@
       "description": "Pay $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad39",
@@ -1424,7 +1442,7 @@
       "description": "PAY $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad40",
@@ -1433,7 +1451,7 @@
       "description": "Pay $200",
       "cost": 200,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad41",
@@ -1442,7 +1460,7 @@
       "description": "Pay $600",
       "cost": 600,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad42",
@@ -1451,7 +1469,7 @@
       "description": "PAY $3,000",
       "cost": 3000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad43",
@@ -1460,7 +1478,7 @@
       "description": "Pay $1,800",
       "cost": 1800,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     },
     {
       "id": "doodad44",
@@ -1469,7 +1487,7 @@
       "description": "Pay $2,000",
       "cost": 2000,
       "rule": "",
-      "isConditional": false
+      "is_conditional": false
     }
   ],
   "payday": [
@@ -1515,11 +1533,11 @@
       "symbol": "realEstate",
       "description": "Water is everywhere at your property!.",
       "rule": "Pay $2000 for a new sewer line(one time). Take out a bank loan if necessary to cover these expenses.",
-      "subRule": [
+      "sub_rule": [
         "Card applies only to person who drew it.If you own No real estate, ignore this card."
       ],
       "cost": 2000,
-      "applicableToEveryOne": false
+      "applicable_to_every_one": false
     },
     {
       "id": "marketDamage02",
@@ -1528,11 +1546,11 @@
       "symbol": "realEstate",
       "description": "Water is everywhere at your property!.",
       "rule": "Pay $1000 for a new sewer line(one time). Take out a bank loan if necessary to cover these expenses.",
-      "subRule": [
+      "sub_rule": [
         "Card applies only to person who drew it.If you own No real estate, ignore this card."
       ],
       "cost": 1000,
-      "applicableToEveryOne": false
+      "applicable_to_every_one": false
     },
     {
       "id": "marketDamage03",
@@ -1541,11 +1559,11 @@
       "symbol": "realEstate",
       "description": "Tenant refuses to pay rent. After the tenant has been evicted, you discover significant damage to your property.",
       "rule": "Insurance covers most repairs, but you still must pay $500 (one time). Take out a bank loan if necessary to cover these expenses.",
-      "subRule": [
+      "sub_rule": [
         "Card applies only to person who drew it.If you own No real estate, ignore this card."
       ],
       "cost": 500,
-      "applicableToEveryOne": false
+      "applicable_to_every_one": false
     },
     {
       "id": "marketDamage04",
@@ -1554,11 +1572,11 @@
       "symbol": "realEstate",
       "description": "Tenant refuses to pay rent. After the tenant has been evicted, you discover significant damage to your property.",
       "rule": "Insurance covers most repairs, but you still must pay $500 (one time). Take out a bank loan if necessary to cover these expenses.",
-      "subRule": [
+      "sub_rule": [
         "Card applies only to person who drew it.If you own No real estate, ignore this card."
       ],
       "cost": 500,
-      "applicableToEveryOne": false
+      "applicable_to_every_one": false
     },
     {
       "id": "marketDamage05",
@@ -1567,11 +1585,11 @@
       "symbol": "realEstate",
       "description": "Tenant refuses to pay rent. After the tenant has been evicted, you discover significant damage to your property.",
       "rule": "Insurance covers most repairs, but you still must pay $1000 (one time). Take out a bank loan if necessary to cover these expenses.",
-      "subRule": [
+      "sub_rule": [
         "Card applies only to person who drew it.If you own No real estate, ignore this card."
       ],
       "cost": 1000,
-      "applicableToEveryOne": false
+      "applicable_to_every_one": false
     },
     {
       "id": "marketLottery01",
@@ -1590,7 +1608,7 @@
       "heading": "Stock - OK4U Drug Co.",
       "description": "OK4U begins trail on possible life saving drug. Side effects are untested. Could change the world... if it works.",
       "rule": "Cardholder Rolls 1 die.",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3,STOCK SPLITS! Everyone hwo owns OK4U DOUBLES their number of shares.",
         "Die = 4-6,STOCK REVERSE SPLITS! Everyone who owns OK4U loses half their shares."
       ],
@@ -1608,7 +1626,7 @@
       "heading": "Stock - GRO4US Fund",
       "description": "The market is in flux and there will be monumental market swings over the next few months. How will mutual funds fair in this time of change?",
       "rule": "Cardholder Rolls 1 die.",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3,STOCK SPLITS! Everyone hwo owns GRO4US DOUBLES their number of shares.",
         "Die = 4-6,STOCK REVERSE SPLITS! Everyone who owns GRO4US loses half their shares."
       ],
@@ -1626,7 +1644,7 @@
       "heading": "Stock - MYT4U Electronics Co.",
       "description": "MYT4U takes a gamble on new home entertainment tech. Will it hit big or be the next Beta-Max?",
       "rule": "Cardholder Rolls 1 die.",
-      "subRule": [
+      "sub_rule": [
         "Die = 1-3,STOCK SPLITS! Everyone hwo owns MYT4U DOUBLES their number of shares.",
         "Die = 4-6,STOCK REVERSE SPLITS! Everyone who owns MYT4U loses half their shares."
       ],
@@ -1645,7 +1663,7 @@
       "value": 1000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $1,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1658,7 +1676,7 @@
       "value": 5000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $5,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1671,7 +1689,7 @@
       "value": 10000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $10,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1684,7 +1702,7 @@
       "value": 15000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $15,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1697,7 +1715,7 @@
       "value": 20000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $20,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1710,7 +1728,7 @@
       "value": 30000,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $30,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1723,7 +1741,7 @@
       "value": 5,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus 5%",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1736,7 +1754,7 @@
       "value": 10,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus 10%",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1749,7 +1767,7 @@
       "value": 15,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus 15%",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1762,7 +1780,7 @@
       "value": 20,
       "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus 20%",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1811,7 +1829,7 @@
       "value": 10,
       "description": "Buyer looking to acquire 2Br/1Ba rentals. Offers your original cost plus 10%",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1824,7 +1842,7 @@
       "value": 15,
       "description": "You are offered 15% more for a 2Br/1Ba House or Condo. Buyer has their own financing.",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1837,7 +1855,7 @@
       "value": 10000,
       "description": "Buyer searching for 3Br/2Ba house. Offers your original cost plus $10,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1850,7 +1868,7 @@
       "value": 15000,
       "description": "Buyer searching for 3Br/2Ba house. Offers your original cost plus $15,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1863,7 +1881,7 @@
       "value": 5000,
       "description": "Buyer searching for 3Br/2Ba house. Offers your original cost plus $5,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     },
@@ -1876,7 +1894,7 @@
       "value": 20000,
       "description": "Buyer searching for 3Br/2Ba house. Offers your original cost plus $20,000",
       "rule": "Everyone may sell any number of properties at this price.",
-      "subRule": [
+      "sub_rule": [
         "If you sell, pay off the related mortgage and give up the cash flow on this property."
       ]
     }

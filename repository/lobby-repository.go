@@ -10,6 +10,7 @@ type LobbyRepository interface {
 	UpdateLobby(b *entity.Lobby) entity.Lobby
 	All() []entity.Lobby
 	DeleteLobby(b *entity.Lobby)
+	CancelLobby(b *entity.Lobby)
 	FindLobbyById(ID uint64) entity.Lobby
 }
 
@@ -47,10 +48,15 @@ func (db *lobbyConnection) DeleteLobby(b *entity.Lobby) {
 	db.connection.Delete(&b)
 }
 
+func (db *lobbyConnection) CancelLobby(b *entity.Lobby) {
+	b.Status = entity.LobbyStatus.Cancelled
+	db.connection.Save(&b)
+}
+
 func (db *lobbyConnection) FindLobbyById(ID uint64) entity.Lobby {
 	var lobby entity.Lobby
 
-	db.connection.Preload(LobbyTable).Find(&lobby, ID)
+	db.connection.Preload(LobbyTable).Where("id = ? and status != ?", ID, entity.LobbyStatus.Cancelled).Find(&lobby)
 
 	return lobby
 }

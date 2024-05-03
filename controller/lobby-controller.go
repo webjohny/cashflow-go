@@ -1,16 +1,20 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
+	"github.com/webjohny/cashflow-go/storage"
 )
 
 type LobbyController interface {
 	Create(ctx *gin.Context)
 	Join(ctx *gin.Context)
 	Leave(ctx *gin.Context)
+	Cancel(ctx *gin.Context)
+	GetLobby(ctx *gin.Context)
 }
 
 type lobbyController struct {
@@ -21,6 +25,20 @@ func NewLobbyController(lobbyService service.LobbyService) LobbyController {
 	return &lobbyController{
 		lobbyService: lobbyService,
 	}
+}
+
+func (c *lobbyController) GetLobby(ctx *gin.Context) {
+	userId := request.GetUserId(ctx)
+	lobbyId := request.GetLobbyId(ctx)
+
+	var err error
+	var response interface{}
+
+	if userId != 0 {
+		response = c.lobbyService.GetLobby(lobbyId, userId)
+	}
+
+	request.FinalResponse(ctx, err, response)
 }
 
 func (c *lobbyController) Create(ctx *gin.Context) {
@@ -60,6 +78,23 @@ func (c *lobbyController) Leave(ctx *gin.Context) {
 
 	if username != "" {
 		err, _ = c.lobbyService.Leave(lobbyId, username)
+	} else {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
+	}
+
+	request.FinalResponse(ctx, err, nil)
+}
+
+func (c *lobbyController) Cancel(ctx *gin.Context) {
+	userId := request.GetUserId(ctx)
+	lobbyId := request.GetLobbyId(ctx)
+
+	var err error
+
+	if userId != 0 {
+		err, _ = c.lobbyService.Cancel(lobbyId, userId)
+	} else {
+		err = fmt.Errorf(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, nil)

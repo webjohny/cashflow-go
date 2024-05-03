@@ -24,6 +24,7 @@ type LobbyPlayer struct {
 
 type Lobby struct {
 	ID         uint64                 `gorm:"primary_key:auto_increment" json:"id"`
+	GameId     uint64                 `json:"game_id"`
 	Players    []LobbyPlayer          `gorm:"serializer:json" json:"players"`
 	MaxPlayers int8                   `json:"max_players"`
 	Status     string                 `json:"status"`
