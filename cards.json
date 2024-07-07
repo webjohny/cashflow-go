@@ -67,7 +67,7 @@
             5,
             6
           ],
-          "cost_per_one": 1
+          "cost_per_one": 10
         },
         {
           "dices": [
@@ -83,7 +83,7 @@
       "symbol": "Crypto",
       "heading": "Криптовалюта",
       "description": "Купите токены новой криптокомпании по цене 0.1$.",
-      "cost_per_one": 0.1
+      "cost_per_one": 1
     }
   ],
   "business": [
@@ -130,7 +130,66 @@
       "type": "bankrupt"
     }
   ],
-  "other_smallDeal": [
+  "smallDeal": [
+    {
+      "id": "ok4u10",
+      "type": "stock",
+      "symbol": "OK4U",
+      "heading": "Stock - OK4U Drug Co.",
+      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
+      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
+      "price": 10,
+      "only_you": true,
+      "range": [
+        5,
+        40
+      ]
+    }
+  ],
+  "smallDealOther": [
+    {
+      "id": "businessS3",
+      "type": "business",
+      "symbol": "IT_COMPANY",
+      "heading": "You're create IT company",
+      "description": "Some description",
+      "rule": "Use this yourself or sell to another player",
+      "cost": 5000,
+      "cash_flow": 0
+    },
+    {
+      "id": "businessS3",
+      "type": "business",
+      "symbol": "IT_COMPANY",
+      "heading": "You're create IT company",
+      "description": "Some description",
+      "rule": "Use this yourself or sell to another player",
+      "cost": 5000,
+      "cash_flow": 0
+    },
+    {
+      "id": "limitedPartnershipS3",
+      "type": "business",
+      "symbol": "SANDWICHES_SHOP",
+      "heading": "Магазин бутербродов",
+      "description": "Some description",
+      "rule": "Use this yourself or sell to another player",
+      "cost": 5000,
+      "limit": 10,
+      "cash_flow": 300
+    },
+    {
+      "id": "realEstateS1",
+      "type": "realEstate",
+      "symbol": "2Ком/Кв",
+      "heading": "Супер-сделка",
+      "description": "Отличная 2-х комнатная квартира в центре Киева.",
+      "rule": "Используй ты эту возможность, или продай другому игроку",
+      "cost": 45000,
+      "mortgage": 43000,
+      "down_payment": 300,
+      "cash_flow": 220
+    },
     {
       "id": "appleIncrease",
       "type": "stock",
@@ -148,9 +207,7 @@
       "description": "Безуспешные попытки продажи новой линейки iPhone.",
       "rule": "Все у кого есть акции этой компании делят их на пополам.",
       "divide_x": 2
-    }
-  ],
-  "smallOtherDeal": [
+    },
     {
       "id": "realEstateS1",
       "type": "realEstate",
@@ -282,9 +339,46 @@
       "mortgage": 29000,
       "down_payment": 1000,
       "cash_flow": 0
-    }
-  ],
-  "smallDeal": [
+    },
+    {
+      "id": "gold1",
+      "type": "other",
+      "symbol": "GOLD",
+      "heading": "Coin Collector Liquidates",
+      "description": "A coin collector needs cash quick to shore up a tax issue.Will sell you five(5) gold coins, well below going rate.",
+      "rule": "Use this yourself or sell to another player",
+      "cost": 750,
+      "cost_per_one": 150,
+      "count": 5
+    },
+    {
+      "id": "lottery01",
+      "type": "lottery",
+      "symbol": "lottery",
+      "heading": "Sister-In-Law borrows Money",
+      "lottery": "money",
+      "description": "Sister-in-law is downsized.Needs $5,000 to make house payment. She promises to pay you back $10,000 after she finds a new job.",
+      "rule": "If you choose to help. Pay $5,000 and roll 1 die:",
+      "sub_rule": [
+        "Die = 1-3, She never pays you back and you're out $5,000",
+        "Die = 4-6, She pays you back $10,000, but family get-togethers are still awkward"
+      ],
+      "cost": 100,
+      "failure": [
+        1,
+        2,
+        3
+      ],
+      "success": [
+        4,
+        5,
+        6
+      ],
+      "outcome": {
+        "failure": 0,
+        "success": 10000
+      }
+    },
     {
       "id": "apple10",
       "type": "stock",
@@ -581,22 +675,24 @@
     },
     {
       "id": "gold1",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Coin Collector Liquidates",
       "description": "A coin collector needs cash quick to shore up a tax issue.Will sell you five(5) gold coins, well below going rate.",
       "rule": "Use this yourself or sell to another player",
       "cost": 1000,
+      "cost_per_one": 200,
       "count": 5
     },
     {
       "id": "gold2",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Friend Needs Cash Quick",
       "description": "A friend has urgent need for money.Will sell you ten(10) gold coins, well below going rate.",
       "rule": "Use this yourself or sell to another player",
       "cost": 3000,
+      "cost_per_one": 300,
       "count": 10
     },
     {
@@ -1527,6 +1623,31 @@
   ],
   "market": [
     {
+      "id": "marketBusiness01",
+      "type": "business",
+      "symbol": "IT_COMPANY",
+      "heading": "Your IT company has grown",
+      "cash_flow": 1000,
+      "business_type": "startup",
+      "applicable_to_every_one": false,
+      "description": "Buyer looking for all Apartment and Plexes in any combination of units. Offers your original cost plus $1,000",
+      "rule": "Everyone may sell any number of properties at this price.",
+      "sub_rule": [
+        "If you sell, pay off the related mortgage and give up the cash flow on this property."
+      ]
+    }
+  ],
+  "marketTemp": [
+    {
+      "id": "marketLottery01",
+      "type": "other",
+      "symbol": "GOLD",
+      "heading": "Collector wants Gold Coins",
+      "description": "Wealthy collector is looking for gold coins. Cash offer of $500 for each coin.",
+      "rule": "Everyone may sell any number of coins at this price.",
+      "cost_per_one": 500
+    },
+    {
       "id": "marketDamage01",
       "type": "damage",
       "heading": "Sewer Line Breaks",
@@ -1593,12 +1714,12 @@
     },
     {
       "id": "marketLottery01",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
       "description": "Wealthy collector is looking for gold coins. Cash offer of $500 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
-      "cost": 500
+      "cost_per_one": 500
     },
     {
       "id": "marketLottery03",
@@ -1786,39 +1907,39 @@
     },
     {
       "id": "marketGoldSale01",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Price of Gold Soars",
       "description": "The Central Bank is printing money in an attempt to boost the economy causing massive inflation. The price of gold skyrockets. Buyer offers $2,000 for each gold coin.",
       "rule": "Everyone may sell any number of coins at this price.",
-      "cost": 2000
+      "cost_per_one": 2000
     },
     {
       "id": "marketGoldSale02",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Price of Gold Soars",
       "description": "Rioting Overseas. Oil prices threatened. Price of gold skyrockets. Buyer offers $1,000 cash for each gold coin.",
       "rule": "Everyone may sell any number of coins at this price.",
-      "cost": 1000
+      "cost_per_one": 1000
     },
     {
       "id": "marketGoldSale03",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
       "description": "Wealthy collector is looking for gold coins. Cash offer of $500 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
-      "cost": 500
+      "cost_per_one": 500
     },
     {
       "id": "marketGoldSale04",
-      "type": "goldCoins",
+      "type": "other",
       "symbol": "GOLD",
       "heading": "Collector wants Gold Coins",
       "description": "Wealthy collector is looking for gold coins. Cash offer of $1,000 for each coin.",
       "rule": "Everyone may sell any number of coins at this price.",
-      "cost": 1000
+      "cost_per_one": 1000
     },
     {
       "id": "marketPlexBuyer11",

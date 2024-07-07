@@ -24,64 +24,62 @@ type PlayerIncome struct {
 }
 
 type PlayerAssets struct {
-	Dreams         []CardDream          `json:"dreams"`
-	PreciousMetals []CardPreciousMetals `json:"preciousMetals"`
-	RealEstates    []CardRealEstate     `json:"realEstates"`
-	Business       []CardBusiness       `json:"business"`
-	Stocks         []CardStocks         `json:"stocks"`
-	Savings        int                  `json:"savings"`
+	Dreams      []CardDream       `json:"dreams"`
+	OtherAssets []CardOtherAssets `json:"other"`
+	RealEstates []CardRealEstate  `json:"realEstates"`
+	Business    []CardBusiness    `json:"business"`
+	Stocks      []CardStocks      `json:"stocks"`
+	Savings     int               `json:"savings"`
 }
 
 type PlayerLiabilities struct {
-	RealEstates    []CardRealEstate `json:"realEstates"`
-	Business       []CardBusiness   `json:"business"`
-	BankLoan       int              `json:"bankLoan"`
-	HomeMortgage   int              `json:"homeMortgage"`
-	SchoolLoans    int              `json:"schoolLoans"`
-	CarLoans       int              `json:"carLoans"`
-	CreditCardDebt int              `json:"creditCardDebt"`
+	BankLoan       int `json:"bankLoan"`
+	HomeMortgage   int `json:"homeMortgage"`
+	SchoolLoans    int `json:"schoolLoans"`
+	CarLoans       int `json:"carLoans"`
+	CreditCardDebt int `json:"creditCardDebt"`
 }
 
 type Player struct {
-	ID              uint64            `gorm:"primary_key:auto_increment" json:"id"`
-	UserId          uint64            `gorm:"index" json:"user_id"`
-	RaceId          uint64            `gorm:"index" gorm:"index" json:"race_id"`
-	Username        string            `gorm:"uniqueIndex;type:varchar(255)" json:"username"`
-	Role            string            `json:"role"`
-	Color           string            `json:"color"`
-	Income          PlayerIncome      `gorm:"serializer:json" json:"income"`
-	Babies          uint8             `json:"babies"`
-	Expenses        map[string]int    `gorm:"serializer:json" json:"expenses"`
-	Assets          PlayerAssets      `gorm:"serializer:json" json:"assets"`
-	Liabilities     PlayerLiabilities `gorm:"serializer:json" json:"liabilities"`
-	Cash            int               `json:"cash"`
-	TotalIncome     int               `json:"total_income"`
-	TotalExpenses   int               `json:"total_expenses"`
-	CashFlow        int               `json:"cash_flow"`
-	PassiveIncome   int               `json:"passive_income"`
-	ProfessionId    uint8             `json:"profession_id"`
-	Profession      Profession        `gorm:"-" sql:"-" json:"profession"`
-	LastPosition    uint8             `json:"last_position"`
-	CurrentPosition uint8             `json:"current_position"`
-	DualDiceCount   uint8             `json:"dual_dice_count"`
-	SkippedTurns    uint8             `json:"skipped_turns"`
+	ID              uint64            `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID          uint64            `gorm:"uniqueIndex:idx_username" json:"user_id"`
+	RaceID          uint64            `gorm:"index" json:"race_id"`
+	Username        string            `gorm:"uniqueIndex:idx_username;type:varchar(255)" json:"username"`
+	Role            string            `gorm:"type:varchar(255)" json:"role"`
+	Color           string            `gorm:"type:varchar(255)" json:"color"`
+	Salary          int               `json:"salary" gorm:"allowzero"`
+	Babies          uint8             `json:"babies" gorm:"allowzero"`
+	Expenses        map[string]int    `gorm:"type:json;serializer:json" json:"expenses"`
+	Assets          PlayerAssets      `gorm:"type:json;serializer:json" json:"assets"`
+	Liabilities     PlayerLiabilities `gorm:"type:json;serializer:json" json:"liabilities"`
+	Cash            int               `json:"cash" gorm:"allowzero"`
+	TotalIncome     int               `json:"total_income" gorm:"allowzero"`
+	TotalExpenses   int               `json:"total_expenses" gorm:"allowzero"`
+	CashFlow        int               `json:"cash_flow" gorm:"allowzero"`
+	PassiveIncome   int               `json:"passive_income" gorm:"allowzero"`
+	ProfessionID    uint8             `json:"profession_id"`
+	Profession      Profession        `gorm:"-" json:"profession"`
+	LastPosition    uint8             `json:"last_position" gorm:"allowzero"`
+	CurrentPosition uint8             `json:"current_position" gorm:"allowzero"`
+	DualDiceCount   uint8             `json:"dual_dice_count" gorm:"allowzero"`
+	SkippedTurns    uint8             `json:"skipped_turns" gorm:"allowzero"`
 	IsRolledDice    uint8             `json:"is_rolled_dice"`
 	CanReRoll       uint8             `json:"can_re_roll"`
 	OnBigRace       uint8             `json:"on_big_race"`
 	HasBankrupt     uint8             `json:"has_bankrupt"`
-	AboutToBankrupt string            `json:"about_to_bankrupt"`
+	AboutToBankrupt string            `gorm:"type:varchar(255)" json:"about_to_bankrupt"`
 	HasMlm          uint8             `json:"has_mlm"`
-	CreatedAt       datatypes.Date    `json:"created_at"`
+	CreatedAt       datatypes.Date    `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }
 
-func (e *Player) FindStocks(symbol string) (int, CardStocks) {
+func (e *Player) FindStocksBySymbol(symbol string) (int, *CardStocks) {
 	for i := 0; i < len(e.Assets.Stocks); i++ {
 		if symbol == e.Assets.Stocks[i].Symbol {
-			return i, e.Assets.Stocks[i]
+			return i, &e.Assets.Stocks[i]
 		}
 	}
 
-	return -1, CardStocks{}
+	return -1, &CardStocks{}
 }
 
 func (e *Player) BornBaby() {
@@ -118,10 +116,33 @@ func (e *Player) IncrementDualDiceCount() {
 	e.DualDiceCount += 3
 }
 
+func (e *Player) Reset(profession Profession) {
+	e.Assets.Business = make([]CardBusiness, 0)
+	e.Assets.RealEstates = make([]CardRealEstate, 0)
+	e.Assets.OtherAssets = make([]CardOtherAssets, 0)
+	e.Assets.Stocks = make([]CardStocks, 0)
+	e.Assets.Dreams = make([]CardDream, 0)
+
+	if profession.ID != 0 {
+		e.Salary = profession.Income.Salary
+		e.Babies = uint8(profession.Babies)
+		e.Expenses = profession.Expenses
+		e.Assets = profession.Assets
+		e.Liabilities = profession.Liabilities
+		e.ProfessionID = uint8(profession.ID)
+	} else {
+		e.Assets.Savings = 0
+	}
+
+	e.CurrentPosition = 0
+	e.SkippedTurns = 0
+	e.SkippedTurns = 0
+}
+
 func (e *Player) CreateResponse() RaceResponse {
 	return RaceResponse{
 		ID:        e.ID,
-		UserId:    e.UserId,
+		UserId:    e.UserID,
 		Username:  e.Username,
 		Responded: false,
 	}
@@ -157,68 +178,103 @@ func (e *Player) HasBusiness() bool {
 	return len(e.Assets.Business) > 0
 }
 
-func (e *Player) FindBusiness(id string) CardBusiness {
+func (e *Player) FindBusinessBySymbol(symbol string) (int, *CardBusiness) {
 	for i := 0; i < len(e.Assets.Business); i++ {
-		if id == e.Assets.Business[i].ID {
-			return e.Assets.Business[i]
+		if symbol == e.Assets.Business[i].Symbol {
+			return i, &e.Assets.Business[i]
 		}
 	}
 
-	return CardBusiness{}
+	return 0, &CardBusiness{}
 }
 
-func (e *Player) FindRealEstate(id string) CardRealEstate {
+func (e *Player) FindAllBusinessBySymbol(symbol string) []*CardBusiness {
+	items := make([]*CardBusiness, 0)
+
+	for i := 0; i < len(e.Assets.Business); i++ {
+		if symbol == e.Assets.Business[i].Symbol {
+			items = append(items, &e.Assets.Business[i])
+		}
+	}
+
+	return items
+}
+
+func (e *Player) AddBusiness(card CardBusiness) {
+	e.Assets.Business = append(e.Assets.Business, card)
+}
+
+func (e *Player) AddStocks(card CardStocks) {
+	_, asset := e.FindStocksBySymbol(card.Symbol)
+
+	if asset.ID != "" {
+		asset.Count = card.Count
+		asset.Price = card.Price
+	} else {
+		e.Assets.Stocks = append(e.Assets.Stocks, card)
+	}
+}
+
+func (e *Player) FindRealEstate(id string) *CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
-			return e.Assets.RealEstates[i]
+			return &e.Assets.RealEstates[i]
 		}
 	}
 
-	return CardRealEstate{}
+	return &CardRealEstate{}
 }
 
-func (e *Player) FindPreciousMetals(symbol string) (int, CardPreciousMetals) {
-	for i := 0; i < len(e.Assets.PreciousMetals); i++ {
-		if symbol == e.Assets.PreciousMetals[i].Symbol {
-			return i, e.Assets.PreciousMetals[i]
+func (e *Player) FindOtherAssets(symbol string) (int, *CardOtherAssets) {
+	for i := 0; i < len(e.Assets.OtherAssets); i++ {
+		if symbol == e.Assets.OtherAssets[i].Symbol {
+			return i, &e.Assets.OtherAssets[i]
 		}
 	}
 
-	return -1, CardPreciousMetals{}
+	return -1, &CardOtherAssets{}
 }
 
-func (e *Player) RemovePreciousMetals(symbol string) CardPreciousMetals {
-	index, _ := e.FindPreciousMetals(symbol)
-	if index >= 0 && index < len(e.Assets.PreciousMetals) {
-		e.Assets.PreciousMetals = append(e.Assets.PreciousMetals[:index], e.Assets.PreciousMetals[index+1:]...)
+func (e *Player) UpdateAsset(symbol string, card CardOtherAssets) {
+	index, _ := e.FindOtherAssets(symbol)
+
+	e.Assets.OtherAssets[index] = card
+}
+
+func (e *Player) RemoveOtherAssets(symbol string) {
+	index, _ := e.FindOtherAssets(symbol)
+	if index >= 0 && index < len(e.Assets.OtherAssets) {
+		e.Assets.OtherAssets = append(e.Assets.OtherAssets[:index], e.Assets.OtherAssets[index+1:]...)
 	}
-
-	return CardPreciousMetals{}
 }
 
-func (e *Player) RemoveStocks(symbol string) CardPreciousMetals {
-	index, _ := e.FindStocks(symbol)
+func (e *Player) RemoveStocks(symbol string) {
+	index, _ := e.FindStocksBySymbol(symbol)
 	if index >= 0 && index < len(e.Assets.Stocks) {
 		e.Assets.Stocks = append(e.Assets.Stocks[:index], e.Assets.Stocks[index+1:]...)
 	}
+}
 
-	return CardPreciousMetals{}
+func (e *Player) ReduceStocks(symbol string, count int) {
+	_, stocks := e.FindStocksBySymbol(symbol)
+
+	for i := 0; i < len(stocks.History); i++ {
+		if stocks.History[i].Count > count {
+			stocks.History[i].Count -= count
+
+			break
+		} else {
+			count -= stocks.History[i].Count
+			stocks.History = append(stocks.History[:i], stocks.History[i+1:]...)
+			i--
+		}
+	}
 }
 
 func (e *Player) RemoveRealEstate(id string) CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
 			e.Assets.RealEstates = append(e.Assets.RealEstates[:i], e.Assets.RealEstates[i+1:]...)
-		}
-	}
-	for i := 0; i < len(e.Liabilities.RealEstates); i++ {
-		if id == e.Liabilities.RealEstates[i].ID {
-			e.Liabilities.RealEstates = append(e.Liabilities.RealEstates[:i], e.Liabilities.RealEstates[i+1:]...)
-		}
-	}
-	for i := 0; i < len(e.Income.RealEstates); i++ {
-		if id == e.Income.RealEstates[i].ID {
-			e.Income.RealEstates = append(e.Income.RealEstates[:i], e.Income.RealEstates[i+1:]...)
 		}
 	}
 
@@ -231,29 +287,19 @@ func (e *Player) RemoveBusiness(id string) CardBusiness {
 			e.Assets.Business = append(e.Assets.Business[:i], e.Assets.Business[i+1:]...)
 		}
 	}
-	for i := 0; i < len(e.Liabilities.Business); i++ {
-		if id == e.Liabilities.Business[i].ID {
-			e.Liabilities.Business = append(e.Liabilities.Business[:i], e.Liabilities.Business[i+1:]...)
-		}
-	}
-	for i := 0; i < len(e.Income.Business); i++ {
-		if id == e.Income.Business[i].ID {
-			e.Income.Business = append(e.Income.Business[:i], e.Income.Business[i+1:]...)
-		}
-	}
 
 	return CardBusiness{}
 }
 
 func (e *Player) SplitStocks(card string) {
-	_, stock := e.FindStocks(card)
-	*stock.Count *= 2
+	_, stock := e.FindStocksBySymbol(card)
+	stock.Count *= 2
 	e.DeactivateReRoll()
 }
 
 func (e *Player) ReverseSplitStocks(card string) {
-	_, stock := e.FindStocks(card)
-	*stock.Count = int(math.Ceil(float64(*stock.Count) / 2))
+	_, stock := e.FindStocksBySymbol(card)
+	stock.Count = int(math.Ceil(float64(stock.Count) / 2))
 	e.DeactivateReRoll()
 }
 
@@ -280,15 +326,23 @@ func (e *Player) CalculateCashFlow() int {
 func (e *Player) CalculatePassiveIncome() int {
 	passiveIncome := 0
 
-	for i := 0; i < len(e.Income.RealEstates); i++ {
-		passiveIncome += *e.Income.RealEstates[i].CashFlow
+	for i := 0; i < len(e.Assets.RealEstates); i++ {
+		passiveIncome += e.Assets.RealEstates[i].CashFlow
+	}
+
+	for i := 0; i < len(e.Assets.Business); i++ {
+		if e.Assets.Business[i].Count > 0 {
+			passiveIncome += e.Assets.Business[i].Count * e.Assets.Business[i].CashFlow
+		} else {
+			passiveIncome += e.Assets.Business[i].CashFlow
+		}
 	}
 
 	return passiveIncome
 }
 
 func (e *Player) CalculateTotalIncome() int {
-	return e.Income.Salary + e.CalculatePassiveIncome()
+	return e.Salary + e.CalculatePassiveIncome()
 }
 
 func (e *Player) CalculateTotalExpenses() int {

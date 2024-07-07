@@ -56,7 +56,7 @@ func (db *professionConnection) PickProfession(excluded *[]int) entity.Professio
 
 	if excluded != nil {
 		for i := 0; i < len(professions); i++ {
-			if helper.ContainsInt(*excluded, int(professions[i].ID)) {
+			if helper.Contains[int](*excluded, int(professions[i].ID)) {
 				professions = append(professions[:i], professions[i+1:]...)
 			}
 		}

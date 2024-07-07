@@ -33,6 +33,7 @@ const (
 	MessageGotTax100Percent              = "100% of your funds are collected from you"
 	MessageYouBecomeBankrupt             = "you are bankrupt Start over with a clean slate, but with acquired experience"
 	MessageFailRiskDeal                  = "risky business passed you by"
+	MessageFailLottery                   = "warning fail lottery"
 	MessageSuccessRiskDeal               = "you acquired a risky business"
 	MessageSuccessRiskStocksDeal         = "you successfully bought stocks of a risky business"
 	MessageFailRiskStocksDeal            = "you lost money on useless stocks"

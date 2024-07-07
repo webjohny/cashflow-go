@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
-	"log"
-	"strconv"
 )
 
 type CardController interface {
@@ -18,6 +16,7 @@ type CardController interface {
 	Accept(ctx *gin.Context)
 	Skip(ctx *gin.Context)
 	Type(ctx *gin.Context)
+	TestCard(ctx *gin.Context)
 	ResetTransaction(ctx *gin.Context)
 }
 
@@ -36,15 +35,13 @@ func (c *cardController) Type(ctx *gin.Context) {
 	userId := request.GetUserId(ctx)
 	bigRace := request.GetBigRace(ctx)
 
-	log.Println(raceId)
-
 	var err error
 	var response interface{}
 
 	if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedPlayer)
+		err = errors.New(storage.ErrorUndefinedPlayer)
 	} else if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else {
 		err, response = c.cardService.GetCard("", raceId, userId, bigRace)
 	}
@@ -52,7 +49,27 @@ func (c *cardController) Type(ctx *gin.Context) {
 	request.FinalResponse(ctx, err, response)
 }
 
-func (c *cardController) ResetTransaction(ctx *gin.Context) {}
+func (c *cardController) TestCard(ctx *gin.Context) {
+	raceId := request.GetRaceId(ctx)
+	userId := request.GetUserId(ctx)
+	bigRace := request.GetBigRace(ctx)
+
+	var err error
+	var response interface{}
+
+	if userId == 0 {
+		err = errors.New(storage.ErrorUndefinedPlayer)
+	} else if raceId == 0 {
+		err = errors.New(storage.ErrorUndefinedGame)
+	} else {
+		err, response = c.cardService.TestCard(ctx.Param("action"), raceId, userId, bigRace)
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *cardController) ResetTransaction(ctx *gin.Context) {
+}
 
 func (c *cardController) Prepare(ctx *gin.Context) {
 	family := ctx.Param("family")
@@ -66,9 +83,9 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	var response interface{}
 
 	if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedPlayer)
+		err = errors.New(storage.ErrorUndefinedPlayer)
 	} else {
 		err, response = c.cardService.Prepare(raceId, family, actionType, userId, bigRace)
 	}
@@ -94,9 +111,9 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	var response interface{}
 
 	if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
 		err, response = c.cardService.Selling(raceId, actionType, userId, body.Value, bigRace)
 	}
@@ -116,9 +133,9 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	var response interface{}
 
 	if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
 		err, response = c.cardService.Accept(raceId, family, actionType, userId, bigRace)
 	}
@@ -135,9 +152,9 @@ func (c *cardController) Skip(ctx *gin.Context) {
 	var response interface{}
 
 	if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
 		err, response = c.cardService.Skip(raceId, userId, bigRace)
 	}
@@ -152,24 +169,22 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 	userId := request.GetUserId(ctx)
 	bigRace := request.GetBigRace(ctx)
 
-	var body dto.CardActionDTO
+	var body dto.CardPurchaseActionDTO
 
 	if err := ctx.BindJSON(&body); err != nil {
 		request.FinalResponse(ctx, err, nil)
 		return
 	}
 
-	value, _ := strconv.Atoi(body.Value)
-
 	var err error
 	var response interface{}
 
 	if raceId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedGame)
+		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
-		err, response = c.cardService.Purchase(raceId, actionType, userId, value, bigRace)
+		err, response = c.cardService.Purchase(actionType, raceId, userId, bigRace, body)
 	}
 
 	request.FinalResponse(ctx, err, response)

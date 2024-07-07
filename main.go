@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/mattn/go-colorable"
+	log "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/config"
 	"github.com/webjohny/cashflow-go/controller"
 	"github.com/webjohny/cashflow-go/entity"
@@ -13,7 +14,6 @@ import (
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,6 +26,7 @@ var (
 	raceRepository       repository.RaceRepository        = repository.NewRaceRepository(db)
 	lobbyRepository      repository.LobbyRepository       = repository.NewLobbyRepository(db)
 	userRepository       repository.UserRepository        = repository.NewUserRepository(db)
+	usedCardRepository   repository.UsedCardRepository    = repository.NewUsedCardRepository(db)
 	playerRepository     repository.PlayerRepository      = repository.NewPlayerRepository(db)
 	professionRepository repository.ProfessionRepository  = repository.NewProfessionRepository(os.Getenv("PROFESSIONS_PATH"))
 	trxRepository        repository.TransactionRepository = repository.NewTransactionRepository(db)
@@ -34,26 +35,25 @@ var (
 	jwtService         service.JWTService         = service.NewJWTService()
 	userService        service.UserService        = service.NewUserService(userRepository)
 	transactionService service.TransactionService = service.NewTransactionService(trxRepository)
-	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, professionRepository, transactionService)
+	professionService  service.ProfessionService  = service.NewProfessionService(professionRepository)
+	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, professionService, transactionService)
 	authService        service.AuthService        = service.NewAuthService(userRepository)
-	gameService        service.GameService        = service.NewGameService(raceService, playerService, lobbyRepository, professionRepository)
+	gameService        service.GameService        = service.NewGameService(raceService, playerService, lobbyService, professionService)
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
-	cardService        service.CardService        = service.NewCardService(gameService, raceService)
+	cardService        service.CardService        = service.NewCardService(usedCardRepository, gameService, raceService, playerService)
 	financeService     service.FinanceService     = service.NewFinanceService(raceService, playerService)
 
 	// Controllers
-	gameController    controller.GameController    = controller.NewGameController(gameService)
-	playerController  controller.PlayerController  = controller.NewPlayerController(playerService)
-	lobbyController   controller.LobbyController   = controller.NewLobbyController(lobbyService)
-	financeController controller.FinanceController = controller.NewFinanceController(financeService)
-	cardController    controller.CardController    = controller.NewCardController(cardService)
-	authController    controller.AuthController    = controller.NewAuthController(authService, jwtService)
-	userController    controller.UserController    = controller.NewUserController(userService, jwtService)
+	gameController       controller.GameController       = controller.NewGameController(gameService)
+	playerController     controller.PlayerController     = controller.NewPlayerController(playerService)
+	playerTestController controller.PlayerTestController = controller.NewPlayerTestController(playerService)
+	lobbyController      controller.LobbyController      = controller.NewLobbyController(lobbyService)
+	financeController    controller.FinanceController    = controller.NewFinanceController(financeService)
+	cardController       controller.CardController       = controller.NewCardController(cardService)
+	authController       controller.AuthController       = controller.NewAuthController(authService, jwtService)
+	userController       controller.UserController       = controller.NewUserController(userService, jwtService)
 )
-
-var LogInfo *log.Logger
-var LogError *log.Logger
 
 var globalToken string
 
@@ -90,13 +90,20 @@ func switchUser(ctx *gin.Context) {
 		return
 	} else {
 		ctx.JSON(http.StatusBadRequest, map[string]string{
-			"error": fmt.Errorf(storage.ErrorForbidden).Error(),
+			"error": storage.ErrorForbidden,
 		})
 	}
 }
 
 func init() {
-	LogError = log.New(os.Stdout, "ERROR: ", log.Ldate|log.Ltime)
+	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true})
+	//log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+	log.SetOutput(colorable.NewColorableStdout())
+	log.SetReportCaller(true)
+
+	log.SetOutput(os.Stdout)
+
+	//log.SetLevel(log.WarnLevel)
 }
 
 func main() {
@@ -107,6 +114,8 @@ func main() {
 
 	cardRoutes := r.Group("api/card", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
+		cardRoutes.GET("/test/:action", cardController.TestCard)
+
 		cardRoutes.GET("/type", cardController.Type)
 		cardRoutes.GET("/reset-transaction", cardController.ResetTransaction)
 		cardRoutes.POST("/prepare/:family/:type", cardController.Prepare)
@@ -146,6 +155,8 @@ func main() {
 		gameRoutes.GET("/cancel/:raceId", gameController.Cancel)
 		gameRoutes.GET("/reset/:raceId", gameController.Reset)
 		gameRoutes.POST("/start/:lobbyId", gameController.Start)
+		// @toDo Create EP for moving to big race
+		gameRoutes.POST("/move/:raceId", gameController.MoveToBigRace)
 		gameRoutes.GET("/roll-dice/:dice", gameController.RollDice)
 		gameRoutes.GET("/re-roll-dice", gameController.RollDice)
 		gameRoutes.GET("/change-turn", gameController.ChangeTurn)
@@ -164,38 +175,27 @@ func main() {
 		playerRoutes.GET("/info", playerController.GetRacePlayer)
 	}
 
-	// cdnRoutes := r.Group("api/cdn")
-	// {
-	// 	cdnRoutes.GET("/picture/:file_name", userController.GetFile)
-	// }
-	// userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
-	// {
-	// 	userRoutes.GET("/profile", userController.Profile)
-	// 	userRoutes.PUT("/profile", userController.Update)
-	// }
+	playerTestRoutes := r.Group("test/player")
+	{
+		playerTestRoutes.GET("/", playerTestController.Index)
+		playerTestRoutes.GET("/sell-stocks", playerTestController.SellStocks)
 
-	// noteRoutes := r.Group("api/notes", middleware.AuthorizeJWT(jwtService))
-	// {
-	// 	noteRoutes.GET("/", noteController.All)
-	// 	noteRoutes.POST("/", noteController.Insert)
-	// 	noteRoutes.GET("/:id", noteController.FindById)
-	// 	noteRoutes.PUT("/:id", noteController.Update)
-	// 	noteRoutes.DELETE("/:id", noteController.Delete)
-	// }
+		playerTestRoutes.GET("/increase-stocks", playerTestController.IncreaseStocks)
+		playerTestRoutes.GET("/decrease-stocks", playerTestController.DecreaseStocks)
 
-	// pagerRoutes := r.Group("pager", middleware.AuthorizeJWT(jwtService))
-	// {
-	// 	pagerRoutes.GET("/", pagerController.All)
-	// 	pagerRoutes.POST("/", pagerController.Insert)
-	// 	pagerRoutes.GET("/:id", pagerController.FindById)
-	// 	pagerRoutes.PUT("/:id", pagerController.Update)
-	// 	pagerRoutes.DELETE("/:id", pagerController.Delete)
-	// }
+		playerTestRoutes.GET("/buy-stocks", playerTestController.BuyStocks)
+		playerTestRoutes.GET("/buy-other-assets", playerTestController.BuyOtherAssets)
+		playerTestRoutes.GET("/buy-real-estate", playerTestController.BuyRealEstate)
+		playerTestRoutes.GET("/buy-lottery", playerTestController.BuyLottery)
+		playerTestRoutes.GET("/buy-business", playerTestController.BuyBusiness)
+		playerTestRoutes.GET("/buy-partner-real-estate", playerTestController.BuyRealEstateInPartnership)
+		playerTestRoutes.GET("/buy-partner-business", playerTestController.BuyBusinessInPartnership)
 
-	// pagerStatusRoutes := r.Group("/api/status")
-	// {
-	// 	pagerStatusRoutes.GET("/:id", pagerController.FindStatusById)
-	// }
+		playerTestRoutes.GET("/buy-dream", playerTestController.BuyDream)
+		playerTestRoutes.GET("/buy-big-business", playerTestController.BuyBigBusiness)
+		playerTestRoutes.GET("/buy-risk-business", playerTestController.BuyRiskBusiness)
+		playerTestRoutes.GET("/buy-risk-stocks", playerTestController.BuyRiskStocks)
+	}
 
 	r.Run(":" + os.Getenv("PORT"))
 }

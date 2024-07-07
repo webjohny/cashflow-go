@@ -1,22 +1,33 @@
 package repository_mocks
 
-import "github.com/webjohny/cashflow-go/entity"
+import (
+	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/storage"
+)
 
 type MockPlayerRepository struct {
+	InsertPlayerFunc                  func(b *entity.Player) (error, entity.Player)
+	UpdatePlayerFunc                  func(b *entity.Player) (error, entity.Player)
+	UpdateCashFunc                    func(b *entity.Player, cash int)
 	AllByRaceIdFunc                   func(raceId uint64) []entity.Player
-	UpdatePlayerFunc                  func(player *entity.Player) entity.Player
-	InsertPlayerFunc                  func(player *entity.Player) entity.Player
-	DeletePlayerFunc                  func(player *entity.Player)
+	DeletePlayerFunc                  func(b *entity.Player) error
 	FindPlayerByIdFunc                func(ID uint64) entity.Player
 	FindPlayerByUsernameFunc          func(username string) entity.Player
 	FindPlayerByUsernameAndRaceIdFunc func(raceId uint64, username string) entity.Player
+	FindPlayerByUserIdAndRaceIdFunc   func(raceId uint64, userId uint64) entity.Player
 }
 
-func (m *MockPlayerRepository) UpdatePlayer(player *entity.Player) entity.Player {
+func (m *MockPlayerRepository) UpdatePlayer(player *entity.Player) (error, entity.Player) {
 	if m.UpdatePlayerFunc != nil {
 		return m.UpdatePlayerFunc(player)
 	}
-	return entity.Player{}
+	return errors.New(storage.ErrorUndefinedPlayer), entity.Player{}
+}
+
+func (m *MockPlayerRepository) UpdateCash(player *entity.Player, cash int) {
+	if m.UpdatePlayerFunc != nil {
+		m.UpdateCashFunc(player, cash)
+	}
 }
 
 func (m *MockPlayerRepository) AllByRaceId(raceId uint64) []entity.Player {
@@ -27,10 +38,12 @@ func (m *MockPlayerRepository) AllByRaceId(raceId uint64) []entity.Player {
 	return make([]entity.Player, 0)
 }
 
-func (m *MockPlayerRepository) DeletePlayer(player *entity.Player) {
+func (m *MockPlayerRepository) DeletePlayer(player *entity.Player) error {
 	if m.DeletePlayerFunc != nil {
-		m.DeletePlayerFunc(player)
+		return m.DeletePlayerFunc(player)
 	}
+
+	return errors.New(storage.ErrorUndefinedPlayer)
 }
 
 func (m *MockPlayerRepository) FindPlayerById(ID uint64) entity.Player {
@@ -54,10 +67,17 @@ func (m *MockPlayerRepository) FindPlayerByUsernameAndRaceId(raceId uint64, user
 	return entity.Player{}
 }
 
-func (m *MockPlayerRepository) InsertPlayer(player *entity.Player) entity.Player {
+func (m *MockPlayerRepository) FindPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player {
+	if m.FindPlayerByUsernameAndRaceIdFunc != nil {
+		return m.FindPlayerByUserIdAndRaceIdFunc(raceId, userId)
+	}
+	return entity.Player{}
+}
+
+func (m *MockPlayerRepository) InsertPlayer(player *entity.Player) (error, entity.Player) {
 	if m.InsertPlayerFunc != nil {
-		m.InsertPlayerFunc(player)
+		return m.InsertPlayerFunc(player)
 	}
 
-	return entity.Player{}
+	return errors.New(storage.ErrorUndefinedPlayer), entity.Player{}
 }

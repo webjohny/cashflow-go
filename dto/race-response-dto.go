@@ -3,16 +3,16 @@ package dto
 import "github.com/webjohny/cashflow-go/entity"
 
 type RacePlayerProfileResponseDTO struct {
-	Income        entity.PlayerIncome      `json:"income"`
-	Babies        uint8                    `json:"babies"`
-	Expenses      map[string]int           `json:"expenses"`
-	Assets        entity.PlayerAssets      `json:"assets"`
-	Liabilities   entity.PlayerLiabilities `json:"liabilities"`
-	TotalIncome   int                      `json:"total_income"`
-	TotalExpenses int                      `json:"total_expenses"`
-	CashFlow      int                      `json:"cash_flow"`
-	PassiveIncome int                      `json:"passive_income"`
-	Cash          int                      `json:"cash"`
+	Income        RacePlayerIncomeResponseDTO      `json:"income"`
+	Babies        uint8                            `json:"babies"`
+	Expenses      map[string]int                   `json:"expenses"`
+	Assets        entity.PlayerAssets              `json:"assets"`
+	Liabilities   RacePlayerLiabilitiesResponseDTO `json:"liabilities"`
+	TotalIncome   int                              `json:"total_income"`
+	TotalExpenses int                              `json:"total_expenses"`
+	CashFlow      int                              `json:"cash_flow"`
+	PassiveIncome int                              `json:"passive_income"`
+	Cash          int                              `json:"cash"`
 }
 
 type RacePlayerTransactionsResponseDTO struct {
@@ -20,6 +20,22 @@ type RacePlayerTransactionsResponseDTO struct {
 	Cash        int    `json:"cash"`
 	Amount      int    `json:"amount"`
 	Details     string `json:"details"`
+}
+
+type RacePlayerIncomeResponseDTO struct {
+	RealEstates []entity.CardRealEstate `json:"realEstates"`
+	Business    []entity.CardBusiness   `json:"business"`
+	Salary      int                     `json:"salary"`
+}
+
+type RacePlayerLiabilitiesResponseDTO struct {
+	RealEstates    []entity.CardRealEstate `json:"realEstates"`
+	Business       []entity.CardBusiness   `json:"business"`
+	BankLoan       int                     `json:"bankLoan"`
+	HomeMortgage   int                     `json:"homeMortgage"`
+	SchoolLoans    int                     `json:"schoolLoans"`
+	CarLoans       int                     `json:"carLoans"`
+	CreditCardDebt int                     `json:"creditCardDebt"`
 }
 
 type GetRacePlayerResponseDTO struct {
@@ -34,8 +50,8 @@ type GetRacePlayerResponseDTO struct {
 	LastPosition    uint8                               `json:"last_position"`
 	Transactions    []RacePlayerTransactionsResponseDTO `json:"transactions"`
 	CurrentPosition uint8                               `json:"current_position"`
-	DualDiceCount   bool                                `json:"dual_dice_count"`
-	SkippedTurns    bool                                `json:"skipped_turns"`
+	DualDiceCount   uint8                               `json:"dual_dice_count"`
+	SkippedTurns    uint8                               `json:"skipped_turns"`
 	CanReRoll       bool                                `json:"can_re_roll"`
 	OnBigRace       bool                                `json:"on_big_race"`
 	HasBankrupt     bool                                `json:"has_bankrupt"`

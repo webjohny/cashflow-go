@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cashflow-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cashflow-backend
+  template:
+    metadata:
+      labels:
+        app: cashflow-backend
+    spec:
+      containers:
+        - name: cashflow-backend
+          image: cashflow-backend
+          ports:
+            - containerPort: 9100
+          envFrom:
+            - secretRef:
+                name: env-secret
+          volumeMounts:
+            - name: secret-volume
+              mountPath: "/etc/secrets"
+              readOnly: true
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: env-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cashflow-backend-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: cashflow-backend
+  ports:
+    - protocol: TCP
+      port: 9100
+      targetPort: 9100

@@ -3,8 +3,7 @@
     "id": 1,
     "profession": "Doctor(MD)",
     "income": {
-      "salary": 13200,
-      "realEstates": []
+      "salary": 13200
     },
     "babies": 0,
     "expenses": {
@@ -19,8 +18,9 @@
     },
     "assets": {
       "savings": 3500,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
+      "business": [],
       "realEstates": []
     },
     "liabilities": {
@@ -28,16 +28,14 @@
       "schoolLoans": 150000,
       "carLoans": 19000,
       "creditCardDebt": 10000,
-      "bankLoan": 0,
-      "realEstates": []
+      "bankLoan": 0
     }
   },
   {
     "id": 2,
     "profession": "Janitor",
     "income": {
-      "salary": 1600,
-      "realEstates": []
+      "salary": 1600
     },
     "babies": 0,
     "expenses": {
@@ -52,8 +50,9 @@
     },
     "assets": {
       "savings": 600,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
+      "business": [],
       "realEstates": []
     },
     "liabilities": {
@@ -61,8 +60,7 @@
       "schoolLoans": 0,
       "carLoans": 4000,
       "creditCardDebt": 3000,
-      "bankLoan": 0,
-      "realEstates": []
+      "bankLoan": 0
     }
   },
   {
@@ -85,7 +83,7 @@
     },
     "assets": {
       "savings": 2500,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -118,7 +116,7 @@
     },
     "assets": {
       "savings": 2500,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -151,7 +149,7 @@
     },
     "assets": {
       "savings": 700,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -184,7 +182,7 @@
     },
     "assets": {
       "savings": 800,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -217,7 +215,7 @@
     },
     "assets": {
       "savings": 2000,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -250,7 +248,7 @@
     },
     "assets": {
       "savings": 400,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -283,7 +281,7 @@
     },
     "assets": {
       "savings": 500,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -316,7 +314,7 @@
     },
     "assets": {
       "savings": 400,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -349,7 +347,7 @@
     },
     "assets": {
       "savings": 500,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },
@@ -382,7 +380,7 @@
     },
     "assets": {
       "savings": 700,
-      "preciousMetals": [],
+      "other": [],
       "stocks": [],
       "realEstates": []
     },

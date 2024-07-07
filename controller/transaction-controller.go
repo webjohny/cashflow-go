@@ -95,7 +95,7 @@ func (c *transactionController) Delete(context *gin.Context) {
 		response := request.BuildErrorResponse("Failed to get id", "No param id were found", request.EmptyObj{})
 		context.JSON(http.StatusBadRequest, response)
 	}
-	transaction.ID = id
+	transaction.ID = uint(id)
 	authHeader := context.GetHeader("Authorization")
 	token, errToken := c.jwtService.ValidateToken(authHeader)
 	if errToken != nil {

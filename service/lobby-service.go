@@ -1,11 +1,11 @@
 package service
 
 import (
-	"fmt"
+	"errors"
+	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
-	"github.com/webjohny/cashflow-go/logger"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/datatypes"
@@ -15,10 +15,12 @@ import (
 
 type LobbyService interface {
 	Create(username string, userId uint64) (error, entity.Lobby)
+	Update(lobby *entity.Lobby) (error, entity.Lobby)
 	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	Leave(ID uint64, username string) (error, entity.Lobby)
 	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
 	GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO
+	GetByID(lobbyId uint64) entity.Lobby
 }
 
 const LobbyMaxPlayers = 6
@@ -31,6 +33,14 @@ func NewLobbyService(lobbyRepository repository.LobbyRepository) LobbyService {
 	return &lobbyService{
 		lobbyRepository: lobbyRepository,
 	}
+}
+
+func (service *lobbyService) GetByID(lobbyId uint64) entity.Lobby {
+	return service.lobbyRepository.FindLobbyById(lobbyId)
+}
+
+func (service *lobbyService) Update(lobby *entity.Lobby) (error, entity.Lobby) {
+	return service.lobbyRepository.UpdateLobby(lobby)
 }
 
 func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO {
@@ -69,10 +79,14 @@ func (service *lobbyService) Create(username string, userId uint64) (error, enti
 		CreatedAt:  datatypes.Date(time.Now()),
 	}
 	lobby.AddOwner(userId, username)
-	instance := service.lobbyRepository.InsertLobby(lobby)
+	err, instance := service.lobbyRepository.InsertLobby(lobby)
+
+	if err != nil {
+		return err, entity.Lobby{}
+	}
 
 	if instance.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Lobby{}
+		return errors.New(storage.ErrorUndefinedLobby), entity.Lobby{}
 	}
 
 	return nil, instance
@@ -92,11 +106,11 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 
 	if lobby.ID != 0 {
 		if lobby.IsFull() {
-			return fmt.Errorf(storage.ErrorGameIsFull), entity.LobbyPlayer{}
+			return errors.New(storage.ErrorGameIsFull), entity.LobbyPlayer{}
 		}
 
 		if !lobby.IsGameStarted() && lobby.IsStarted() {
-			return fmt.Errorf(storage.ErrorGameIsStarted), entity.LobbyPlayer{}
+			return errors.New(storage.ErrorGameIsStarted), entity.LobbyPlayer{}
 		}
 
 		player = lobby.GetPlayer(userId)
@@ -115,12 +129,16 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 				lobby.AddGuest(userId, username)
 			}
 
-			_ = service.lobbyRepository.UpdateLobby(&lobby)
+			err, _ := service.lobbyRepository.UpdateLobby(&lobby)
+
+			if err != nil {
+				return err, entity.LobbyPlayer{}
+			}
 
 			player = lobby.GetPlayer(userId)
 		}
 	} else {
-		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.LobbyPlayer{}
+		return errors.New(storage.ErrorUndefinedLobby), entity.LobbyPlayer{}
 	}
 
 	return nil, player
@@ -145,12 +163,16 @@ func (service *lobbyService) Leave(ID uint64, username string) (error, entity.Lo
 			service.lobbyRepository.DeleteLobby(&lobby)
 		}
 
-		_ = service.lobbyRepository.UpdateLobby(&lobby)
+		err, _ := service.lobbyRepository.UpdateLobby(&lobby)
+
+		if err != nil {
+			return err, entity.Lobby{}
+		}
 
 		return nil, lobby
 	}
 
-	return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Lobby{}
+	return errors.New(storage.ErrorUndefinedLobby), entity.Lobby{}
 }
 
 func (service *lobbyService) Cancel(ID uint64, userId uint64) (error, entity.Lobby) {
@@ -173,5 +195,5 @@ func (service *lobbyService) Cancel(ID uint64, userId uint64) (error, entity.Lob
 		return nil, lobby
 	}
 
-	return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Lobby{}
+	return errors.New(storage.ErrorUndefinedLobby), entity.Lobby{}
 }

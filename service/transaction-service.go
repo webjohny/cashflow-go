@@ -13,9 +13,9 @@ type TransactionService interface {
 	InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction
 	UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction
 	Delete(b entity.Transaction)
-	//IsAllowedToEdit(userID string, transactionID uint64) bool
 	GetPlayerTransactions(playerId uint64) []entity.Transaction
 	GetRaceTransactions(raceId uint64) []entity.Transaction
+	GetRaceLogs(raceId uint64) []entity.RaceLog
 }
 
 type transactionService struct {
@@ -44,8 +44,9 @@ func (service *transactionService) InsertPlayerTransaction(b dto.TransactionCrea
 
 func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction {
 	trx := entity.Transaction{}
-	trx.PlayerID = &b.RaceID
-	trx.TransactionType = entity.TransactionType.PLAYER
+	trx.RaceID = &b.RaceID
+	trx.PlayerID = &b.PlayerID
+	trx.TransactionType = entity.TransactionType.RACE
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
 		TxType:   &b.TxType,
@@ -62,6 +63,21 @@ func (service *transactionService) GetPlayerTransactions(playerId uint64) []enti
 
 func (service *transactionService) GetRaceTransactions(raceId uint64) []entity.Transaction {
 	return service.transactionRepository.GetRaceTransactions(raceId)
+}
+
+func (service *transactionService) GetRaceLogs(raceId uint64) []entity.RaceLog {
+	logs := make([]entity.RaceLog, 0)
+	transactions := service.GetRaceTransactions(raceId)
+
+	for _, transaction := range transactions {
+		logs = append(logs, entity.RaceLog{
+			Username: *transaction.Data.Username,
+			Color:    *transaction.Data.Color,
+			Message:  transaction.Details,
+		})
+	}
+
+	return logs
 }
 
 func (service *transactionService) UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction {

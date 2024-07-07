@@ -1,12 +1,11 @@
 package service
 
 import (
-	"fmt"
+	"errors"
+	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
-	"github.com/webjohny/cashflow-go/logger"
-	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/datatypes"
 	"log"
@@ -24,23 +23,23 @@ type GameService interface {
 }
 
 type gameService struct {
-	raceService          RaceService
-	playerService        PlayerService
-	lobbyRepository      repository.LobbyRepository
-	professionRepository repository.ProfessionRepository
+	raceService       RaceService
+	playerService     PlayerService
+	lobbyService      LobbyService
+	professionService ProfessionService
 }
 
 func NewGameService(
 	raceService RaceService,
 	playerService PlayerService,
-	lobbyRepository repository.LobbyRepository,
-	professionRepository repository.ProfessionRepository,
+	lobbyService LobbyService,
+	professionService ProfessionService,
 ) GameService {
 	return &gameService{
-		raceService:          raceService,
-		playerService:        playerService,
-		lobbyRepository:      lobbyRepository,
-		professionRepository: professionRepository,
+		raceService:       raceService,
+		playerService:     playerService,
+		lobbyService:      lobbyService,
+		professionService: professionService,
 	}
 }
 
@@ -62,6 +61,10 @@ func (service *gameService) GetGame(raceId uint64, userId uint64, isBigRace bool
 	response.CurrentCard = &race.CurrentCard
 	response.CurrentPlayer = &race.CurrentPlayer
 	response.GameId = race.GameId
+	response.IsTurnEnded = race.IsTurnEnded
+	response.Status = race.Status
+	response.DiceValues = race.DiceValues
+	response.Logs = race.Logs
 	//response.Race = &race
 	response.Hash = helper.CreateHashByJson(race)
 
@@ -82,16 +85,16 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dice int, isB
 	}
 
 	if dice == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedDiceValue), []int{}
+		return errors.New(storage.ErrorUndefinedDiceValue), []int{}
 	}
 
 	getDice := race.GetDice()
 
-	diceValues := getDice.Roll(dice)
+	race.Dice = getDice.Roll(dice)
 
 	dualDiceCount := player.DualDiceCount
 
-	totalCount := race.CalculateTotalSteps(diceValues, dice)
+	totalCount := race.CalculateTotalSteps(race.Dice, dice)
 
 	if dualDiceCount > 0 {
 		player.DecrementDualDiceCount()
@@ -101,10 +104,11 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dice int, isB
 	player.Move(totalCount)
 
 	err, _ = service.playerService.UpdatePlayer(&player)
+	err, _ = service.raceService.UpdateRace(&race)
 
 	//this.addLog(currentPlayer.username, `rolled ${totalCount}`);
 
-	return err, diceValues
+	return err, race.Dice
 }
 
 func (service *gameService) ReRollDice(raceId uint64, userId uint64, dice int, isBigRace bool) (error, []int) {
@@ -121,7 +125,7 @@ func (service *gameService) ReRollDice(raceId uint64, userId uint64, dice int, i
 	}
 
 	if dice == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedDiceValue), []int{}
+		return errors.New(storage.ErrorUndefinedDiceValue), []int{}
 	}
 
 	log.Println(player, race)
@@ -153,12 +157,12 @@ func (service *gameService) Cancel(raceId uint64, userId uint64) error {
 	race := service.raceService.GetRaceByRaceId(raceId, false)
 
 	if race.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedGame)
+		return errors.New(storage.ErrorUndefinedGame)
 	}
 
 	for _, player := range players {
-		if player.UserId == userId && player.Role != entity.PlayerRoles.Owner {
-			return fmt.Errorf(storage.ErrorPermissionDenied)
+		if player.UserID == userId && player.Role != entity.PlayerRoles.Owner {
+			return errors.New(storage.ErrorPermissionDenied)
 		}
 	}
 
@@ -178,45 +182,47 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	race := service.raceService.GetRaceByRaceId(raceId, false)
 
 	if race.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedGame)
+		return errors.New(storage.ErrorUndefinedGame)
 	}
 
 	for _, player := range players {
-		if player.UserId == userId && player.Role != entity.PlayerRoles.Owner {
-			return fmt.Errorf(storage.ErrorPermissionDenied)
+		if player.UserID == userId && player.Role != entity.PlayerRoles.Owner {
+			return errors.New(storage.ErrorPermissionDenied)
 		}
 	}
 
 	for _, player := range players {
-		profession := service.professionRepository.FindProfessionById(uint64(player.ProfessionId))
+		profession := service.professionService.GetByID(uint64(player.ProfessionID))
 
-		profession.Income.Business = make([]entity.CardBusiness, 0)
-		profession.Liabilities.Business = make([]entity.CardBusiness, 0)
 		profession.Assets.Business = make([]entity.CardBusiness, 0)
+		profession.Assets.RealEstates = make([]entity.CardRealEstate, 0)
+		profession.Assets.OtherAssets = make([]entity.CardOtherAssets, 0)
+		profession.Assets.Stocks = make([]entity.CardStocks, 0)
 		profession.Assets.Dreams = make([]entity.CardDream, 0)
 
 		_, _ = service.playerService.UpdatePlayer(&entity.Player{
-			UserId:       player.UserId,
-			RaceId:       race.ID,
+			ID:           player.ID,
+			UserID:       player.UserID,
+			RaceID:       race.ID,
 			Username:     player.Username,
 			Role:         player.Role,
 			Color:        player.Color,
-			Income:       profession.Income,
+			Salary:       profession.Income.Salary,
 			Babies:       uint8(profession.Babies),
 			Expenses:     profession.Expenses,
 			Assets:       profession.Assets,
 			Liabilities:  profession.Liabilities,
-			ProfessionId: uint8(profession.ID),
-			CreatedAt:    datatypes.Date(time.Now()),
+			ProfessionID: uint8(profession.ID),
 		})
 	}
 
 	race.Responses = service.createResponses(race.ID)
 	race.CurrentPlayer = entity.RacePlayer{
 		ID:       players[0].ID,
-		UserId:   players[0].UserId,
+		UserId:   players[0].UserID,
 		Username: players[0].Username,
 	}
+	race.CurrentCard = entity.Card{}
 	race.Status = entity.RaceStatus.STARTED
 	race.Notifications = make([]entity.RaceNotification, 0)
 	race.BankruptedPlayers = make([]entity.RaceBankruptPlayer, 0)
@@ -257,17 +263,17 @@ func (service *gameService) ChangeTurn(raceId uint64, isBigRace bool) error {
 	race := service.raceService.GetRaceByRaceId(raceId, isBigRace)
 
 	if race.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedGame)
+		return errors.New(storage.ErrorUndefinedGame)
 	}
 
 	race.NextPlayer()
 
 	currentPlayer := race.CurrentPlayer
 
-	player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, currentPlayer.ID)
+	player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, currentPlayer.UserId)
 
 	if player.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedPlayer)
+		return errors.New(storage.ErrorUndefinedPlayer)
 	}
 
 	var err error
@@ -311,18 +317,18 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		"lobbyId": lobbyId,
 	})
 
-	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
+	lobby := service.lobbyService.GetByID(lobbyId)
 
 	if lobby.ID == 0 {
-		return fmt.Errorf(storage.ErrorUndefinedLobby), entity.Race{}
+		return errors.New(storage.ErrorUndefinedLobby), entity.Race{}
 	}
 
 	if !lobby.AvailableToStart() {
-		return fmt.Errorf(storage.ErrorInsufficientPlayers), entity.Race{}
+		return errors.New(storage.ErrorInsufficientPlayers), entity.Race{}
 	}
 
 	if lobby.IsStarted() {
-		return fmt.Errorf(storage.ErrorGameIsStarted), entity.Race{}
+		return errors.New(storage.ErrorGameIsStarted), entity.Race{}
 	}
 
 	err, race := service.raceService.InsertRace(&entity.Race{
@@ -337,9 +343,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 	})
 
 	if err != nil {
-		log.Panic(err)
-
-		return fmt.Errorf(storage.ErrorCannotCreatedRace), entity.Race{}
+		return errors.New(storage.ErrorCannotCreatedRace), entity.Race{}
 	}
 
 	var excluded []int
@@ -348,26 +352,24 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 
 	for i := 0; i < len(lobby.Players); i++ {
 		lobbyPlayer := lobby.Players[i]
-		profession := service.professionRepository.PickProfession(&excluded)
+		profession := service.professionService.GetRandomProfession(&excluded)
 		excluded = append(excluded, int(profession.ID))
 
-		profession.Income.Business = make([]entity.CardBusiness, 0)
-		profession.Liabilities.Business = make([]entity.CardBusiness, 0)
 		profession.Assets.Business = make([]entity.CardBusiness, 0)
 		profession.Assets.Dreams = make([]entity.CardDream, 0)
 
 		playerErr, player := service.playerService.InsertPlayer(&entity.Player{
-			UserId:       lobbyPlayer.ID,
-			RaceId:       race.ID,
+			UserID:       lobbyPlayer.ID,
+			RaceID:       race.ID,
 			Username:     lobbyPlayer.Username,
 			Role:         lobbyPlayer.Role,
 			Color:        lobbyPlayer.Color,
-			Income:       profession.Income,
+			Salary:       profession.Income.Salary,
 			Babies:       uint8(profession.Babies),
 			Expenses:     profession.Expenses,
 			Assets:       profession.Assets,
 			Liabilities:  profession.Liabilities,
-			ProfessionId: uint8(profession.ID),
+			ProfessionID: uint8(profession.ID),
 			CreatedAt:    datatypes.Date(time.Now()),
 		})
 
@@ -377,7 +379,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 
 		players = append(players, entity.RacePlayer{
 			ID:       player.ID,
-			UserId:   player.UserId,
+			UserId:   player.UserID,
 			Username: player.Username,
 		})
 
@@ -391,12 +393,10 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 
 	lobby.Status = entity.LobbyStatus.Started
 	lobby.GameId = race.ID
-	_ = service.lobbyRepository.UpdateLobby(&lobby)
+	err, _ = service.lobbyService.Update(&lobby)
 
 	if err != nil {
-		log.Panic(err)
-
-		return fmt.Errorf(storage.ErrorProcessFailed), entity.Race{}
+		return errors.New(storage.ErrorProcessFailed), entity.Race{}
 	}
 
 	return nil, race

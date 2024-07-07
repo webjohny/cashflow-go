@@ -6,6 +6,6 @@ import (
 )
 
 func Random(max int) int {
-	rand.Seed(time.Now().UnixNano())
-	return rand.Intn(max + 1)
+	r := rand.New(rand.NewSource(time.Now().UnixNano())) // Инициализация генератора случайных чисел
+	return r.Intn(max + 1)
 }

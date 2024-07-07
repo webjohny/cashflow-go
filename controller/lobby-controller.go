@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/request"
@@ -79,7 +79,7 @@ func (c *lobbyController) Leave(ctx *gin.Context) {
 	if username != "" {
 		err, _ = c.lobbyService.Leave(lobbyId, username)
 	} else {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, nil)
@@ -94,7 +94,7 @@ func (c *lobbyController) Cancel(ctx *gin.Context) {
 	if userId != 0 {
 		err, _ = c.lobbyService.Cancel(lobbyId, userId)
 	} else {
-		err = fmt.Errorf(storage.ErrorUndefinedUser)
+		err = errors.New(storage.ErrorUndefinedUser)
 	}
 
 	request.FinalResponse(ctx, err, nil)

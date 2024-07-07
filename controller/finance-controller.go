@@ -36,7 +36,11 @@ func (c *financeController) SendMoney(ctx *gin.Context) {
 	if errDTO != nil {
 		response = request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 	} else if raceId != 0 && username != "" {
-		err = c.financeService.SendMoney(raceId, username, sendMoneyBodyDTO.Amount, sendMoneyBodyDTO.Player)
+		if sendMoneyBodyDTO.Player == "bankLoan" {
+			err = c.financeService.PayLoan(raceId, username, sendMoneyBodyDTO.Amount)
+		} else if sendMoneyBodyDTO.Player != "" {
+			err = c.financeService.SendMoney(raceId, username, sendMoneyBodyDTO.Amount, sendMoneyBodyDTO.Player)
+		}
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -55,7 +59,7 @@ func (c *financeController) SendAssets(ctx *gin.Context) {
 	if errDTO != nil {
 		response = request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 	} else if raceId != 0 && username != "" {
-		err = c.financeService.SendAssets(raceId, username, sendAssetsBodyDTO.Amount, sendAssetsBodyDTO.Player, sendAssetsBodyDTO.Asset)
+		err = c.financeService.SendAssets(raceId, username, sendAssetsBodyDTO)
 	}
 
 	request.FinalResponse(ctx, err, response)

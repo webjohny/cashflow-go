@@ -1,13 +1,15 @@
 package repository
 
 import (
+	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"gorm.io/gorm"
 )
 
 type LobbyRepository interface {
-	InsertLobby(b *entity.Lobby) entity.Lobby
-	UpdateLobby(b *entity.Lobby) entity.Lobby
+	InsertLobby(b *entity.Lobby) (error, entity.Lobby)
+	UpdateLobby(b *entity.Lobby) (error, entity.Lobby)
 	All() []entity.Lobby
 	DeleteLobby(b *entity.Lobby)
 	CancelLobby(b *entity.Lobby)
@@ -26,37 +28,59 @@ func NewLobbyRepository(dbConn *gorm.DB) LobbyRepository {
 	}
 }
 
-func (db *lobbyConnection) InsertLobby(b *entity.Lobby) entity.Lobby {
-	db.connection.Save(&b)
-	db.connection.Preload(LobbyTable).Find(&b)
-	return *b
+func (db *lobbyConnection) InsertLobby(b *entity.Lobby) (error, entity.Lobby) {
+	result := db.connection.Save(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+
+		return result.Error, entity.Lobby{}
+	}
+
+	db.connection.Find(&b)
+	return nil, *b
 }
 
 func (db *lobbyConnection) All() []entity.Lobby {
 	var lobbies []entity.Lobby
-	db.connection.Preload(LobbyTable).Find(&lobbies)
+	db.connection.Find(&lobbies)
 	return lobbies
 }
 
-func (db *lobbyConnection) UpdateLobby(b *entity.Lobby) entity.Lobby {
-	db.connection.Save(&b)
-	db.connection.Preload(LobbyTable).Find(&b)
-	return *b
+func (db *lobbyConnection) UpdateLobby(b *entity.Lobby) (error, entity.Lobby) {
+	result := db.connection.Select("*").Updates(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+
+		return result.Error, entity.Lobby{}
+	}
+
+	db.connection.Find(&b)
+	return nil, *b
 }
 
 func (db *lobbyConnection) DeleteLobby(b *entity.Lobby) {
-	db.connection.Delete(&b)
+	result := db.connection.Delete(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+	}
 }
 
 func (db *lobbyConnection) CancelLobby(b *entity.Lobby) {
 	b.Status = entity.LobbyStatus.Cancelled
-	db.connection.Save(&b)
+	result := db.connection.Save(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+	}
 }
 
 func (db *lobbyConnection) FindLobbyById(ID uint64) entity.Lobby {
 	var lobby entity.Lobby
 
-	db.connection.Preload(LobbyTable).Where("id = ? and status != ?", ID, entity.LobbyStatus.Cancelled).Find(&lobby)
+	db.connection.Where("id = ? and status != ?", ID, entity.LobbyStatus.Cancelled).Find(&lobby)
 
 	return lobby
 }

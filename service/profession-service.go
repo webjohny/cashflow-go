@@ -7,6 +7,8 @@ import (
 
 type ProfessionService interface {
 	GetAll() []entity.Profession
+	GetByID(ID uint64) entity.Profession
+	GetRandomProfession(excluded *[]int) entity.Profession
 }
 
 type professionService struct {
@@ -21,4 +23,12 @@ func NewProfessionService(professionRepository repository.ProfessionRepository) 
 
 func (service *professionService) GetAll() []entity.Profession {
 	return service.professionRepository.All()
+}
+
+func (service *professionService) GetByID(ID uint64) entity.Profession {
+	return service.professionRepository.FindProfessionById(ID)
+}
+
+func (service *professionService) GetRandomProfession(excluded *[]int) entity.Profession {
+	return service.professionRepository.PickProfession(excluded)
 }

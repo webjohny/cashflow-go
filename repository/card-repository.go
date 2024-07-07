@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"github.com/webjohny/cashflow-go/entity"
+	"gorm.io/gorm"
 	"os"
 )
 
@@ -15,7 +16,7 @@ type cardConnection struct {
 	path string
 }
 
-func NewCardRepository(path string) CardRepository {
+func NewCardRepository(path string, dbConn *gorm.DB) CardRepository {
 	return &cardConnection{
 		path: path,
 	}

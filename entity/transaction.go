@@ -1,6 +1,8 @@
 package entity
 
-import "gorm.io/datatypes"
+import (
+	"gorm.io/datatypes"
+)
 
 var TransactionType = struct {
 	PLAYER string
@@ -34,11 +36,11 @@ type TransactionData struct {
 }
 
 type Transaction struct {
-	ID              uint64           `gorm:"primary_key:auto_increment" json:"id"`
-	PlayerID        *uint64          `gorm:"index" json:"user_id,omitempty"`
+	ID              uint             `gorm:"primaryKey;autoIncrement" json:"id"`
+	PlayerID        *uint64          `gorm:"index" json:"player_id,omitempty"`
 	RaceID          *uint64          `gorm:"index" json:"race_id,omitempty"`
-	TransactionType string           `json:"transaction_type"`
-	Details         string           `json:"description"`
-	Data            *TransactionData `gorm:"serializer:json" json:"data,omitempty"`
-	CreatedAt       datatypes.Date   `json:"created_at"`
+	TransactionType string           `gorm:"type:varchar(20)" json:"transaction_type"` // Handle enum in application logic
+	Details         string           `gorm:"type:varchar(255)" json:"description"`
+	Data            *TransactionData `gorm:"type:json;serializer:json" json:"data,omitempty"`
+	CreatedAt       datatypes.Date   `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }

@@ -24,12 +24,12 @@ type LobbyPlayer struct {
 
 type Lobby struct {
 	ID         uint64                 `gorm:"primary_key:auto_increment" json:"id"`
-	GameId     uint64                 `json:"game_id"`
-	Players    []LobbyPlayer          `gorm:"serializer:json" json:"players"`
-	MaxPlayers int8                   `json:"max_players"`
-	Status     string                 `json:"status"`
-	Options    map[string]interface{} `gorm:"serializer:json" json:"options"`
-	CreatedAt  datatypes.Date         `json:"created_at"`
+	GameId     uint64                 `gorm:"index;type:int(11)" json:"game_id"`
+	Players    []LobbyPlayer          `gorm:"type:json;serializer:json" json:"players"`
+	MaxPlayers int8                   `gorm:"max_players:int(3)" json:"max_players"`
+	Status     string                 `gorm:"status;type:enum('new','started','cancelled')" json:"status"`
+	Options    map[string]interface{} `gorm:"type:json;serializer:json" json:"options"`
+	CreatedAt  datatypes.Date         `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }
 
 func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profession) Player {
@@ -43,18 +43,18 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 	}
 
 	instance := Player{
-		RaceId:          raceId,
+		RaceID:          raceId,
 		Username:        username,
 		Role:            player.Role,
 		Color:           player.Color,
-		Income:          profession.Income,
+		Salary:          profession.Income.Salary,
 		Babies:          uint8(profession.Babies),
 		Expenses:        profession.Expenses,
 		Assets:          profession.Assets,
 		Liabilities:     profession.Liabilities,
 		Cash:            0,
 		PassiveIncome:   0,
-		ProfessionId:    uint8(profession.ID),
+		ProfessionID:    uint8(profession.ID),
 		LastPosition:    0,
 		CurrentPosition: 0,
 		DualDiceCount:   0,
@@ -146,7 +146,7 @@ func (l *Lobby) AvailableToStart() bool {
 		}
 	}
 
-	return count <= 2
+	return count >= 2
 }
 
 func (l *Lobby) RemovePlayer(username string) {

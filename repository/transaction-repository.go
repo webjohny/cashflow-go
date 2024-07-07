@@ -1,7 +1,9 @@
 package repository
 
 import (
+	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"gorm.io/datatypes"
 	"time"
@@ -32,20 +34,27 @@ func NewTransactionRepository(dbConn *gorm.DB) TransactionRepository {
 
 func (db *transactionConnection) InsertTransaction(b *entity.Transaction) entity.Transaction {
 	b.CreatedAt = datatypes.Date(time.Now())
-	db.connection.Save(&b)
-	db.connection.Preload(TransactionsTable).Find(&b)
+	result := db.connection.Save(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+
+		return entity.Transaction{}
+	}
+
+	db.connection.Find(&b)
 	return *b
 }
 
 func (db *transactionConnection) GetPlayerTransactions(playerId uint64) []entity.Transaction {
 	var transactions []entity.Transaction
-	db.connection.Preload(TransactionsTable).Where("player_id = ?", playerId).Find(&transactions)
+	db.connection.Model(&entity.Transaction{}).Where("player_id = ?", playerId).Where("transaction_type = ?", entity.TransactionType.PLAYER).Scan(&transactions)
 	return transactions
 }
 
 func (db *transactionConnection) GetRaceTransactions(raceId uint64) []entity.Transaction {
 	var transactions []entity.Transaction
-	db.connection.Preload(TransactionsTable).Where("race_id = ?", raceId).Find(&transactions)
+	db.connection.Model(&entity.Transaction{}).Where("race_id = ?", raceId).Where("transaction_type = ?", entity.TransactionType.RACE).Scan(&transactions)
 	return transactions
 }
 
@@ -62,23 +71,34 @@ func (db *transactionConnection) TransactionReport(idUser string) request.Transa
 }
 
 func (db *transactionConnection) UpdateTransaction(b *entity.Transaction) entity.Transaction {
-	db.connection.Save(&b)
-	db.connection.Preload(TransactionsTable).Find(&b)
+	result := db.connection.Select("*").Updates(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+
+		return entity.Transaction{}
+	}
+
+	db.connection.Find(&b)
 	return *b
 }
 
 func (db *transactionConnection) DeleteTransaction(b *entity.Transaction) {
-	db.connection.Delete(&b)
+	result := db.connection.Delete(&b)
+
+	if result.Error != nil {
+		logger.Error(result.Error, helper.JsonSerialize(b))
+	}
 }
 
 func (db *transactionConnection) FindTransactionByPlayerId(ID uint64) entity.Transaction {
 	var transaction entity.Transaction
-	db.connection.Preload(TransactionsTable).Find(&transaction, ID)
+	db.connection.Model(TransactionsTable).Find(&transaction, ID)
 	return transaction
 }
 
 func (db *transactionConnection) FindTransactionByRaceId(ID uint64) entity.Transaction {
 	var transaction entity.Transaction
-	db.connection.Preload(TransactionsTable).Find(&transaction, ID)
+	db.connection.Model(TransactionsTable).Find(&transaction, ID)
 	return transaction
 }
