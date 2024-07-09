@@ -5,6 +5,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
 )
 
@@ -37,11 +38,18 @@ func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEst
 	}
 
 	cardCost := card.DownPayment
-
-	var err error
-
 	mortgage := card.Mortgage
 	cost := card.Cost
+
+	var cashFlow int
+
+	for _, part := range parts {
+		cashFlow += part.Passive
+	}
+
+	if cashFlow > card.CashFlow {
+		return errors.New(storage.ErrorCommonPassiveIncomeGreaterThanCashFlowOfCard)
+	}
 
 	for _, pl := range parts {
 		var currentPlayer entity.Player
@@ -55,30 +63,28 @@ func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEst
 		card.CashFlow = pl.Passive
 		card.DownPayment = pl.Amount
 
-		if int(owner.ID) != pl.ID {
-			card.Mortgage = 0
-			card.Cost = 0
-			card.IsOwner = false
-		} else {
+		if owner.ID == currentPlayer.ID {
 			card.Mortgage = mortgage
 			card.Cost = cost
 			card.IsOwner = true
+		} else {
+			card.Cost = 0
+			card.Mortgage = 0
+			card.IsOwner = false
 		}
 
-		currentPlayer.CashFlow += card.CashFlow
 		currentPlayer.Assets.RealEstates = append(currentPlayer.Assets.RealEstates, card)
 
 		if owner.ID == currentPlayer.ID {
 			service.UpdateCash(&currentPlayer, -cardCost, card.Heading)
 		} else {
-			card.Cost = 0
-			err, _ = service.UpdatePlayer(&currentPlayer)
-		}
+			err, player := service.UpdatePlayer(&currentPlayer)
 
-		if err != nil {
-			logger.Error(err, nil)
+			if err != nil {
+				logger.Error(err, player)
 
-			return err
+				return err
+			}
 		}
 	}
 
@@ -113,22 +119,49 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 		"realEstateId": ID,
 	})
 
-	realEstate := player.FindRealEstate(ID)
+	var totalCost int
+
+	realEstate := player.FindRealEstateByID(ID)
 
 	if realEstate.ID == "" {
 		return errors.New(storage.ErrorNotFoundAssets)
 	}
 
-	value := (realEstate.Cost / 100) * card.Value
-	totalCost := realEstate.Cost + value
-
-	if card.Plus {
-		totalCost = realEstate.Cost + card.Value
+	if !realEstate.IsOwner {
+		return errors.New(storage.ErrorForbidden)
 	}
 
-	service.UpdateCash(&player, totalCost-realEstate.Mortgage, card.Symbol)
+	if card.AssetType == entity.RealEstateTypes.Building {
+		if helper.Contains[int](card.Range, realEstate.Count) || len(card.Range) == 0 {
+			totalCost = card.Cost * realEstate.Count
+		} else {
+			return errors.New(storage.ErrorNotSuitableBuilding)
+		}
+	} else if card.AssetType == entity.RealEstateTypes.Single {
+		totalCost = card.Cost
+	}
 
-	player.RemoveRealEstate(card.ID)
+	player.RemoveRealEstate(ID)
+
+	if totalCost > 0 {
+		service.UpdateCash(&player, totalCost, card.Heading)
+	}
+
+	players := service.GetAllPlayersByRaceId(player.RaceID)
+
+	for _, user := range players {
+		asset := player.FindRealEstateByID(ID)
+
+		if ID == asset.ID && !asset.IsOwner {
+			user.RemoveRealEstate(ID)
+
+			err, play := service.UpdatePlayer(&user)
+
+			if err != nil {
+				logger.Error("SellRealEstate.UpdatePlayer", play, ID, user.ID, user.RaceID)
+			}
+		}
+	}
 
 	return nil
 }

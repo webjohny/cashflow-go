@@ -10,14 +10,13 @@ import (
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"os"
-	"strconv"
 )
 
 type CardService interface {
-	Prepare(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{})
-	Accept(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{})
+	Prepare(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
+	Accept(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
 	Purchase(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardPurchaseActionDTO) (error, interface{})
-	Selling(raceId uint64, actionType string, userId uint64, value string, isBigRace bool) (error, interface{})
+	Selling(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardSellingActionDTO) (error, interface{})
 	Skip(raceId uint64, userId uint64, isBigRace bool) (error, interface{})
 	GetCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
 	TestCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
@@ -120,7 +119,7 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 	return err, race.CurrentCard
 }
 
-func (service *cardService) Prepare(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{}) {
+func (service *cardService) Prepare(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{}) {
 	logger.Info("CardService.Prepare", map[string]interface{}{
 		"raceId":     raceId,
 		"family":     family,
@@ -140,7 +139,7 @@ func (service *cardService) Prepare(raceId uint64, family string, actionType str
 	return errors.New(storage.ErrorForbidden), nil
 }
 
-func (service *cardService) Accept(raceId uint64, family string, actionType string, userId uint64, isBigRace bool) (error, interface{}) {
+func (service *cardService) Accept(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{}) {
 	logger.Info("CardService.Accept", map[string]interface{}{
 		"raceId":     raceId,
 		"family":     family,
@@ -210,20 +209,12 @@ func (service *cardService) Purchase(actionType string, raceId uint64, userId ui
 		err = service.raceService.DreamAction(raceId, userId)
 		break
 
-	case "riskBusiness":
-		err, response = service.raceService.RiskBusinessAction(raceId, userId)
-		break
-
-	case "riskStock":
-		err, response = service.raceService.RiskStocksAction(raceId, userId)
-		break
-
 	case "stock":
 		err = service.raceService.StocksAction(raceId, userId, dto.Count)
 		break
 
-	case "lottery":
-		err = service.raceService.LotteryAction(raceId, userId, isBigRace, dto.Count)
+	case "lottery", "riskBusiness", "riskStock":
+		err, response = service.raceService.LotteryAction(raceId, userId, isBigRace)
 		break
 
 	case "mlm":
@@ -238,12 +229,12 @@ func (service *cardService) Purchase(actionType string, raceId uint64, userId ui
 	return err, response
 }
 
-func (service *cardService) Selling(raceId uint64, actionType string, userId uint64, value string, isBigRace bool) (error, interface{}) {
+func (service *cardService) Selling(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardSellingActionDTO) (error, interface{}) {
 	logger.Info("CardService.Selling", map[string]interface{}{
 		"raceId":     raceId,
 		"userId":     userId,
 		"actionType": actionType,
-		"value":      value,
+		"dto":        dto,
 	})
 
 	var err error
@@ -251,29 +242,32 @@ func (service *cardService) Selling(raceId uint64, actionType string, userId uin
 
 	switch actionType {
 	case "realEstate":
-		if value != "" {
+		if dto.ID != "" {
 			return errors.New(storage.ErrorIsNotValidRealEstate), nil
 		}
 
-		err = service.raceService.SellRealEstate(raceId, userId, value)
+		err = service.raceService.SellRealEstate(raceId, userId, dto.ID)
+		break
+	case "business":
+		if dto.ID != "" {
+			return errors.New(storage.ErrorIsNotValidBusiness), nil
+		}
+
+		err = service.raceService.SellBusiness(raceId, userId, dto.ID, dto.Count)
 		break
 	case "stock":
-		count, _ := strconv.Atoi(value)
-
-		if count < 1 {
+		if dto.Count < 1 {
 			return errors.New(storage.ErrorIsNotValidCountValue), nil
 		}
 
-		err = service.raceService.SellStocks(raceId, userId, count)
+		err = service.raceService.SellStocks(raceId, userId, dto.Count)
 		break
 	case "other":
-		count, _ := strconv.Atoi(value)
-
-		if count < 1 {
-			return errors.New(storage.ErrorIsNotValidCountValue), nil
+		if dto.ID != "" {
+			return errors.New(storage.ErrorIsNotValidOtherAssets), nil
 		}
 
-		err = service.raceService.SellOtherAssets(raceId, userId, count)
+		err = service.raceService.SellOtherAssets(raceId, userId, dto.ID, dto.Count)
 		break
 	default:
 		err = service.raceService.SkipAction(raceId, userId, isBigRace)

@@ -165,10 +165,10 @@ func (service *playerService) TransferStocks(ID string, sender entity.Player, re
 		}
 	}
 
-	err, _ := service.UpdatePlayer(&sender)
+	err, player := service.UpdatePlayer(&sender)
 
 	if err != nil {
-		logger.Error(err, map[string]interface{}{
+		logger.Error(err, player, map[string]interface{}{
 			"ID":     sender.ID,
 			"raceID": sender.RaceID,
 		})
@@ -190,36 +190,4 @@ func (service *playerService) TransferStocks(ID string, sender entity.Player, re
 	}
 
 	return err
-}
-
-func (service *playerService) BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) (error, bool) {
-	logger.Info("PlayerService.BuyRiskStocks", map[string]interface{}{
-		"playerId":   player.ID,
-		"card":       card,
-		"rolledDice": rolledDice,
-	})
-
-	cost := card.Cost
-
-	if player.Cash < cost {
-		return errors.New(storage.ErrorNotEnoughMoney), false
-	}
-
-	var costPerOne int
-	for _, dice := range card.Dices {
-		for _, value := range dice.Dices {
-			if value == rolledDice {
-				costPerOne = *dice.CostPerOne
-			}
-		}
-	}
-
-	if costPerOne > 0 {
-		service.UpdateCash(&player, -cost, card.Heading)
-		service.UpdateCash(&player, card.Count*costPerOne, card.Heading)
-
-		return nil, true
-	}
-
-	return nil, false
 }

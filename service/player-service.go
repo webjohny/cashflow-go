@@ -17,20 +17,19 @@ type PlayerService interface {
 	Payday(player entity.Player)
 	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
-	BuyBusiness(card entity.CardBusiness, player entity.Player, count int, updateCash bool) error
+	BuyBusiness(card entity.CardBusiness, player entity.Player, count int) error
 	BuyRealEstate(card entity.CardRealEstate, player entity.Player) error
 	BuyRealEstateInPartnership(card entity.CardRealEstate, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
 	BuyBusinessInPartnership(card entity.CardBusiness, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
 	BuyLottery(card entity.CardLottery, player entity.Player, dice int) (error, bool)
-	BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) (error, bool)
 	BuyOtherAssets(card entity.CardOtherAssets, player entity.Player, count int) error
-	BuyRiskStocks(card entity.CardRiskStocks, player entity.Player, rolledDice int) (error, bool)
+	BuyOtherAssetsInPartnership(card entity.CardOtherAssets, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
 	BuyDream(card entity.CardDream, player entity.Player) error
 	BuyStocks(card entity.CardStocks, player entity.Player, updateCash bool) error
-	SellOtherAssets(card entity.CardOtherAssets, player entity.Player) error
+	SellOtherAssets(ID string, card entity.CardMarketOtherAssets, player entity.Player, count int) error
 	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
 	SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error
-	SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player) (error, int)
+	SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player, count int) (error, int)
 	TransferBusiness(ID string, sender entity.Player, receiver entity.Player, count int) error
 	TransferStocks(ID string, sender entity.Player, receiver entity.Player, count int) error
 	DecreaseStocks(card entity.CardStocks, player entity.Player) error
@@ -98,17 +97,13 @@ func (service *playerService) AreYouBankrupt(player entity.Player) {
 
 		businesses := player.Assets.Business
 		realEstates := player.Assets.RealEstates
-		//otherAssets := player.Assets.OtherAssets
+		otherAssets := player.Assets.OtherAssets
 
 		for _, business := range businesses {
 			if business.IsOwner {
 				for _, anotherPlayer := range players {
-					_, item := anotherPlayer.FindBusinessBySymbol(business.Symbol)
-
-					if item.ID != "" {
-						anotherPlayer.RemoveBusiness(item.ID)
-						_, _ = service.UpdatePlayer(&anotherPlayer)
-					}
+					anotherPlayer.RemoveBusiness(business.ID)
+					_, _ = service.UpdatePlayer(&anotherPlayer)
 				}
 			}
 		}
@@ -116,17 +111,22 @@ func (service *playerService) AreYouBankrupt(player entity.Player) {
 		for _, realEs := range realEstates {
 			if realEs.IsOwner {
 				for _, anotherPlayer := range players {
-					item := anotherPlayer.FindRealEstate(realEs.Symbol)
-
-					if item.ID != "" {
-						anotherPlayer.RemoveRealEstate(item.ID)
-						_, _ = service.UpdatePlayer(&anotherPlayer)
-					}
+					anotherPlayer.RemoveRealEstate(realEs.ID)
+					_, _ = service.UpdatePlayer(&anotherPlayer)
 				}
 			}
 		}
 
-		//player.Reset()
+		for _, asset := range otherAssets {
+			if asset.IsOwner {
+				for _, anotherPlayer := range players {
+					anotherPlayer.RemoveOtherAssetsByID(asset.ID)
+					_, _ = service.UpdatePlayer(&anotherPlayer)
+				}
+			}
+		}
+
+		player.Reset(entity.Profession{})
 	}
 }
 
@@ -183,7 +183,24 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 	player.AllowReRoll()
 
 	if helper.Contains[int](card.Success, dice) {
-		amount := card.Outcome.Success - card.Cost
+		var amount int
+
+		if card.Lottery == entity.LotteryTypes.Money {
+			amount = card.Outcome.Success - card.Cost
+		} else {
+			amount = -card.Cost
+			business := entity.CardBusiness{
+				ID:          card.ID,
+				Type:        card.Type,
+				Symbol:      card.Symbol,
+				Heading:     card.Heading,
+				Description: card.Description,
+				Cost:        card.Cost,
+				CashFlow:    card.Outcome.Success,
+			}
+
+			player.Assets.Business = append(player.Assets.Business, business)
+		}
 		service.UpdateCash(&player, amount, card.Symbol)
 
 		return nil, true
@@ -194,32 +211,60 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 	return nil, false
 }
 
-func (service *playerService) SellOtherAssets(card entity.CardOtherAssets, player entity.Player) error {
+func (service *playerService) SellOtherAssets(ID string, card entity.CardMarketOtherAssets, player entity.Player, count int) error {
 	logger.Info("PlayerService.SellOtherAssets", map[string]interface{}{
 		"playerId": player.ID,
 		"card":     card,
 	})
 
-	_, asset := player.FindOtherAssets(card.Symbol)
+	_, asset := player.FindOtherAssetsByID(ID)
 
 	if asset.ID == "" {
 		return errors.New(storage.ErrorNotFoundAssets)
 	}
 
-	if asset.Count < card.Count {
+	if !asset.IsOwner {
+		return errors.New(storage.ErrorForbidden)
+	}
+
+	if asset.Count < count {
 		return errors.New(storage.ErrorNotEnoughAsset)
 	}
 
-	asset.Count -= card.Count
-	asset.Cost = asset.CostPerOne * asset.Count
+	var totalCost = card.Cost
 
-	if asset.Count <= 0 {
-		player.RemoveOtherAssets(asset.Symbol)
-	} else {
-		player.UpdateAsset(asset.Symbol, *asset)
+	if asset.AssetType == entity.OtherAssetTypes.Piece && count > 0 {
+		totalCost *= count
+		asset.Count -= count
 	}
 
-	service.UpdateCash(&player, card.CostPerOne*card.Count, card.Symbol)
+	if asset.Count <= 0 || asset.AssetType != entity.OtherAssetTypes.Piece {
+		player.RemoveOtherAssetsByID(ID)
+	}
+
+	if totalCost > 0 {
+		service.UpdateCash(&player, totalCost, card.Heading)
+	}
+
+	if asset.AssetType == entity.OtherAssetTypes.Piece {
+		return nil
+	}
+
+	players := service.GetAllPlayersByRaceId(player.RaceID)
+
+	for _, user := range players {
+		_, item := player.FindOtherAssetsByID(ID)
+
+		if ID == item.ID && !item.IsOwner {
+			user.RemoveOtherAssetsByID(ID)
+
+			err, play := service.UpdatePlayer(&user)
+
+			if err != nil {
+				logger.Error("SellOtherAssets.UpdatePlayer", play, ID, user.ID, user.RaceID)
+			}
+		}
+	}
 
 	return nil
 }
@@ -356,20 +401,93 @@ func (service *playerService) BuyOtherAssets(card entity.CardOtherAssets, player
 		return errors.New(storage.ErrorTooManyAssets)
 	}
 
-	_, asset := player.FindOtherAssets(card.Symbol)
+	_, asset := player.FindOtherAssetsBySymbol(card.Symbol)
 
-	if asset.ID != "" {
-		asset.Count += count
-		asset.Cost += count * card.CostPerOne
-		asset.CostPerOne = asset.Cost * asset.Count
-	} else {
-		card.Count = count
-		card.Cost = count * card.CostPerOne
+	var totalCost = card.Cost
+	var err error
 
+	if card.AssetType == entity.OtherAssetTypes.Piece {
+		if asset.ID != "" {
+			totalCost = card.CostPerOne * count
+			asset.Count += count
+			asset.SumCost()
+		} else if asset.ID == "" {
+			totalCost = card.CostPerOne * count
+
+			card.Count = count
+			card.SumCost()
+		}
+	}
+
+	if asset.ID == "" || card.AssetType == entity.OtherAssetTypes.Whole {
 		player.Assets.OtherAssets = append(player.Assets.OtherAssets, card)
 	}
 
-	service.UpdateCash(&player, -card.Cost, "Другие активы: "+card.Heading)
+	if card.IsOwner {
+		if card.WholeCost > 0 {
+			totalCost = card.WholeCost
+		}
+		service.UpdateCash(&player, -totalCost, "Другие активы: "+card.Heading)
+	} else {
+		err, _ = service.UpdatePlayer(&player)
+	}
+
+	return err
+}
+
+func (service *playerService) BuyOtherAssetsInPartnership(card entity.CardOtherAssets, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error {
+	logger.Info("PlayerService.BuyOtherAssetsInPartnership", map[string]interface{}{
+		"ownerId": owner.ID,
+		"card":    card,
+		"parts":   parts,
+	})
+
+	var cardCost = card.Cost
+
+	if card.AssetType == entity.OtherAssetTypes.Piece {
+		cardCost = 0
+		for _, pl := range parts {
+			cardCost += pl.Amount * card.CostPerOne
+		}
+	}
+
+	if owner.Cash < cardCost {
+		return errors.New(storage.ErrorNotEnoughMoney)
+	}
+
+	for _, pl := range parts {
+		var currentPlayer entity.Player
+
+		for _, person := range players {
+			if int(person.ID) == pl.ID {
+				currentPlayer = person
+			}
+		}
+
+		if card.AssetType == entity.OtherAssetTypes.Piece && pl.Amount > 0 {
+			card.Count = pl.Amount
+		} else if card.AssetType == entity.OtherAssetTypes.Whole {
+			card.CostPerOne = pl.Percent
+		} else {
+			return errors.New(storage.ErrorForbidden)
+		}
+
+		if owner.ID == currentPlayer.ID {
+			card.WholeCost = cardCost
+		} else {
+			card.WholeCost = 0
+		}
+
+		card.IsOwner = owner.ID == currentPlayer.ID || card.AssetType == entity.OtherAssetTypes.Piece
+
+		err := service.BuyOtherAssets(card, currentPlayer, pl.Amount)
+
+		if err != nil {
+			logger.Error(err, nil)
+
+			return err
+		}
+	}
 
 	return nil
 }
@@ -480,30 +598,18 @@ func (service *playerService) SetTransaction(ID uint64, currentCash int, cash in
 }
 
 func (service *playerService) InsertPlayer(b *entity.Player) (error, entity.Player) {
-	logger.Info("PlayerService.InsertPlayer", helper.JsonSerialize(b))
-
 	return service.playerRepository.InsertPlayer(b)
 }
 
 func (service *playerService) UpdatePlayer(b *entity.Player) (error, entity.Player) {
-	logger.Info("PlayerService.UpdatePlayer", helper.JsonSerialize(b))
-
 	return service.playerRepository.UpdatePlayer(b)
 }
 
 func (service *playerService) GetPlayerByUsername(username string) entity.Player {
-	logger.Info("PlayerService.GetPlayerByUsername", map[string]interface{}{
-		"username": username,
-	})
-
 	return service.playerRepository.FindPlayerByUsername(username)
 }
 
 func (service *playerService) GetProfessionById(id uint8) (error, entity.Profession) {
-	logger.Info("PlayerService.GetProfessionById", map[string]interface{}{
-		"id": id,
-	})
-
 	profession := service.professionService.GetByID(uint64(id))
 
 	if profession.ID == 0 {
@@ -514,37 +620,18 @@ func (service *playerService) GetProfessionById(id uint8) (error, entity.Profess
 }
 
 func (service *playerService) GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player {
-	logger.Info("PlayerService.GetPlayerByUsernameAndRaceId", map[string]interface{}{
-		"raceId":   raceId,
-		"username": username,
-	})
-
 	return service.playerRepository.FindPlayerByUsernameAndRaceId(raceId, username)
 }
 
 func (service *playerService) GetAllPlayersByRaceId(raceId uint64) []entity.Player {
-	//logger.Info("PlayerService.GetAllPlayersByRaceId", map[string]interface{}{
-	//	"raceId": raceId,
-	//})
-
 	return service.playerRepository.AllByRaceId(raceId)
 }
 
 func (service *playerService) GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player {
-	logger.Info("PlayerService.GetPlayerByUserIdAndRaceId", map[string]interface{}{
-		"raceId": raceId,
-		"userId": userId,
-	})
-
 	return service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
 }
 
 func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error, dto.GetRacePlayerResponseDTO) {
-	//logger.Info("PlayerService.GetRacePlayer", map[string]interface{}{
-	//	"raceId": raceId,
-	//	"userId": userId,
-	//})
-
 	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
 
 	if player.ID != 0 {
@@ -555,8 +642,6 @@ func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error
 }
 
 func (service *playerService) GetFormattedPlayerResponse(player entity.Player) dto.GetRacePlayerResponseDTO {
-	//logger.Info("PlayerService.GetFormattedPlayerResponse", helper.JsonSerialize(player))
-
 	profession := service.professionService.GetByID(uint64(player.ProfessionID))
 	transactionsQuery := service.transactionService.GetPlayerTransactions(player.ID)
 

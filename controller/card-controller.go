@@ -87,7 +87,7 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	} else if userId == 0 {
 		err = errors.New(storage.ErrorUndefinedPlayer)
 	} else {
-		err, response = c.cardService.Prepare(raceId, family, actionType, userId, bigRace)
+		err, response = c.cardService.Prepare(actionType, raceId, family, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -100,7 +100,7 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	userId := request.GetUserId(ctx)
 	bigRace := request.GetBigRace(ctx)
 
-	var body dto.CardActionDTO
+	var body dto.CardSellingActionDTO
 
 	if err := ctx.BindJSON(&body); err != nil {
 		request.FinalResponse(ctx, err, nil)
@@ -115,7 +115,7 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	} else if userId == 0 {
 		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
-		err, response = c.cardService.Selling(raceId, actionType, userId, body.Value, bigRace)
+		err, response = c.cardService.Selling(actionType, raceId, userId, bigRace, body)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -137,7 +137,7 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	} else if userId == 0 {
 		err = errors.New(storage.ErrorUndefinedUser)
 	} else {
-		err, response = c.cardService.Accept(raceId, family, actionType, userId, bigRace)
+		err, response = c.cardService.Accept(actionType, raceId, family, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)

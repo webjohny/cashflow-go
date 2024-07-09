@@ -18,7 +18,7 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 	cardCost := card.Cost
 	cardCashFlow := card.CashFlow
 
-	if cardCashFlow > 0 && card.Limit == 0 {
+	if cardCashFlow > 0 && card.AssetType != entity.BusinessTypes.Limited {
 		fullPassiveIncome := 0
 
 		for _, part := range parts {
@@ -34,7 +34,7 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 				part.Percent = (part.Passive * fullPassiveIncome) * 100
 			}
 		}
-	} else if card.Limit > 0 {
+	} else if card.AssetType == entity.BusinessTypes.Limited {
 		cardCost = 0
 
 		for _, part := range parts {
@@ -55,9 +55,9 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 			}
 		}
 
-		if card.Limit > 0 && part.Amount > 0 {
+		if card.AssetType == entity.BusinessTypes.Limited && part.Amount > 0 {
 			card.Count = part.Amount
-		} else if part.Passive > 0 {
+		} else if card.AssetType != entity.BusinessTypes.Limited {
 			card.CashFlow = part.Passive
 			card.Percent = part.Percent
 		} else {
@@ -66,15 +66,17 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 
 		if owner.ID == currentPlayer.ID {
 			card.WholeCost = cardCost
-			card.IsOwner = true
 		} else {
 			card.WholeCost = 0
-			card.IsOwner = false
 		}
 
-		err := service.BuyBusiness(card, currentPlayer, part.Amount, owner.ID == currentPlayer.ID)
+		card.IsOwner = card.AssetType == entity.BusinessTypes.Limited || owner.ID == currentPlayer.ID
+
+		err := service.BuyBusiness(card, currentPlayer, part.Amount)
 
 		if err != nil {
+			logger.Error(err, nil)
+
 			return err
 		}
 	}
@@ -82,7 +84,7 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 	return nil
 }
 
-func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player, count int, updateCash bool) error {
+func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player, count int) error {
 	logger.Info("PlayerService.BuyBusiness", map[string]interface{}{
 		"playerId":         player.ID,
 		"player.Cash":      player.Cash,
@@ -104,10 +106,10 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 		count = 1
 	}
 
-	if card.Limit > 0 && count > 0 {
+	if card.AssetType == entity.BusinessTypes.Limited && count > 0 {
 		cost = count * cardCost
 
-		if card.Limit > 0 && card.Limit < count {
+		if card.Limit < count {
 			return errors.New(storage.ErrorLimitedPartnership)
 		}
 
@@ -138,7 +140,7 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 
 	var err error
 
-	if updateCash {
+	if card.IsOwner {
 		if card.WholeCost > 0 {
 			cost = card.WholeCost
 		}
@@ -153,49 +155,6 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 	}
 
 	return err
-}
-
-func (service *playerService) BuyRiskBusiness(card entity.CardRiskBusiness, player entity.Player, rolledDice int) (error, bool) {
-	logger.Info("PlayerService.BuyRiskBusiness", map[string]interface{}{
-		"playerId":   player.ID,
-		"card":       card,
-		"rolledDice": rolledDice,
-	})
-
-	cost := card.Cost
-
-	if player.Cash < cost {
-		return errors.New(storage.ErrorNotEnoughMoney), false
-	}
-
-	var cashFlow int
-	for _, dice := range card.Dices {
-		for _, value := range dice.Dices {
-			if value == rolledDice {
-				cashFlow = *dice.CashFlow
-			}
-		}
-	}
-
-	if cashFlow > 0 {
-		service.UpdateCash(&player, -cost, card.Heading)
-
-		business := entity.CardBusiness{
-			ID:          card.ID,
-			Type:        card.Type,
-			Symbol:      card.Symbol,
-			Heading:     card.Heading,
-			Description: card.Description,
-			Cost:        card.Cost,
-			CashFlow:    cashFlow,
-		}
-
-		player.Assets.Business = append(player.Assets.Business, business)
-
-		return nil, true
-	}
-
-	return nil, false
 }
 
 func (service *playerService) TransferBusiness(ID string, sender entity.Player, receiver entity.Player, count int) error {
@@ -236,16 +195,20 @@ func (service *playerService) TransferBusiness(ID string, sender entity.Player, 
 		}
 	}
 
-	err, _ := service.UpdatePlayer(&sender)
+	err, player := service.UpdatePlayer(&sender)
 
-	if err == nil {
-		err, _ = service.UpdatePlayer(&receiver)
+	if err != nil {
+		logger.Error(err, player)
+
+		return err
 	}
+
+	err, _ = service.UpdatePlayer(&receiver)
 
 	return err
 }
 
-func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player) (error, int) {
+func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player, count int) (error, int) {
 	logger.Info("PlayerService.SellBusiness", map[string]interface{}{
 		"ID":       ID,
 		"card":     card,
@@ -258,12 +221,53 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 		return errors.New(storage.ErrorYouHaveNoProperties), 0
 	}
 
-	for i := 0; i < len(player.Assets.Business); i++ {
-		property := player.Assets.Business[i]
-		totalCash += property.Cost / 2
+	_, business := player.FindBusinessByID(ID)
+
+	if !business.IsOwner {
+		return errors.New(storage.ErrorForbidden), 0
 	}
 
-	player.Assets.Business = make([]entity.CardBusiness, 0)
+	if card.Cost < 10 {
+		totalCash = business.Cost * card.Cost
+	} else if card.Cost >= 10 && card.Cost <= 100 {
+		totalCash = (business.Cost / 100) * card.Cost
+	} else if card.Cost > 100 {
+		totalCash = card.Cost
+	}
+
+	if business.AssetType == entity.BusinessTypes.Limited && count > 0 {
+		totalCash *= count
+		business.Count -= count
+		player.ReduceLimitedShares(ID, count)
+	}
+
+	if business.Count <= 0 || business.AssetType != entity.BusinessTypes.Limited {
+		player.RemoveBusiness(ID)
+	}
+
+	if totalCash > 0 {
+		service.UpdateCash(&player, totalCash, card.Heading)
+	}
+
+	if business.AssetType == entity.BusinessTypes.Limited {
+		return nil, totalCash
+	}
+
+	players := service.GetAllPlayersByRaceId(player.RaceID)
+
+	for _, user := range players {
+		_, asset := player.FindBusinessByID(ID)
+
+		if ID == asset.ID && !asset.IsOwner && asset.AssetType != entity.BusinessTypes.Limited {
+			user.RemoveBusiness(ID)
+
+			err, play := service.UpdatePlayer(&user)
+
+			if err != nil {
+				logger.Error("SellBusiness.UpdatePlayer", play, ID, user.ID, user.RaceID)
+			}
+		}
+	}
 
 	return nil, totalCash
 }
@@ -275,29 +279,27 @@ func (service *playerService) MarketBusiness(card entity.CardMarketBusiness, pla
 	})
 
 	//@toDo make percent for cards where happens cashflow for users / maybe take all amounts-cashflows and calculate it to percents and new cashflow give per cashflows previous values
-	assets := player.Assets.Business
+	businesses := &player.Assets.Business
 
-	if len(assets) == 0 {
+	if len(*businesses) == 0 {
 		return errors.New(storage.ErrorNotFoundAssets)
 	}
 
 	if card.CashFlow > 0 {
-		businessType := card.BusinessType
+		businessType := card.AssetType
 
-		for index, asset := range assets {
-			assetBusinessType := asset.BusinessType
+		for _, asset := range *businesses {
+			assetAssetType := asset.AssetType
 
 			if (asset.Symbol == card.Symbol) ||
-				(assetBusinessType == businessType) {
+				(assetAssetType == businessType) {
 
-				assets[index].CashFlow += card.CashFlow
+				asset.CashFlow += card.CashFlow
 			} else {
 				continue
 			}
 		}
 	}
-
-	player.Assets.Business = assets
 
 	var err error
 

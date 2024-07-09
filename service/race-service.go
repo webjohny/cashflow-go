@@ -18,15 +18,14 @@ type RaceService interface {
 	BusinessAction(raceId uint64, userId uint64, isBigRace bool, dto dto.CardPurchaseActionDTO) error
 	RealEstateAction(raceId uint64, userId uint64, isBigRace bool, dto dto.CardPurchaseActionDTO) error
 	DreamAction(raceId uint64, userId uint64) error
-	RiskBusinessAction(raceId uint64, userId uint64) (error, dto.RiskResponseDTO)
-	RiskStocksAction(raceId uint64, userId uint64) (error, dto.RiskResponseDTO)
 	OtherAssetsAction(raceId uint64, userId uint64, count int) error
 	StocksAction(raceId uint64, userId uint64, count int) error
-	LotteryAction(raceId uint64, userId uint64, isBigRace bool, dice int) error
+	LotteryAction(raceId uint64, userId uint64, isBigRace bool) (error, dto.RiskResponseDTO)
 	MlmAction(raceId uint64, userId uint64, isBigRace bool) error
+	SellBusiness(raceId uint64, userId uint64, assetId string, count int) error
 	SellRealEstate(raceId uint64, userId uint64, realEstateId string) error
 	SellStocks(raceId uint64, userId uint64, count int) error
-	SellOtherAssets(raceId uint64, userId uint64, count int) error
+	SellOtherAssets(raceId uint64, userId uint64, assetId string, count int) error
 	SkipAction(raceId uint64, userId uint64, isBigRace bool) error
 	PaydayAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error
 	MarketAction(raceId uint64, userId uint64, actionType string) error
@@ -118,7 +117,8 @@ func (service *raceService) BusinessAction(raceId uint64, userId uint64, isBigRa
 	if len(dto.Players) > 0 {
 		err = service.playerService.BuyBusinessInPartnership(card, player, players, dto.Players)
 	} else {
-		err = service.playerService.BuyBusiness(card, player, dto.Count, true)
+		card.IsOwner = true
+		err = service.playerService.BuyBusiness(card, player, dto.Count)
 	}
 
 	if err == nil {
@@ -163,6 +163,7 @@ func (service *raceService) RealEstateAction(raceId uint64, userId uint64, isBig
 	if len(dto.Players) > 0 {
 		err = service.playerService.BuyRealEstateInPartnership(card, player, players, dto.Players)
 	} else {
+		card.IsOwner = true
 		err = service.playerService.BuyRealEstate(card, player)
 	}
 
@@ -207,8 +208,8 @@ func (service *raceService) DreamAction(raceId uint64, userId uint64) error {
 	return err
 }
 
-func (service *raceService) RiskBusinessAction(raceId uint64, userId uint64) (error, dto.RiskResponseDTO) {
-	logger.Info("RaceService.RiskBusinessAction", map[string]interface{}{
+func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRace bool) (error, dto.RiskResponseDTO) {
+	logger.Info("RaceService.LotteryAction", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
 	})
@@ -225,15 +226,19 @@ func (service *raceService) RiskBusinessAction(raceId uint64, userId uint64) (er
 
 	var status bool
 
-	err, status = service.playerService.BuyRiskBusiness(entity.CardRiskBusiness{
+	err, status = service.playerService.BuyLottery(entity.CardLottery{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
+		Symbol:      race.CurrentCard.Symbol,
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
 		Cost:        race.CurrentCard.Cost,
-		Dices:       race.CurrentCard.Dices,
-		ExtraDices:  race.CurrentCard.ExtraDices,
-		Symbol:      race.CurrentCard.Symbol,
+		Lottery:     race.CurrentCard.Lottery,
+		Rule:        race.CurrentCard.Rule,
+		SubRule:     race.CurrentCard.SubRule,
+		Failure:     race.CurrentCard.Failure,
+		Success:     race.CurrentCard.Success,
+		Outcome:     race.CurrentCard.Outcome,
 	}, player, rolledDice)
 
 	if err == nil {
@@ -270,12 +275,14 @@ func (service *raceService) SellRealEstate(raceId uint64, userId uint64, realEst
 	err = service.playerService.SellRealEstate(realEstateId, entity.CardMarketRealEstate{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
-		Symbol:      race.CurrentCard.Symbol,
 		Heading:     race.CurrentCard.Heading,
+		Symbol:      race.CurrentCard.Symbol,
 		Description: race.CurrentCard.Description,
 		Rule:        race.CurrentCard.Rule,
-		Value:       race.CurrentCard.Value,
-		Plus:        race.CurrentCard.Plus,
+		AssetType:   race.CurrentCard.AssetType,
+		SubRule:     race.CurrentCard.SubRule,
+		Cost:        race.CurrentCard.Cost,
+		Range:       race.CurrentCard.Range,
 	}, player)
 
 	if err == nil {
@@ -323,7 +330,7 @@ func (service *raceService) SellStocks(raceId uint64, userId uint64, count int) 
 	return err
 }
 
-func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, count int) error {
+func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, assetId string, count int) error {
 	logger.Info("RaceService.SellOtherAssets", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
@@ -336,16 +343,17 @@ func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, count 
 		return err
 	}
 
-	err = service.playerService.SellOtherAssets(entity.CardOtherAssets{
+	err = service.playerService.SellOtherAssets(assetId, entity.CardMarketOtherAssets{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
 		Symbol:      race.CurrentCard.Symbol,
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
-		Count:       count,
 		Cost:        race.CurrentCard.Cost,
-		CostPerOne:  race.CurrentCard.CostPerOne,
-	}, player)
+		Rule:        race.CurrentCard.Rule,
+		SubRule:     race.CurrentCard.SubRule,
+		AssetType:   race.CurrentCard.AssetType,
+	}, player, count)
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
@@ -356,52 +364,39 @@ func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, count 
 	return err
 }
 
-func (service *raceService) RiskStocksAction(raceId uint64, userId uint64) (error, dto.RiskResponseDTO) {
-	logger.Info("RaceService.RiskStocksAction", map[string]interface{}{
+func (service *raceService) SellBusiness(raceId uint64, userId uint64, assetId string, count int) error {
+	logger.Info("RaceService.SellBusiness", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
+		"count":  count,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, true)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
 
 	if err != nil {
-		return err, dto.RiskResponseDTO{RolledDice: 0}
+		return err
 	}
 
-	dice := objects.Dice{}
-	roll := dice.Roll(0)
-	rolledDice := roll[0] | 1
-
-	var status bool
-
-	err, status = service.playerService.BuyRiskStocks(entity.CardRiskStocks{
+	err, _ = service.playerService.SellBusiness(assetId, entity.CardMarketBusiness{
 		ID:          race.CurrentCard.ID,
 		Type:        race.CurrentCard.Type,
+		Symbol:      race.CurrentCard.Symbol,
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
-		Count:       race.CurrentCard.Count,
-		CostPerOne:  race.CurrentCard.CostPerOne,
-		Dices:       race.CurrentCard.Dices,
-		ExtraDices:  race.CurrentCard.ExtraDices,
-		Symbol:      race.CurrentCard.Symbol,
-	}, player, rolledDice)
+		Cost:        race.CurrentCard.Cost,
+		CashFlow:    race.CurrentCard.CashFlow,
+		Rule:        race.CurrentCard.Rule,
+		SubRule:     race.CurrentCard.SubRule,
+		AssetType:   race.CurrentCard.AssetType,
+	}, player, count)
 
 	if err == nil {
-		if status {
-			go service.SetTransaction(race.ID, player, entity.TxTypes.Stocks, storage.MessageSuccessRiskStocksDeal)
-			//this.setTransactionState('risk', player.username, messages.SUCCESS_RISK_DEAL, { type: 'success', timeout: 1000 });
-			//this.#log.addLog(player, `Рискованный бизнес - ${this.#card.symbol} за $${this.#card.cost}`);
-		} else {
-			go service.SetTransaction(race.ID, player, entity.TxTypes.Stocks, storage.MessageFailRiskStocksDeal)
-			//this.setTransactionState('risk', player.username, messages.FAIL_RISK_DEAL, { type: 'warning', timeout: 1000 });
-		}
-
-		//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 		race.Respond(player.ID, race.CurrentPlayer.ID)
 		err, _ = service.UpdateRace(&race)
+		go service.SetTransaction(race.ID, player, entity.TxTypes.Other, storage.MessageGoldHasBeenSold)
 	}
 
-	return err, dto.RiskResponseDTO{RolledDice: rolledDice}
+	return err
 }
 
 func (service *raceService) StocksAction(raceId uint64, userId uint64, count int) error {
@@ -438,49 +433,6 @@ func (service *raceService) StocksAction(raceId uint64, userId uint64, count int
 		race.Respond(player.ID, race.CurrentPlayer.ID)
 		err, _ = service.UpdateRace(&race)
 		go service.SetTransaction(race.ID, player, entity.TxTypes.Stocks, storage.MessageYouBoughtStocks)
-	}
-
-	return err
-}
-
-func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRace bool, dice int) error {
-	logger.Info("RaceService.LotteryAction", map[string]interface{}{
-		"raceId": raceId,
-		"userId": userId,
-	})
-
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
-
-	if err != nil {
-		return err
-	}
-
-	var result bool
-
-	err, result = service.playerService.BuyLottery(entity.CardLottery{
-		ID:          race.CurrentCard.ID,
-		Type:        race.CurrentCard.Type,
-		Symbol:      race.CurrentCard.Symbol,
-		Heading:     race.CurrentCard.Heading,
-		Description: race.CurrentCard.Description,
-		Cost:        race.CurrentCard.Cost,
-		Lottery:     race.CurrentCard.Lottery,
-		Rule:        race.CurrentCard.Rule,
-		SubRule:     race.CurrentCard.SubRule,
-		Failure:     race.CurrentCard.Failure,
-		Success:     race.CurrentCard.Success,
-		Outcome:     race.CurrentCard.Outcome,
-	}, player, dice)
-
-	if err != nil {
-		return err
-	}
-
-	race.Respond(player.ID, race.CurrentPlayer.ID)
-	err, _ = service.UpdateRace(&race)
-
-	if !result {
-		err = errors.New(storage.MessageFailLottery)
 	}
 
 	return err

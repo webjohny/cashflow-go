@@ -179,6 +179,9 @@ func main() {
 	{
 		playerTestRoutes.GET("/", playerTestController.Index)
 		playerTestRoutes.GET("/sell-stocks", playerTestController.SellStocks)
+		playerTestRoutes.GET("/sell-business", playerTestController.SellBusiness)
+		playerTestRoutes.GET("/sell-real-estate", playerTestController.SellRealEstate)
+		playerTestRoutes.GET("/sell-other-assets", playerTestController.SellOtherAssets)
 
 		playerTestRoutes.GET("/increase-stocks", playerTestController.IncreaseStocks)
 		playerTestRoutes.GET("/decrease-stocks", playerTestController.DecreaseStocks)
@@ -188,6 +191,7 @@ func main() {
 		playerTestRoutes.GET("/buy-real-estate", playerTestController.BuyRealEstate)
 		playerTestRoutes.GET("/buy-lottery", playerTestController.BuyLottery)
 		playerTestRoutes.GET("/buy-business", playerTestController.BuyBusiness)
+		playerTestRoutes.GET("/buy-partner-other-assets", playerTestController.BuyOtherAssetsInPartnership)
 		playerTestRoutes.GET("/buy-partner-real-estate", playerTestController.BuyRealEstateInPartnership)
 		playerTestRoutes.GET("/buy-partner-business", playerTestController.BuyBusinessInPartnership)
 

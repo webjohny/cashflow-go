@@ -32,7 +32,7 @@ func NewPlayerRepository(dbConn *gorm.DB) PlayerRepository {
 }
 
 func (db *playerConnection) InsertPlayer(b *entity.Player) (error, entity.Player) {
-	logger.Info("PlayerRepository.InsertPlayer", helper.JsonSerialize(b))
+	logger.Info("PlayerRepository.InsertPlayer", b.ID)
 
 	result := db.connection.Save(&b)
 
@@ -57,13 +57,7 @@ func (db *playerConnection) AllByRaceId(raceId uint64) []entity.Player {
 }
 
 func (db *playerConnection) UpdatePlayer(b *entity.Player) (error, entity.Player) {
-	logger.Info("PlayerRepository.UpdatePlayer", helper.JsonSerialize(b))
-
-	logger.Println("UpdatePlayer", map[string]interface{}{
-		"ID":        b.ID,
-		"CASH_FLOW": b.CashFlow,
-		"BUSINESS":  b.Assets.Business,
-	})
+	logger.Info("PlayerRepository.UpdatePlayer", b.ID)
 
 	result := db.connection.Select("*").Updates(&b)
 
@@ -79,8 +73,8 @@ func (db *playerConnection) UpdatePlayer(b *entity.Player) (error, entity.Player
 
 func (db *playerConnection) UpdateCash(b *entity.Player, cash int) {
 	logger.Info("PlayerRepository.UpdateCash", map[string]interface{}{
-		"cash":   cash,
-		"player": helper.JsonSerialize(b),
+		"cash":     cash,
+		"playerId": b.ID,
 	})
 
 	result := db.connection.Model(&b).Select("Cash").Update("cash", cash)

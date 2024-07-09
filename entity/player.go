@@ -188,6 +188,16 @@ func (e *Player) FindBusinessBySymbol(symbol string) (int, *CardBusiness) {
 	return 0, &CardBusiness{}
 }
 
+func (e *Player) FindBusinessByID(ID string) (int, *CardBusiness) {
+	for i := 0; i < len(e.Assets.Business); i++ {
+		if ID == e.Assets.Business[i].ID {
+			return i, &e.Assets.Business[i]
+		}
+	}
+
+	return 0, &CardBusiness{}
+}
+
 func (e *Player) FindAllBusinessBySymbol(symbol string) []*CardBusiness {
 	items := make([]*CardBusiness, 0)
 
@@ -198,6 +208,23 @@ func (e *Player) FindAllBusinessBySymbol(symbol string) []*CardBusiness {
 	}
 
 	return items
+}
+
+func (e *Player) ReduceLimitedShares(ID string, count int) {
+	_, shares := e.FindBusinessByID(ID)
+
+	for i := 0; i < len(shares.History); i++ {
+		if shares.History[i].Count > count {
+			shares.History[i].Count -= count
+			shares.History[i].SumCost()
+
+			break
+		} else {
+			count -= shares.History[i].Count
+			shares.History = append(shares.History[:i], shares.History[i+1:]...)
+			i--
+		}
+	}
 }
 
 func (e *Player) AddBusiness(card CardBusiness) {
@@ -215,7 +242,7 @@ func (e *Player) AddStocks(card CardStocks) {
 	}
 }
 
-func (e *Player) FindRealEstate(id string) *CardRealEstate {
+func (e *Player) FindRealEstateByID(id string) *CardRealEstate {
 	for i := 0; i < len(e.Assets.RealEstates); i++ {
 		if id == e.Assets.RealEstates[i].ID {
 			return &e.Assets.RealEstates[i]
@@ -225,7 +252,17 @@ func (e *Player) FindRealEstate(id string) *CardRealEstate {
 	return &CardRealEstate{}
 }
 
-func (e *Player) FindOtherAssets(symbol string) (int, *CardOtherAssets) {
+func (e *Player) FindRealEstateBySymbol(symbol string) (int, *CardRealEstate) {
+	for i := 0; i < len(e.Assets.RealEstates); i++ {
+		if symbol == e.Assets.RealEstates[i].Symbol {
+			return i, &e.Assets.RealEstates[i]
+		}
+	}
+
+	return 0, &CardRealEstate{}
+}
+
+func (e *Player) FindOtherAssetsBySymbol(symbol string) (int, *CardOtherAssets) {
 	for i := 0; i < len(e.Assets.OtherAssets); i++ {
 		if symbol == e.Assets.OtherAssets[i].Symbol {
 			return i, &e.Assets.OtherAssets[i]
@@ -235,17 +272,38 @@ func (e *Player) FindOtherAssets(symbol string) (int, *CardOtherAssets) {
 	return -1, &CardOtherAssets{}
 }
 
+func (e *Player) FindOtherAssetsByID(ID string) (int, *CardOtherAssets) {
+	for i := 0; i < len(e.Assets.OtherAssets); i++ {
+		if ID == e.Assets.OtherAssets[i].ID {
+			return i, &e.Assets.OtherAssets[i]
+		}
+	}
+
+	return -1, &CardOtherAssets{}
+}
+
 func (e *Player) UpdateAsset(symbol string, card CardOtherAssets) {
-	index, _ := e.FindOtherAssets(symbol)
+	index, _ := e.FindOtherAssetsBySymbol(symbol)
 
 	e.Assets.OtherAssets[index] = card
 }
 
 func (e *Player) RemoveOtherAssets(symbol string) {
-	index, _ := e.FindOtherAssets(symbol)
+	index, _ := e.FindOtherAssetsBySymbol(symbol)
 	if index >= 0 && index < len(e.Assets.OtherAssets) {
 		e.Assets.OtherAssets = append(e.Assets.OtherAssets[:index], e.Assets.OtherAssets[index+1:]...)
 	}
+}
+
+func (e *Player) RemoveOtherAssetsByID(ID string) {
+	index, _ := e.FindOtherAssetsByID(ID)
+	if index >= 0 && index < len(e.Assets.OtherAssets) {
+		e.Assets.OtherAssets = append(e.Assets.OtherAssets[:index], e.Assets.OtherAssets[index+1:]...)
+	}
+}
+
+func (h *CardOtherAssets) SumCost() {
+	h.Cost = h.CostPerOne * h.Count
 }
 
 func (e *Player) RemoveStocks(symbol string) {
@@ -261,6 +319,7 @@ func (e *Player) ReduceStocks(symbol string, count int) {
 	for i := 0; i < len(stocks.History); i++ {
 		if stocks.History[i].Count > count {
 			stocks.History[i].Count -= count
+			stocks.History[i].SumCost()
 
 			break
 		} else {
