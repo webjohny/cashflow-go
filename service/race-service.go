@@ -238,7 +238,7 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 		SubRule:     race.CurrentCard.SubRule,
 		Failure:     race.CurrentCard.Failure,
 		Success:     race.CurrentCard.Success,
-		Outcome:     race.CurrentCard.Outcome,
+		Outcome:     race.CurrentCard.Outcome.(entity.CardLotteryOutcome),
 	}, player, rolledDice)
 
 	if err == nil {
@@ -625,7 +625,7 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 	cardMarket.Fill(race.CurrentCard)
 
 	if actionType == "damage" {
-		err = service.playerService.MarketPayDamages(cardMarket, player)
+		err = service.playerService.MarketDamage(cardMarket, player)
 	} else if actionType == "business" {
 		cardMarketBusiness := entity.CardMarketBusiness{}
 		cardMarketBusiness.Fill(race.CurrentCard)

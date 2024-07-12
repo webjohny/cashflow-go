@@ -108,7 +108,15 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 		tile = service.getBigCardType(int(player.CurrentPosition))
 	}
 
-	race.CurrentCard = service.getCardByTile(tile, race.CardMap.Active[action])
+	if !race.CardMap.HasMapping() {
+		cardList := service.GetCards()
+
+		race.CardMap.SetMap(cardList)
+	}
+
+	race.CardMap.Next(tile)
+
+	race.CurrentCard = service.getCardByTile(tile, race.CardMap.Active[tile])
 
 	err = service.processCard(action, race, player)
 
@@ -338,19 +346,19 @@ func (service *cardService) processCard(action string, race entity.Race, player 
 		cardBusinessMarket := entity.CardMarketBusiness{}
 		cardBusinessMarket.Fill(race.CurrentCard)
 
-		if race.CurrentCard.ApplicableToEveryOne {
-			players := service.playerService.GetAllPlayersByRaceId(race.ID)
-
-			for _, pl := range players {
-				if race.CurrentCard.Type == "business" {
-					return service.playerService.MarketBusiness(cardBusinessMarket, pl)
-				}
-			}
-		} else {
-			if race.CurrentCard.Type == "business" {
-				return service.playerService.MarketBusiness(cardBusinessMarket, player)
-			}
-		}
+		//if race.CurrentCard.ApplicableToEveryOne {
+		//	players := service.playerService.GetAllPlayersByRaceId(race.ID)
+		//
+		//	for _, pl := range players {
+		//		if race.CurrentCard.Type == "business" {
+		//			return service.playerService.MarketBusiness(cardBusinessMarket, pl)
+		//		}
+		//	}
+		//} else {
+		//	if race.CurrentCard.Type == "business" {
+		//		return service.playerService.MarketBusiness(cardBusinessMarket, player)
+		//	}
+		//}
 	}
 
 	return nil

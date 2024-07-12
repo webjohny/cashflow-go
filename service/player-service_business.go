@@ -6,6 +6,7 @@ import (
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/storage"
+	"math"
 )
 
 func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error {
@@ -29,10 +30,19 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 			return errors.New(storage.ErrorCommonPassiveIncomeGreaterThanCashFlowOfCard)
 		}
 
-		for _, part := range parts {
+		percent := 0
+
+		for i, part := range parts {
 			if part.Percent == 0 {
-				part.Percent = (part.Passive * fullPassiveIncome) * 100
+				parts[i].Percent = int(math.Floor((float64(part.Passive) / float64(fullPassiveIncome)) * 100))
 			}
+			percent += parts[i].Percent
+		}
+
+		if percent > 100 {
+			parts[0].Percent -= percent - 100
+		} else if percent < 100 {
+			parts[0].Percent += 100 - percent
 		}
 	} else if card.AssetType == entity.BusinessTypes.Limited {
 		cardCost = 0

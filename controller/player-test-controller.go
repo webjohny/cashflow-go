@@ -15,7 +15,8 @@ import (
 )
 
 type PlayerTestController interface {
-	BuyStocks(ctx *gin.Context)
+	MarketManipulation(ctx *gin.Context)
+	DamageRealEstate(ctx *gin.Context)
 	SellStocks(ctx *gin.Context)
 	SellBusiness(ctx *gin.Context)
 	SellRealEstate(ctx *gin.Context)
@@ -23,6 +24,7 @@ type PlayerTestController interface {
 	DecreaseStocks(ctx *gin.Context)
 	IncreaseStocks(ctx *gin.Context)
 	BuyRealEstate(ctx *gin.Context)
+	BuyStocks(ctx *gin.Context)
 	BuyBusiness(ctx *gin.Context)
 	BuyBigBusiness(ctx *gin.Context)
 	BuyLottery(ctx *gin.Context)
@@ -90,9 +92,81 @@ var Links = map[string]map[string]string{
 		"Удвоение кол-во акций":                       "/test/player/increase-stocks",
 		"Разделение (на 3) кол-во акций":              "/test/player/decrease-stocks",
 		"Недвижимость повреждена":                     "/test/player/damage-real-estate",
-		"Бизнес идёт вверх (прибавка к пасс. доходу)": "/test/player/business-growth-up",
-		"Бизнес идёт вниз (убавление пасс. дохода)":   "/test/player/business-growth-down",
+		"Бизнес идёт вверх (прибавка к пасс. доходу)": "/test/player/market-manipulation?type=success",
+		//"Бизнес идёт вниз (убавление пасс. дохода)":   "/test/player/market-manipulation?type=failure",
+		"Удары инфляции": "/test/player/market-manipulation?type=inflation",
 	},
+}
+
+func (c *playerTestController) MarketManipulation(ctx *gin.Context) {
+	c.cleaning(ctx)
+	b := c.getPlayer(ctx)
+
+	card := c.getCard(ctx, "inflation").(entity.CardMarket)
+
+	err := c.playerService.MarketManipulation(card, b)
+
+	if err != nil {
+		logger.Error(err, nil)
+
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+
+	request.FinalResponse(ctx, err, PlayerResponse{
+		ID:               player.ID,
+		UserID:           player.UserID,
+		Card:             card,
+		OldCash:          b.Cash,
+		NewCash:          player.Cash,
+		OldCashFlow:      b.CalculateCashFlow(),
+		NewCashFlow:      player.CalculateCashFlow(),
+		NewPassiveIncome: player.CalculatePassiveIncome(),
+		Assets:           player.Assets,
+	})
+}
+
+func (c *playerTestController) DamageRealEstate(ctx *gin.Context) {
+	c.cleaning(ctx)
+	b := c.getPlayer(ctx)
+
+	card := entity.CardMarket{
+		ID:          helper.Uuid("damage"),
+		Type:        "damage",
+		Heading:     "Арендатор повредил вашу собственность",
+		Symbol:      "ANY",
+		Description: "Потеряв работу арендатор отказался платить и скрылся, заплатите $1000",
+		AssetType:   entity.MarketTypes.AnyRealEstate,
+		Cost:        1000,
+		OnlyYou:     false,
+	}
+
+	c.addCashForPlayer(&b, card.Cost, false)
+
+	err := c.playerService.MarketDamage(card, b)
+
+	if err != nil {
+		logger.Error(err, nil)
+
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+
+	request.FinalResponse(ctx, err, PlayerResponse{
+		ID:               player.ID,
+		UserID:           player.UserID,
+		Card:             card,
+		OldCash:          b.Cash,
+		NewCash:          player.Cash,
+		OldCashFlow:      b.CalculateCashFlow(),
+		NewCashFlow:      player.CalculateCashFlow(),
+		NewPassiveIncome: player.CalculatePassiveIncome(),
+		Assets:           player.Assets,
+	})
 }
 
 func (c *playerTestController) BuyBigBusiness(ctx *gin.Context) {
@@ -157,16 +231,10 @@ func (c *playerTestController) BuyLottery(ctx *gin.Context) {
 		},
 		Failure: []int{1, 2, 3},
 		Success: []int{4, 5, 6},
-		Outcome: struct {
-			Failure int `json:"failure"`
-			Success int `json:"success"`
-		}(struct {
-			Failure int
-			Success int
-		}{
+		Outcome: entity.CardLotteryOutcome{
 			Failure: 0,
 			Success: 5000,
-		}),
+		},
 	}
 
 	c.addCashForPlayer(&b, card.Cost, false)
@@ -347,7 +415,15 @@ func (c *playerTestController) BuyBusinessInPartnership(ctx *gin.Context) {
 	if card.AssetType == entity.BusinessTypes.Limited {
 		parts = c.fillAmounts(players, card.Limit, 1, 5, "amount")
 	} else {
-		parts = c.fillAmounts(players, card.CashFlow, 10, card.CashFlow/2, "passive")
+		//parts = c.fillAmounts(players, card.CashFlow, 10, card.CashFlow/2, "passive")
+		parts = append(parts, dto.CardPurchasePlayerActionDTO{
+			ID:      int(players[0].ID),
+			Passive: 112,
+		})
+		parts = append(parts, dto.CardPurchasePlayerActionDTO{
+			ID:      int(players[1].ID),
+			Passive: 300 - 112,
+		})
 	}
 
 	logger.Warn(parts)
@@ -803,16 +879,10 @@ func (c *playerTestController) BuyRiskStocks(ctx *gin.Context) {
 		},
 		Failure: []int{1, 2, 3},
 		Success: []int{4, 5, 6},
-		Outcome: struct {
-			Failure int `json:"failure"`
-			Success int `json:"success"`
-		}(struct {
-			Failure int
-			Success int
-		}{
+		Outcome: entity.CardLotteryOutcome{
 			Failure: 0,
 			Success: 100000,
-		}),
+		},
 	}
 
 	c.addCashForPlayer(&b, card.Cost, false)
@@ -854,16 +924,10 @@ func (c *playerTestController) BuyRiskBusiness(ctx *gin.Context) {
 		},
 		Failure: []int{1, 2, 3},
 		Success: []int{4, 5, 6},
-		Outcome: struct {
-			Failure int `json:"failure"`
-			Success int `json:"success"`
-		}(struct {
-			Failure int
-			Success int
-		}{
+		Outcome: entity.CardLotteryOutcome{
 			Failure: 0,
 			Success: 75000,
-		}),
+		},
 	}
 
 	c.addCashForPlayer(&b, card.Cost, false)
@@ -1087,6 +1151,41 @@ func (c *playerTestController) getCard(ctx *gin.Context, defaultValue string) in
 			Heading:     "Золотые монеты 12го века",
 			Description: "Супер возможность на покупку уникальных золотых монет",
 			WholeCost:   10000,
+		}
+
+	case "inflation":
+		return entity.CardMarket{
+			ID:          helper.Uuid("inflation"),
+			Type:        "inflation",
+			Heading:     "Удары инфляции!",
+			Symbol:      "ANY",
+			Description: "Все 3Вг/2Ва дома которыми вы владеете забираются банком без права выкупа.",
+			AssetType:   entity.MarketTypes.EachRealEstate,
+			OnlyYou:     true,
+		}
+
+	case "success":
+		return entity.CardMarket{
+			ID:          helper.Uuid("success"),
+			Type:        "success",
+			Heading:     "Экономический рост",
+			Symbol:      "ANY",
+			Description: "Ваша созданная компания заключила важный договор и ваш пасс. дох. увеличился на $400",
+			AssetType:   entity.MarketTypes.EachStartup,
+			CashFlow:    400,
+			OnlyYou:     true,
+		}
+
+	case "failure":
+		return entity.CardMarket{
+			ID:          helper.Uuid("failure"),
+			Type:        "failure",
+			Heading:     "Арендатор повредил вашу собственность",
+			Symbol:      "ANY",
+			Description: "Потеряв работу арендатор отказался платить и скрылся, заплатите $1000",
+			AssetType:   entity.MarketTypes.AnyRealEstate,
+			Cost:        1000,
+			OnlyYou:     false,
 		}
 
 	default:

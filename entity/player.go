@@ -198,12 +198,12 @@ func (e *Player) FindBusinessByID(ID string) (int, *CardBusiness) {
 	return 0, &CardBusiness{}
 }
 
-func (e *Player) FindAllBusinessBySymbol(symbol string) []*CardBusiness {
-	items := make([]*CardBusiness, 0)
+func (e *Player) FindAllBusinessBySymbol(symbol string) []CardBusiness {
+	items := make([]CardBusiness, 0)
 
 	for i := 0; i < len(e.Assets.Business); i++ {
 		if symbol == e.Assets.Business[i].Symbol {
-			items = append(items, &e.Assets.Business[i])
+			items = append(items, e.Assets.Business[i])
 		}
 	}
 
@@ -260,6 +260,18 @@ func (e *Player) FindRealEstateBySymbol(symbol string) (int, *CardRealEstate) {
 	}
 
 	return 0, &CardRealEstate{}
+}
+
+func (e *Player) FindAllRealEstateBySymbol(symbol string) []CardRealEstate {
+	var realEstates []CardRealEstate
+
+	for i := 0; i < len(e.Assets.RealEstates); i++ {
+		if symbol == e.Assets.RealEstates[i].Symbol {
+			realEstates = append(realEstates, e.Assets.RealEstates[i])
+		}
+	}
+
+	return realEstates
 }
 
 func (e *Player) FindOtherAssetsBySymbol(symbol string) (int, *CardOtherAssets) {

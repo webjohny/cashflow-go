@@ -183,6 +183,7 @@ func main() {
 		playerTestRoutes.GET("/sell-real-estate", playerTestController.SellRealEstate)
 		playerTestRoutes.GET("/sell-other-assets", playerTestController.SellOtherAssets)
 
+		playerTestRoutes.GET("/damage-real-estate", playerTestController.DamageRealEstate)
 		playerTestRoutes.GET("/increase-stocks", playerTestController.IncreaseStocks)
 		playerTestRoutes.GET("/decrease-stocks", playerTestController.DecreaseStocks)
 

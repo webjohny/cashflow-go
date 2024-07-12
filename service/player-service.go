@@ -39,7 +39,8 @@ type PlayerService interface {
 	PayTax(card entity.CardPayTax, player entity.Player) error
 	Downsized(player entity.Player) error
 	MoveToBigRace(player entity.Player) error
-	MarketPayDamages(card entity.CardMarket, player entity.Player) error
+	MarketDamage(card entity.CardMarket, player entity.Player) error
+	MarketManipulation(card entity.CardMarket, player entity.Player) error
 	MarketBusiness(card entity.CardMarketBusiness, player entity.Player) error
 	SellAllProperties(player entity.Player) (error, int)
 	TakeLoan(player entity.Player, amount int) error
@@ -368,8 +369,8 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 	return err
 }
 
-func (service *playerService) MarketPayDamages(card entity.CardMarket, player entity.Player) error {
-	logger.Info("PlayerService.MarketPayDamages", map[string]interface{}{
+func (service *playerService) MarketDamage(card entity.CardMarket, player entity.Player) error {
+	logger.Info("PlayerService.MarketDamage", map[string]interface{}{
 		"playerId": player.ID,
 		"card":     card,
 	})
@@ -382,9 +383,101 @@ func (service *playerService) MarketPayDamages(card entity.CardMarket, player en
 		return errors.New(storage.ErrorYouHaveNoProperties)
 	}
 
-	service.UpdateCash(&player, -card.Cost, "Имущество поврежденно")
+	realEstates := player.Assets.RealEstates
+
+	if card.Symbol != "ANY" {
+		_, asset := player.FindRealEstateBySymbol(card.Symbol)
+
+		if asset.ID == "" {
+			return errors.New(storage.ErrorYouHaveNoProperties)
+		}
+		realEstates = []entity.CardRealEstate{
+			*asset,
+		}
+	}
+
+	if card.AssetType == entity.MarketTypes.AnyRealEstate {
+		service.UpdateCash(&player, -card.Cost, "Имущество поврежденно")
+	} else if card.AssetType == entity.MarketTypes.EachRealEstate {
+		cost := card.Cost * len(realEstates)
+		service.UpdateCash(&player, -cost, "Каждое имущество поврежденно")
+	}
 
 	return nil
+}
+
+func (service *playerService) MarketManipulation(card entity.CardMarket, player entity.Player) error {
+	logger.Info("PlayerService.MarketManipulation", map[string]interface{}{
+		"playerId": player.ID,
+		"card":     card,
+	})
+
+	if card.Type == "inflation" {
+		realEstates := player.Assets.RealEstates
+
+		//@toDo make removing by ID for any realEstate
+		if card.Symbol != "ANY" {
+			assets := player.FindAllRealEstateBySymbol(card.Symbol)
+
+			if len(assets) == 0 {
+				return errors.New(storage.ErrorYouHaveNoProperties)
+			}
+
+			realEstates = assets
+		}
+
+		for _, asset := range realEstates {
+			if !asset.IsOwner {
+				continue
+			}
+
+			player.RemoveBusiness(asset.ID)
+
+			if card.AssetType == entity.MarketTypes.AnyRealEstate {
+				break
+			}
+		}
+		player.Assets.RealEstates = realEstates
+	}
+
+	if card.Type == "success" {
+		businesses := player.Assets.Business
+
+		//@toDo make by ID for any business
+		if card.Symbol != "ANY" {
+			assets := player.FindAllBusinessBySymbol(card.Symbol)
+
+			if len(assets) == 0 {
+				return errors.New(storage.ErrorYouHaveNoProperties)
+			}
+
+			businesses = assets
+		}
+
+		for i, asset := range businesses {
+			if !asset.IsOwner || asset.AssetType == entity.BusinessTypes.Limited {
+				continue
+			}
+
+			percent := asset.Percent
+
+			if percent == 0 {
+				percent = 100
+			}
+
+			businesses[i].CashFlow += (card.CashFlow / 100) * percent
+
+			if card.AssetType == entity.MarketTypes.AnyBusiness ||
+				card.AssetType == entity.MarketTypes.AnyStartup {
+				break
+			}
+		}
+		player.Assets.Business = businesses
+	}
+
+	err, _ := service.UpdatePlayer(&player)
+
+	return err
 }
 
 func (service *playerService) BuyOtherAssets(card entity.CardOtherAssets, player entity.Player, count int) error {
