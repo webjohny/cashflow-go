@@ -50,7 +50,9 @@ type GetRacePlayerResponseDTO struct {
 	LastPosition    uint8                               `json:"last_position"`
 	Transactions    []RacePlayerTransactionsResponseDTO `json:"transactions"`
 	CurrentPosition uint8                               `json:"current_position"`
-	DualDiceCount   uint8                               `json:"dual_dice_count"`
+	ExtraDices      int                                 `json:"extra_dices"`
+	Dices           []int                               `json:"dices,omitempty"`
+	DualDiceCount   int                                 `json:"dual_dice_count"`
 	SkippedTurns    uint8                               `json:"skipped_turns"`
 	CanReRoll       bool                                `json:"can_re_roll"`
 	OnBigRace       bool                                `json:"on_big_race"`

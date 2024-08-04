@@ -30,7 +30,7 @@ func (d *Dice) Serialize() []int {
 
 // Roll simulates rolling the dice and returns the face values
 func (d *Dice) Roll(numberOfDice int) []int {
-	if numberOfDice > 0 {
+	if numberOfDice == 0 {
 		numberOfDice = d.numberOfDice
 	}
 
@@ -38,12 +38,13 @@ func (d *Dice) Roll(numberOfDice int) []int {
 	for i := 0; i < numberOfDice; i++ {
 		faceValues[i] = d.dice[i].Roll()
 	}
+
 	return faceValues
 }
 
 // Face returns the current face values of the dice
 func (d *Dice) Face(numberOfDice int) []int {
-	if numberOfDice > 0 {
+	if numberOfDice == 0 {
 		numberOfDice = d.numberOfDice
 	}
 

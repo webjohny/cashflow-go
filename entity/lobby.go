@@ -61,7 +61,7 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 		SkippedTurns:    0,
 		IsRolledDice:    0,
 		CanReRoll:       0,
-		OnBigRace:       0,
+		OnBigRace:       false,
 		HasBankrupt:     0,
 		AboutToBankrupt: "",
 		HasMlm:          0,

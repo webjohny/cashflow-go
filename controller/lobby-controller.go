@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
@@ -28,8 +29,8 @@ func NewLobbyController(lobbyService service.LobbyService) LobbyController {
 }
 
 func (c *lobbyController) GetLobby(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
-	lobbyId := request.GetLobbyId(ctx)
+	userId := helper.GetUserId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
 	var response interface{}
@@ -42,7 +43,7 @@ func (c *lobbyController) GetLobby(ctx *gin.Context) {
 }
 
 func (c *lobbyController) Create(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
+	userId := helper.GetUserId(ctx)
 	username := ctx.GetString("username")
 
 	var err error
@@ -56,9 +57,9 @@ func (c *lobbyController) Create(ctx *gin.Context) {
 }
 
 func (c *lobbyController) Join(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
+	userId := helper.GetUserId(ctx)
 	username := ctx.GetString("username")
-	lobbyId := request.GetLobbyId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
 	var player entity.LobbyPlayer
@@ -72,7 +73,7 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 
 func (c *lobbyController) Leave(ctx *gin.Context) {
 	username := ctx.GetString("username")
-	lobbyId := request.GetLobbyId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
 
@@ -86,8 +87,8 @@ func (c *lobbyController) Leave(ctx *gin.Context) {
 }
 
 func (c *lobbyController) Cancel(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
-	lobbyId := request.GetLobbyId(ctx)
+	userId := helper.GetUserId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
 

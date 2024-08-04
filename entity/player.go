@@ -61,15 +61,31 @@ type Player struct {
 	Profession      Profession        `gorm:"-" json:"profession"`
 	LastPosition    uint8             `json:"last_position" gorm:"allowzero"`
 	CurrentPosition uint8             `json:"current_position" gorm:"allowzero"`
-	DualDiceCount   uint8             `json:"dual_dice_count" gorm:"allowzero"`
+	ExtraDices      int               `json:"extra_dices" gorm:"allowzero"`
+	DualDiceCount   int               `json:"dual_dice_count" gorm:"allowzero"`
+	Dices           []int             `json:"dices" gorm:"type:json;serializer:json"`
 	SkippedTurns    uint8             `json:"skipped_turns" gorm:"allowzero"`
 	IsRolledDice    uint8             `json:"is_rolled_dice"`
 	CanReRoll       uint8             `json:"can_re_roll"`
-	OnBigRace       uint8             `json:"on_big_race"`
+	OnBigRace       bool              `gorm:"default:false" json:"on_big_race"`
 	HasBankrupt     uint8             `json:"has_bankrupt"`
-	AboutToBankrupt string            `gorm:"type:varchar(255)" json:"about_to_bankrupt"`
+	AboutToBankrupt string            `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
 	HasMlm          uint8             `json:"has_mlm"`
 	CreatedAt       datatypes.Date    `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+}
+
+func (r *Player) CalculateDices() int {
+	var dices int
+	for i := 0; i < len(r.Dices); i++ {
+		dices += r.Dices[i]
+	}
+	return dices
+}
+
+func (r *Player) AddDices(dices []int) {
+	for i := 0; i < len(dices); i++ {
+		r.Dices = append(r.Dices, dices[i])
+	}
 }
 
 func (e *Player) FindStocksBySymbol(symbol string) (int, *CardStocks) {
@@ -97,7 +113,7 @@ func (e *Player) ChangeDiceStatus(status bool) {
 func (e *Player) Move(steps int) {
 	e.LastPosition = e.CurrentPosition
 
-	if e.OnBigRace == 1 {
+	if e.OnBigRace {
 		e.CurrentPosition = uint8((int(e.CurrentPosition) + steps) % 46)
 
 		if e.CurrentPosition == 0 {
@@ -112,8 +128,8 @@ func (e *Player) Move(steps int) {
 	}
 }
 
-func (e *Player) IncrementDualDiceCount() {
-	e.DualDiceCount += 3
+func (e *Player) IncrementDualDiceCount(count int) {
+	e.DualDiceCount += count
 }
 
 func (e *Player) Reset(profession Profession) {
@@ -172,6 +188,18 @@ func (e *Player) DecrementSkippedTurns() {
 
 func (e *Player) HasRealEstates() bool {
 	return len(e.Assets.RealEstates) > 0
+}
+
+func (e *Player) HasOwnRealEstates() bool {
+	if len(e.Assets.RealEstates) > 0 {
+		for i := 0; i < len(e.Assets.RealEstates); i++ {
+			if e.Assets.RealEstates[i].IsOwner {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (e *Player) HasBusiness() bool {

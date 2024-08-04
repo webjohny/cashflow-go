@@ -13,6 +13,7 @@ type PlayerRepository interface {
 	UpdateCash(b *entity.Player, cash int)
 	AllByRaceId(raceId uint64) []entity.Player
 	DeletePlayer(b *entity.Player) error
+	IsCurrentPlayerOnTheRace(player entity.Player) bool
 	FindPlayerById(ID uint64) entity.Player
 	FindPlayerByUsername(username string) entity.Player
 	FindPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
@@ -108,6 +109,19 @@ func (db *playerConnection) FindPlayerById(ID uint64) entity.Player {
 	db.connection.Find(&player, ID)
 
 	return player
+}
+
+func (db *playerConnection) IsCurrentPlayerOnTheRace(player entity.Player) bool {
+	logger.Info("PlayerRepository.IsCurrentPlayerOnRace", map[string]interface{}{
+		"id": player.ID,
+	})
+
+	var count int64
+	db.connection.Model(&entity.Race{}).
+		Where("id = ? AND JSON_EXTRACT(current_player, '$.id') = ?", player.RaceID, player.ID).
+		Count(&count)
+
+	return count > 0
 }
 
 func (db *playerConnection) FindPlayerByUsername(username string) entity.Player {

@@ -63,6 +63,10 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 		"updateCash": updateCash,
 	})
 
+	if count <= 0 {
+		return errors.New(storage.ErrorIncorrectCount)
+	}
+
 	_, stock := player.FindStocksBySymbol(card.Symbol)
 
 	if stock.ID == "" || stock.Count < count {
@@ -78,11 +82,15 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 		player.ReduceStocks(stock.Symbol, count)
 	}
 
+	var err error
+
 	if updateCash {
 		service.UpdateCash(&player, totalCost, card.Symbol)
+	} else {
+		err, _ = service.UpdatePlayer(&player)
 	}
 
-	return nil
+	return err
 }
 
 func (service *playerService) DecreaseStocks(card entity.CardStocks, player entity.Player) error {
@@ -97,11 +105,13 @@ func (service *playerService) DecreaseStocks(card entity.CardStocks, player enti
 		return errors.New(storage.ErrorNotFoundStocks)
 	}
 
-	stock.Count = int(math.Floor(float64(stock.Count / card.Decrease)))
-
+	var count int
 	for i := 0; i < len(stock.History); i++ {
 		stock.History[i].Count = int(math.Floor(float64(stock.History[i].Count) / float64(card.Decrease)))
+		count += stock.History[i].Count
 	}
+
+	stock.Count = count
 
 	err, _ := service.UpdatePlayer(&player)
 
@@ -131,7 +141,7 @@ func (service *playerService) IncreaseStocks(card entity.CardStocks, player enti
 	return err
 }
 
-func (service *playerService) TransferStocks(ID string, sender entity.Player, receiver entity.Player, count int) error {
+func (service *playerService) TransferStocks(card entity.CardStocks, ID string, sender entity.Player, receiver entity.Player, count int) error {
 	logger.Info("PlayerService.TransferStocks", map[string]interface{}{
 		"ID":         ID,
 		"senderId":   sender.ID,
@@ -143,32 +153,16 @@ func (service *playerService) TransferStocks(ID string, sender entity.Player, re
 		return errors.New(storage.ErrorIncorrectCount)
 	}
 
-	for index, item := range sender.Assets.Stocks {
-		if item.ID == ID && item.Count > 0 {
-			senderCount := item.Count
+	_, item := sender.FindStocksBySymbol(card.Symbol)
 
-			if senderCount < count {
-				return errors.New(storage.ErrorNotEnoughStocks)
-			}
-
-			item.Count = count
-			receiver.AddStocks(item)
-
-			item.Count = senderCount - count
-			if item.Count > 0 {
-				sender.Assets.Stocks[index] = item
-			} else {
-				sender.Assets.Stocks = append(sender.Assets.Stocks[:index], sender.Assets.Stocks[index+1:]...)
-			}
-
-			break
-		}
+	if item.Count < count {
+		return errors.New(storage.ErrorNotEnoughStocks)
 	}
 
-	err, player := service.UpdatePlayer(&sender)
+	err := service.SellStocks(card, sender, count, false)
 
 	if err != nil {
-		logger.Error(err, player, map[string]interface{}{
+		logger.Error(err, sender, map[string]interface{}{
 			"ID":     sender.ID,
 			"raceID": sender.RaceID,
 		})
@@ -176,18 +170,17 @@ func (service *playerService) TransferStocks(ID string, sender entity.Player, re
 		return err
 	}
 
-	if err == nil {
-		err, _ = service.UpdatePlayer(&receiver)
+	card.Count = count
+	err = service.BuyStocks(card, receiver, false)
 
-		if err != nil {
-			logger.Error(err, map[string]interface{}{
-				"ID":     receiver.ID,
-				"raceID": receiver.RaceID,
-			})
+	if err != nil {
+		logger.Error(err, receiver, map[string]interface{}{
+			"ID":     receiver.ID,
+			"raceID": receiver.RaceID,
+		})
 
-			return err
-		}
+		return err
 	}
 
-	return err
+	return nil
 }

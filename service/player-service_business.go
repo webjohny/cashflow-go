@@ -17,6 +17,11 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 	})
 
 	cardCost := card.Cost
+
+	if card.DownPayment > 0 {
+		cardCost = card.DownPayment
+	}
+
 	cardCashFlow := card.CashFlow
 
 	if cardCashFlow > 0 && card.AssetType != entity.BusinessTypes.Limited {
@@ -46,11 +51,18 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 		}
 	} else if card.AssetType == entity.BusinessTypes.Limited {
 		cardCost = 0
-
+		cardLimit := 0
 		for _, part := range parts {
 			cardCost += part.Amount * card.Cost
+			cardLimit += part.Amount
+		}
+
+		if card.Limit > 0 && card.Limit < cardLimit {
+			return errors.New(storage.ErrorLimitedPartnership)
 		}
 	}
+
+	logger.Warn("OWNER_CASH", owner.Cash, cardCost)
 
 	if owner.Cash < cardCost {
 		return errors.New(storage.ErrorNotEnoughMoney)
@@ -82,7 +94,7 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 
 		card.IsOwner = card.AssetType == entity.BusinessTypes.Limited || owner.ID == currentPlayer.ID
 
-		err := service.BuyBusiness(card, currentPlayer, part.Amount)
+		err := service.BuyBusiness(card, currentPlayer, part.Amount, owner.ID == currentPlayer.ID)
 
 		if err != nil {
 			logger.Error(err, nil)
@@ -94,7 +106,7 @@ func (service *playerService) BuyBusinessInPartnership(card entity.CardBusiness,
 	return nil
 }
 
-func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player, count int) error {
+func (service *playerService) BuyBusiness(card entity.CardBusiness, player entity.Player, count int, updateCash bool) error {
 	logger.Info("PlayerService.BuyBusiness", map[string]interface{}{
 		"playerId":         player.ID,
 		"player.Cash":      player.Cash,
@@ -150,7 +162,7 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 
 	var err error
 
-	if card.IsOwner {
+	if card.IsOwner && updateCash {
 		if card.WholeCost > 0 {
 			cost = card.WholeCost
 		}
@@ -164,7 +176,11 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 		err, _ = service.UpdatePlayer(&player)
 	}
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return service.AreYouBankrupt(player)
 }
 
 func (service *playerService) TransferBusiness(ID string, sender entity.Player, receiver entity.Player, count int) error {
@@ -215,7 +231,11 @@ func (service *playerService) TransferBusiness(ID string, sender entity.Player, 
 
 	err, _ = service.UpdatePlayer(&receiver)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return service.AreYouBankrupt(sender)
 }
 
 func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player, count int) (error, int) {
@@ -227,14 +247,17 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 
 	var totalCash int
 
-	if !player.HasBusiness() {
-		return errors.New(storage.ErrorYouHaveNoProperties), 0
+	if count <= 0 && card.AssetType == entity.BusinessTypes.Limited {
+		return errors.New(storage.ErrorIncorrectCount), 0
 	}
 
 	_, business := player.FindBusinessByID(ID)
 
+	if business.ID == "" {
+		return errors.New(storage.ErrorYouHaveNoProperties), 0
+	}
 	if !business.IsOwner {
-		return errors.New(storage.ErrorForbidden), 0
+		return errors.New(storage.ErrorForbiddenByOwner), 0
 	}
 
 	if card.Cost < 10 {
@@ -266,7 +289,7 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 	players := service.GetAllPlayersByRaceId(player.RaceID)
 
 	for _, user := range players {
-		_, asset := player.FindBusinessByID(ID)
+		_, asset := user.FindBusinessByID(ID)
 
 		if ID == asset.ID && !asset.IsOwner && asset.AssetType != entity.BusinessTypes.Limited {
 			user.RemoveBusiness(ID)
@@ -279,7 +302,7 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 		}
 	}
 
-	return nil, totalCash
+	return service.AreYouBankrupt(player), totalCash
 }
 
 func (service *playerService) MarketBusiness(card entity.CardMarketBusiness, player entity.Player) error {
@@ -319,5 +342,9 @@ func (service *playerService) MarketBusiness(card entity.CardMarketBusiness, pla
 		err, _ = service.UpdatePlayer(&player)
 	}
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return service.AreYouBankrupt(player)
 }

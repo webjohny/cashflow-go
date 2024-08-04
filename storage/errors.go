@@ -17,7 +17,7 @@ const (
 	ErrorIsNotValidBusiness                           = "error is not valid business"
 	ErrorIsNotValidOtherAssets                        = "error is not valid other assets"
 	ErrorInvalidTypeOfCard                            = "error invalid type of card"
-	ErrorUndefinedDiceValue                           = "error undefined dice value"
+	ErrorWrongAmount                                  = "error wrong amount"
 	ErrorYouHaveNoBabies                              = "error you have no babies"
 	ErrorTooManyAssets                                = "error too many assets"
 	ErrorNotFoundAssets                               = "error not found assets"
@@ -38,4 +38,6 @@ const (
 	ErrorUndefinedTypeOfDeal                          = "error undefined type of deal"
 	ErrorInsufficientPlayers                          = "error insufficient players"
 	ErrorMovingBigRaceDeclined                        = "error moving big race declined"
+	ErrorYouAreBankrupt                               = "error you are bankrupt"
+	ErrorForbiddenByOwner                             = "error forbidden by owner"
 )

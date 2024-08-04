@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
@@ -31,9 +32,9 @@ func NewCardController(cardService service.CardService) CardController {
 }
 
 func (c *cardController) Type(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
@@ -50,9 +51,9 @@ func (c *cardController) Type(ctx *gin.Context) {
 }
 
 func (c *cardController) TestCard(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
@@ -75,9 +76,9 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
@@ -96,9 +97,9 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 func (c *cardController) Selling(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var body dto.CardSellingActionDTO
 
@@ -125,9 +126,9 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	family := ctx.Param("family")
 	actionType := ctx.Param("type")
 
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
@@ -144,9 +145,9 @@ func (c *cardController) Accept(ctx *gin.Context) {
 }
 
 func (c *cardController) Skip(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
@@ -165,9 +166,9 @@ func (c *cardController) Skip(ctx *gin.Context) {
 func (c *cardController) Purchase(ctx *gin.Context) {
 	actionType := ctx.Param("type")
 
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var body dto.CardPurchaseActionDTO
 
@@ -178,7 +179,6 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 
 	var err error
 	var response interface{}
-
 	if raceId == 0 {
 		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {

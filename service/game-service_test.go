@@ -61,7 +61,6 @@ func TestStartGame(t *testing.T) {
 		return nil, entity.Race{
 			ID:                0,
 			Responses:         []entity.RaceResponse{},
-			ParentID:          0,
 			Status:            entity.RaceStatus.STARTED,
 			CurrentPlayer:     entity.RacePlayer{},
 			CurrentCard:       entity.Card{},
@@ -138,7 +137,7 @@ func TestStartGame(t *testing.T) {
 				SkippedTurns:    0,
 				IsRolledDice:    0,
 				CanReRoll:       0,
-				OnBigRace:       0,
+				OnBigRace:       false,
 				HasBankrupt:     0,
 				AboutToBankrupt: "",
 				HasMlm:          0,
@@ -148,7 +147,6 @@ func TestStartGame(t *testing.T) {
 		raceRepo.FindRaceByIdFunc = func(ID uint64, IsBigRace bool) entity.Race {
 			return entity.Race{
 				Responses: make([]entity.RaceResponse, 0),
-				ParentID:  0,
 				Status:    entity.RaceStatus.STARTED,
 				CurrentPlayer: entity.RacePlayer{
 					ID:       1,

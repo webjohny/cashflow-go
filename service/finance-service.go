@@ -5,39 +5,114 @@ import (
 	"fmt"
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
+	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"strconv"
 )
 
 type FinanceService interface {
-	SendMoney(raceId uint64, username string, amount int, player string) error
-	SendAssets(raceId uint64, username string, dto dto.SendAssetsBodyDTO) error
-	PayLoan(raceId uint64, username string, amount int) error
-	TakeLoan(raceId uint64, username string, amount int) error
+	SendMoney(raceId uint64, userId uint64, amount int, player string) error
+	SendAssets(raceId uint64, userId uint64, dto dto.SendAssetsBodyDTO) error
+	PayLoan(raceId uint64, userId uint64, amount int) error
+	TakeLoan(raceId uint64, userId uint64, amount int) error
+	AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) error
 }
 
 type financeService struct {
-	raceService   RaceService
-	playerService PlayerService
+	requestRepository repository.RequestRepository
+	cardService       CardService
+	raceService       RaceService
+	playerService     PlayerService
 }
 
-func NewFinanceService(raceService RaceService, playerService PlayerService) FinanceService {
+func NewFinanceService(requestRepository repository.RequestRepository, cardService CardService, raceService RaceService, playerService PlayerService) FinanceService {
 	return &financeService{
-		raceService:   raceService,
-		playerService: playerService,
+		requestRepository: requestRepository,
+		cardService:       cardService,
+		raceService:       raceService,
+		playerService:     playerService,
 	}
 }
 
-func (service *financeService) SendMoney(raceId uint64, username string, amount int, receiverUsername string) error {
+func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) error {
+	logger.Info("FinanceService.AskMoney", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+		"dto":    dto,
+	})
+
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, false)
+
+	if err != nil {
+		return err
+	}
+
+	if race.ID == 0 {
+		return errors.New(storage.ErrorUndefinedGame)
+	}
+	if player.ID == 0 {
+		return errors.New(storage.ErrorUndefinedPlayer)
+	}
+
+	if dto.Type == "" {
+		dto.Type = entity.UserRequestTypes.Salary
+	}
+
+	//@toDo need to make checking if its not repeated
+
+	if !race.Options.EnableManager {
+		countPayDay := service.cardService.CheckPayDay(player)
+
+		if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
+			if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
+				return errors.New(storage.ErrorWrongAmount)
+			}
+		} else if dto.Type == entity.UserRequestTypes.Salary {
+			if countPayDay == 0 || dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
+				return errors.New(storage.ErrorWrongAmount)
+			}
+		} else if dto.Type == entity.UserRequestTypes.Baby && dto.Amount != 1000 {
+			return errors.New(storage.ErrorWrongAmount)
+		}
+	}
+
+	var request entity.Request
+
+	request.Type = dto.Type
+	request.CurrentCard = race.CurrentCard.ID
+	request.RaceID = raceId
+	request.UserID = userId
+	request.Message = dto.Message
+	request.Amount = dto.Amount
+	request.Data = map[string]interface{}{
+		"last":    player.LastPosition,
+		"current": player.CurrentPosition,
+	}
+
+	if !race.Options.EnableManager {
+		request.Approved = true
+	}
+
+	err, _ = service.requestRepository.Insert(&request)
+
+	return err
+}
+
+func (service *financeService) SendMoney(raceId uint64, userId uint64, amount int, receiverUsername string) error {
 	logger.Info("FinanceService.SendMoney", map[string]interface{}{
 		"raceId":           raceId,
-		"username":         username,
+		"userId":           userId,
 		"amount":           amount,
 		"receiverUsername": receiverUsername,
 	})
 
-	sender := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
+	err, sender := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	if err != nil {
+		return err
+	}
 	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
 
 	if sender.ID == 0 {
@@ -67,14 +142,14 @@ func (service *financeService) SendMoney(raceId uint64, username string, amount 
 		amount,
 		fmt.Sprintf(
 			"%s перевёл Вам $%s",
-			helper.CamelToCapitalize(username),
+			helper.CamelToCapitalize(sender.Username),
 			strconv.Itoa(amount),
 		),
 	)
 
 	go service.raceService.SetTransaction(raceId, sender, "", fmt.Sprintf(
 		"%s перевёл $%s игроку %s",
-		helper.CamelToCapitalize(username),
+		helper.CamelToCapitalize(sender.Username),
 		strconv.Itoa(amount),
 		helper.CamelToCapitalize(receiverUsername),
 	))
@@ -82,14 +157,21 @@ func (service *financeService) SendMoney(raceId uint64, username string, amount 
 	return nil
 }
 
-func (service *financeService) SendAssets(raceId uint64, username string, dto dto.SendAssetsBodyDTO) error {
+func (service *financeService) SendAssets(raceId uint64, userId uint64, dto dto.SendAssetsBodyDTO) error {
 	logger.Info("FinanceService.SendAssets", map[string]interface{}{
 		"raceId": raceId,
+		"userId": userId,
 		"dto":    dto,
 	})
 
-	sender := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
+	err, sender := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	if err != nil {
+		return err
+	}
+
 	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, dto.Player)
+	race := service.raceService.GetRaceByRaceId(raceId, false)
 
 	if sender.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
@@ -102,10 +184,11 @@ func (service *financeService) SendAssets(raceId uint64, username string, dto dt
 	var transactionMessage string
 	var transactionSenderMessage string
 	var transactionReceiverMessage string
-	var err error
 
 	if dto.Asset == "stock" {
-		err = service.playerService.TransferStocks(dto.AssetId, sender, receiver, dto.Amount)
+		cardStocks := entity.CardStocks{}
+		cardStocks.Fill(race.CurrentCard)
+		err = service.playerService.TransferStocks(cardStocks, dto.AssetId, sender, receiver, dto.Amount)
 
 		if err == nil {
 			transactionSenderMessage = fmt.Sprintf(
@@ -120,7 +203,7 @@ func (service *financeService) SendAssets(raceId uint64, username string, dto dt
 			)
 			transactionMessage = fmt.Sprintf(
 				"%s перевёл акции (%s шт.) игроку %s",
-				helper.CamelToCapitalize(username),
+				helper.CamelToCapitalize(sender.Username),
 				strconv.Itoa(dto.Amount),
 				helper.CamelToCapitalize(dto.Player),
 			)
@@ -141,7 +224,7 @@ func (service *financeService) SendAssets(raceId uint64, username string, dto dt
 			)
 			transactionMessage = fmt.Sprintf(
 				"%s перевёл акции (%s шт.) игроку %s",
-				helper.CamelToCapitalize(username),
+				helper.CamelToCapitalize(sender.Username),
 				strconv.Itoa(dto.Amount),
 				helper.CamelToCapitalize(dto.Player),
 			)
@@ -157,14 +240,18 @@ func (service *financeService) SendAssets(raceId uint64, username string, dto dt
 	return err
 }
 
-func (service *financeService) PayLoan(raceId uint64, username string, amount int) error {
+func (service *financeService) PayLoan(raceId uint64, userId uint64, amount int) error {
 	logger.Info("FinanceService.PayLoan", map[string]interface{}{
-		"raceId":   raceId,
-		"username": username,
-		"amount":   amount,
+		"raceId": raceId,
+		"userId": userId,
+		"amount": amount,
 	})
 
-	player := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
+	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	if err != nil {
+		return err
+	}
 
 	if player.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
@@ -174,12 +261,12 @@ func (service *financeService) PayLoan(raceId uint64, username string, amount in
 		return errors.New(storage.ErrorWrongAmountForPayingLoan)
 	}
 
-	err := service.playerService.PayLoan(player, "bankLoan", amount)
+	err = service.playerService.PayLoan(player, "bankLoan", amount)
 
 	if err == nil {
 		go service.raceService.SetTransaction(raceId, player, "", fmt.Sprintf(
 			"%s отдал кредит $%s",
-			helper.CamelToCapitalize(username),
+			helper.CamelToCapitalize(player.Username),
 			strconv.Itoa(amount),
 		))
 	}
@@ -187,14 +274,14 @@ func (service *financeService) PayLoan(raceId uint64, username string, amount in
 	return err
 }
 
-func (service *financeService) TakeLoan(raceId uint64, username string, amount int) error {
+func (service *financeService) TakeLoan(raceId uint64, userId uint64, amount int) error {
 	logger.Info("FinanceService.TakeLoan", map[string]interface{}{
-		"raceId":   raceId,
-		"username": username,
-		"amount":   amount,
+		"raceId": raceId,
+		"userId": userId,
+		"amount": amount,
 	})
 
-	player := service.playerService.GetPlayerByUsernameAndRaceId(raceId, username)
+	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 	if player.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
@@ -204,12 +291,12 @@ func (service *financeService) TakeLoan(raceId uint64, username string, amount i
 		return errors.New(storage.ErrorWrongAmountForTakingLoan)
 	}
 
-	err := service.playerService.TakeLoan(player, amount)
+	err = service.playerService.TakeLoan(player, amount)
 
 	if err == nil {
 		go service.raceService.SetTransaction(raceId, player, "", fmt.Sprintf(
 			"%s взял в кредит $%s",
-			helper.CamelToCapitalize(username),
+			helper.CamelToCapitalize(player.Username),
 			strconv.Itoa(amount),
 		))
 	}

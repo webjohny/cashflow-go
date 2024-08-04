@@ -53,7 +53,9 @@ type RaceBankruptPlayer struct {
 }
 
 type RaceOptions struct {
-	EnableWaitList bool `json:"enable_wait_list"`
+	EnableManager  bool   `json:"enable_manager"`
+	EnableWaitList bool   `json:"enable_wait_list"`
+	CardCollection string `json:"card_collection"`
 }
 
 type RaceCardMap struct {
@@ -117,7 +119,7 @@ func (rcm *RaceCardMap) Next(action string) {
 type Race struct {
 	ID                uint64               `gorm:"primary_key:auto_increment" json:"id"`
 	Responses         []RaceResponse       `gorm:"type:json;serializer:json" json:"responses"`
-	ParentID          uint64               `gorm:"index" json:"parent_id"`
+	IsMultiFlow       bool                 `gorm:"is_multi_flow" json:"is_multi_flow"`
 	Status            string               `gorm:"status;type:enum('lobby','started','cancelled','finished')" json:"status"`
 	CurrentPlayer     RacePlayer           `gorm:"type:json;serializer:json" json:"current_player,omitempty"`
 	CurrentCard       Card                 `gorm:"type:json;serializer:json" json:"current_card,omitempty"`
@@ -132,7 +134,11 @@ type Race struct {
 
 func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
 	if len(r.Responses) > 0 {
-		playerId := ID | currentPlayerID
+		playerId := ID
+
+		if ID == 0 {
+			playerId = currentPlayerID
+		}
 		for i := 0; i < len(r.Responses); i++ {
 			if playerId == r.Responses[i].ID {
 				r.Responses[i].Responded = true
@@ -141,7 +147,19 @@ func (r *Race) Respond(ID uint64, currentPlayerID uint64) {
 	}
 }
 
+func (r *Race) ResetResponses() {
+	if len(r.Responses) > 0 {
+		for i := 0; i < len(r.Responses); i++ {
+			r.Responses[i].Responded = false
+		}
+	}
+}
+
 func (r *Race) IsReceived(username string) bool {
+	if r.IsMultiFlow {
+		return r.AreReceived()
+	}
+
 	if len(r.Responses) > 0 {
 		for i := 0; i < len(r.Responses); i++ {
 			if username == r.Responses[i].Username {
@@ -153,6 +171,26 @@ func (r *Race) IsReceived(username string) bool {
 	return false
 }
 
+func (r *Race) AreReceived() bool {
+	if len(r.Responses) > 0 {
+		for i := 0; i < len(r.Responses); i++ {
+			if !r.Responses[i].Responded {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func (r *Race) CalculateDices() int {
+	var dices int
+	for i := 0; i < len(r.Dice); i++ {
+		dices += r.Dice[i]
+	}
+	return dices
+}
+
 func (r *Race) GetDice() objects.Dice {
 	dice := 1
 
@@ -160,7 +198,7 @@ func (r *Race) GetDice() objects.Dice {
 		dice = r.Dice[0]
 	}
 
-	return objects.NewDice(dice, 2, 6)
+	return objects.NewDice(dice, 1, 6)
 }
 
 func (r *Race) NextPlayer() {

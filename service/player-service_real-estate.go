@@ -23,7 +23,7 @@ func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player e
 
 	service.UpdateCash(&player, -card.DownPayment, card.Heading)
 
-	return nil
+	return service.AreYouBankrupt(player)
 }
 
 func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEstate, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error {
@@ -109,7 +109,7 @@ func (service *playerService) SellAllProperties(player entity.Player) (error, in
 
 	player.Assets.RealEstates = make([]entity.CardRealEstate, 0)
 
-	return nil, totalCash
+	return service.AreYouBankrupt(player), totalCash
 }
 
 func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error {
@@ -128,7 +128,7 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 	}
 
 	if !realEstate.IsOwner {
-		return errors.New(storage.ErrorForbidden)
+		return errors.New(storage.ErrorForbiddenByOwner)
 	}
 
 	if card.AssetType == entity.RealEstateTypes.Building {
@@ -150,7 +150,7 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 	players := service.GetAllPlayersByRaceId(player.RaceID)
 
 	for _, user := range players {
-		asset := player.FindRealEstateByID(ID)
+		asset := user.FindRealEstateByID(ID)
 
 		if ID == asset.ID && !asset.IsOwner {
 			user.RemoveRealEstate(ID)
@@ -163,5 +163,5 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 		}
 	}
 
-	return nil
+	return service.AreYouBankrupt(player)
 }

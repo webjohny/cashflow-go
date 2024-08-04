@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 )
@@ -21,8 +22,8 @@ func NewPlayerController(playerService service.PlayerService) PlayerController {
 }
 
 func (c *playerController) GetRacePlayer(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
-	raceId := request.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
 
 	var err error
 	var response interface{}

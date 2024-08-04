@@ -3,10 +3,10 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
-	"strconv"
 )
 
 type GameController interface {
@@ -32,23 +32,23 @@ func NewGameController(gameService service.GameService) GameController {
 }
 
 func (c *gameController) GetGame(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
-	raceId := request.GetRaceId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
 
 	if userId != 0 {
-		response = c.gameService.GetGame(raceId, userId, bigRace)
+		err, response = c.gameService.GetGame(raceId, userId, bigRace)
 	}
 
 	request.FinalResponse(ctx, err, response)
 }
 
 func (c *gameController) Reset(ctx *gin.Context) {
-	userId := request.GetUserId(ctx)
-	raceId := request.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
 
 	var err error
 	var response interface{}
@@ -61,7 +61,7 @@ func (c *gameController) Reset(ctx *gin.Context) {
 }
 
 func (c *gameController) Start(ctx *gin.Context) {
-	lobbyId := request.GetLobbyId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
 
 	var response dto.StartGameResponseDto
 
@@ -75,14 +75,19 @@ func (c *gameController) Start(ctx *gin.Context) {
 }
 
 func (c *gameController) RollDice(ctx *gin.Context) {
-	dice, _ := strconv.Atoi(ctx.Param("dice"))
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	var response dto.RollDiceResponseDto
+	var body dto.RollDiceDto
 
-	err, diceValues := c.gameService.RollDice(raceId, userId, dice, bigRace)
+	if err := ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	err, diceValues := c.gameService.RollDice(raceId, userId, body, bigRace)
 
 	if err == nil {
 		response = dto.RollDiceResponseDto{
@@ -113,8 +118,8 @@ func (c *gameController) ReRollDice(ctx *gin.Context) {
 }
 
 func (c *gameController) Cancel(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	userId := request.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+	userId := helper.GetUserId(ctx)
 
 	err := c.gameService.Cancel(raceId, userId)
 
@@ -122,8 +127,8 @@ func (c *gameController) Cancel(ctx *gin.Context) {
 }
 
 func (c *gameController) ChangeTurn(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	err := c.gameService.ChangeTurn(raceId, bigRace)
 
@@ -131,8 +136,8 @@ func (c *gameController) ChangeTurn(ctx *gin.Context) {
 }
 
 func (c *gameController) GetTiles(ctx *gin.Context) {
-	raceId := request.GetRaceId(ctx)
-	bigRace := request.GetBigRace(ctx)
+	raceId := helper.GetRaceId(ctx)
+	bigRace := helper.GetBigRace(ctx)
 
 	tiles := c.gameService.GetTiles(raceId, bigRace)
 

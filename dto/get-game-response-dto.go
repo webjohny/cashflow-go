@@ -14,6 +14,7 @@ type GetGameResponseDTO struct {
 	CurrentPlayer     *GetRacePlayerResponseDTO  `json:"current_player"`
 	CurrentCard       *entity.Card               `json:"current_card"`
 	GameId            uint64                     `json:"game_id"`
+	IsMultiFlow       bool                       `json:"is_multi_flow"`
 	IsTurnEnded       bool                       `json:"is_turn_ended"`
 	Logs              []entity.RaceLog           `json:"logs"`
 	Notifications     []entity.RaceNotification  `json:"notifications"`
@@ -28,6 +29,7 @@ type GetRaceResponseDTO struct {
 	CurrentPlayer GetRacePlayerResponseDTO   `json:"current_player"`
 	CurrentCard   entity.Card                `json:"current_card"`
 	GameId        uint64                     `json:"game_id"`
+	IsMultiFlow   bool                       `json:"is_multi_flow"`
 	IsTurnEnded   bool                       `json:"is_turn_ended"`
 	Logs          []entity.RaceLog           `json:"logs"`
 	Notifications []entity.RaceNotification  `json:"notifications"`

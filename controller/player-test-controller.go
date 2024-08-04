@@ -15,6 +15,7 @@ import (
 )
 
 type PlayerTestController interface {
+	AddMoney(ctx *gin.Context)
 	MarketManipulation(ctx *gin.Context)
 	DamageRealEstate(ctx *gin.Context)
 	SellStocks(ctx *gin.Context)
@@ -98,6 +99,15 @@ var Links = map[string]map[string]string{
 	},
 }
 
+func (c *playerTestController) AddMoney(ctx *gin.Context) {
+	b := c.getPlayer(ctx)
+
+	cashQuery := ctx.Query("cash")
+	cash, _ := strconv.Atoi(cashQuery)
+
+	c.addCashForPlayer(&b, cash, false)
+}
+
 func (c *playerTestController) MarketManipulation(ctx *gin.Context) {
 	c.cleaning(ctx)
 	b := c.getPlayer(ctx)
@@ -113,7 +123,7 @@ func (c *playerTestController) MarketManipulation(ctx *gin.Context) {
 		return
 	}
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               player.ID,
@@ -154,7 +164,7 @@ func (c *playerTestController) DamageRealEstate(ctx *gin.Context) {
 		return
 	}
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               player.ID,
@@ -185,7 +195,7 @@ func (c *playerTestController) BuyBigBusiness(ctx *gin.Context) {
 	}
 	c.addCashForPlayer(&b, card.Cost, true)
 
-	err := c.playerService.BuyBusiness(card, b, 1)
+	err := c.playerService.BuyBusiness(card, b, 1, true)
 
 	if err != nil {
 		logger.Error(err, nil)
@@ -194,7 +204,7 @@ func (c *playerTestController) BuyBigBusiness(ctx *gin.Context) {
 		return
 	}
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	_, business := player.FindBusinessBySymbol(card.Symbol)
 
@@ -223,7 +233,7 @@ func (c *playerTestController) BuyLottery(ctx *gin.Context) {
 		Heading:     "Sister-In-Law borrows Money",
 		Description: "Sister-in-law is downsized.Needs $5,000 to make house payment.",
 		Cost:        1000,
-		Lottery:     entity.LotteryTypes.Money,
+		AssetType:   entity.LotteryTypes.Money,
 		Rule:        "If you choose to help. Pay $5,000 and roll 1 die:",
 		SubRule: []string{
 			"Die = 1-3, She never pays you back and you're out $5,000",
@@ -241,7 +251,7 @@ func (c *playerTestController) BuyLottery(ctx *gin.Context) {
 
 	err, result := c.playerService.BuyLottery(card, b, helper.Random(6))
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:      player.ID,
@@ -263,7 +273,7 @@ func (c *playerTestController) BuyOtherAssets(ctx *gin.Context) {
 
 	err := c.playerService.BuyOtherAssets(card, b, 5)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -295,7 +305,7 @@ func (c *playerTestController) BuyOtherAssetsInPartnership(ctx *gin.Context) {
 	if card.AssetType == entity.OtherAssetTypes.Piece {
 		parts = c.fillAmounts(players, card.Count, 1, 5, "amount")
 	} else {
-		parts = c.fillAmounts(players, 100, 10, 90, "percent")
+		parts = c.fillAmounts(players, card.Cost, 10, card.Cost, "amount")
 	}
 
 	err := c.playerService.BuyOtherAssetsInPartnership(card, players[1], players, parts)
@@ -481,7 +491,7 @@ func (c *playerTestController) BuyStocks(ctx *gin.Context) {
 
 	err := c.playerService.BuyStocks(card, b, true)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -514,7 +524,7 @@ func (c *playerTestController) SellStocks(ctx *gin.Context) {
 
 	err := c.playerService.SellStocks(card, b, 2100, true)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -541,14 +551,14 @@ func (c *playerTestController) SellBusiness(ctx *gin.Context) {
 		card := c.cardBusiness(ctx, &b)
 		card.IsOwner = true
 
-		err := c.playerService.BuyBusiness(card, b, 0)
+		err := c.playerService.BuyBusiness(card, b, 0, true)
 
 		if err != nil {
 			request.FinalResponse(ctx, err, business)
 			return
 		}
 
-		b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+		err, b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 		_, business = b.FindBusinessBySymbol(typeOfBusiness)
 	}
@@ -584,7 +594,7 @@ func (c *playerTestController) SellBusiness(ctx *gin.Context) {
 
 	err, result := c.playerService.SellBusiness(business.ID, card, b, count)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -622,7 +632,7 @@ func (c *playerTestController) SellRealEstate(ctx *gin.Context) {
 			return
 		}
 
-		b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+		err, b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 		_, realEstate = b.FindRealEstateBySymbol(typeOfRealEstate)
 	}
@@ -654,7 +664,7 @@ func (c *playerTestController) SellRealEstate(ctx *gin.Context) {
 
 	err := c.playerService.SellRealEstate(realEstate.ID, card, b)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -696,7 +706,7 @@ func (c *playerTestController) SellOtherAssets(ctx *gin.Context) {
 			return
 		}
 
-		b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+		err, b = c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 		_, otherAsset = b.FindOtherAssetsBySymbol(typeOf)
 	}
@@ -727,7 +737,7 @@ func (c *playerTestController) SellOtherAssets(ctx *gin.Context) {
 
 	err := c.playerService.SellOtherAssets(otherAsset.ID, card, b, 5)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -758,7 +768,7 @@ func (c *playerTestController) IncreaseStocks(ctx *gin.Context) {
 
 	err := c.playerService.IncreaseStocks(card, b)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -789,7 +799,7 @@ func (c *playerTestController) DecreaseStocks(ctx *gin.Context) {
 
 	err := c.playerService.DecreaseStocks(card, b)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -814,7 +824,7 @@ func (c *playerTestController) BuyRealEstate(ctx *gin.Context) {
 
 	err := c.playerService.BuyRealEstate(card, b)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -845,7 +855,7 @@ func (c *playerTestController) BuyDream(ctx *gin.Context) {
 
 	err := c.playerService.BuyDream(card, b)
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -871,7 +881,7 @@ func (c *playerTestController) BuyRiskStocks(ctx *gin.Context) {
 		Heading:     "Рискованные акции",
 		Description: "Крупнейшая компания распродаёт свои акции по 0.1$, купи 100,000 акций и сможешь забрать 100,000$",
 		Cost:        10000,
-		Lottery:     entity.LotteryTypes.Money,
+		AssetType:   entity.LotteryTypes.Money,
 		Rule:        "If you choose to help. Pay $10,000 and roll 1 die:",
 		SubRule: []string{
 			"Кубик = 1-3, Ты проиграл $10,000",
@@ -889,7 +899,7 @@ func (c *playerTestController) BuyRiskStocks(ctx *gin.Context) {
 
 	err, result := c.playerService.BuyLottery(card, b, helper.Random(6))
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -916,7 +926,7 @@ func (c *playerTestController) BuyRiskBusiness(ctx *gin.Context) {
 		Heading:     "Рискованный бизнес",
 		Description: "Заплати $300,000 и получишь пассивный доход в $75,000",
 		Cost:        300000,
-		Lottery:     entity.LotteryTypes.CashFlow,
+		AssetType:   entity.LotteryTypes.CashFlow,
 		Rule:        "If you choose to help. Pay $10,000 and roll 1 die:",
 		SubRule: []string{
 			"Кубик = 1-3, Ты проиграл $300,000",
@@ -934,7 +944,7 @@ func (c *playerTestController) BuyRiskBusiness(ctx *gin.Context) {
 
 	err, result := c.playerService.BuyLottery(card, b, helper.Random(6))
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	request.FinalResponse(ctx, err, PlayerResponse{
 		ID:               b.ID,
@@ -965,7 +975,7 @@ func (c *playerTestController) BuyBusiness(ctx *gin.Context) {
 
 	card.IsOwner = true
 
-	err := c.playerService.BuyBusiness(card, b, count)
+	err := c.playerService.BuyBusiness(card, b, count, true)
 
 	if err != nil {
 		logger.Error(err, nil)
@@ -974,7 +984,7 @@ func (c *playerTestController) BuyBusiness(ctx *gin.Context) {
 		return
 	}
 
-	player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(b.RaceID, b.UserID)
 
 	_, business := player.FindBusinessBySymbol(card.Symbol)
 
@@ -1048,7 +1058,9 @@ func (c *playerTestController) getPlayer(ctx *gin.Context) entity.Player {
 	userIDNum, _ := strconv.Atoi(ctx.DefaultQuery("userID", "3"))
 	userID := uint64(userIDNum)
 
-	return c.playerService.GetPlayerByUserIdAndRaceId(raceID, userID)
+	_, player := c.playerService.GetPlayerByUserIdAndRaceId(raceID, userID)
+
+	return player
 }
 
 func (c *playerTestController) cardBusiness(ctx *gin.Context, player *entity.Player) entity.CardBusiness {

@@ -12,7 +12,7 @@ type RaceRepository interface {
 	UpdateRace(b *entity.Race) (error, entity.Race)
 	All() []entity.Race
 	DeleteRace(b *entity.Race) error
-	FindRaceById(ID uint64, IsBigRace bool) entity.Race
+	FindRaceById(ID uint64) entity.Race
 }
 
 const RaceTable = "races"
@@ -71,14 +71,10 @@ func (db *raceConnection) DeleteRace(b *entity.Race) error {
 	return nil
 }
 
-func (db *raceConnection) FindRaceById(ID uint64, isBigRace bool) entity.Race {
+func (db *raceConnection) FindRaceById(ID uint64) entity.Race {
 	var race entity.Race
 
-	if !isBigRace {
-		db.connection.Find(&race, ID)
-	} else {
-		db.connection.Where("parent_id = ? AND is_big_race = ?", ID, isBigRace).Find(&race)
-	}
+	db.connection.Where("id = ?", ID).Find(&race)
 
 	return race
 }

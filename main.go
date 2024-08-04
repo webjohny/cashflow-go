@@ -26,7 +26,7 @@ var (
 	raceRepository       repository.RaceRepository        = repository.NewRaceRepository(db)
 	lobbyRepository      repository.LobbyRepository       = repository.NewLobbyRepository(db)
 	userRepository       repository.UserRepository        = repository.NewUserRepository(db)
-	usedCardRepository   repository.UsedCardRepository    = repository.NewUsedCardRepository(db)
+	requestRepository    repository.RequestRepository     = repository.NewRequestRepository(db)
 	playerRepository     repository.PlayerRepository      = repository.NewPlayerRepository(db)
 	professionRepository repository.ProfessionRepository  = repository.NewProfessionRepository(os.Getenv("PROFESSIONS_PATH"))
 	trxRepository        repository.TransactionRepository = repository.NewTransactionRepository(db)
@@ -41,8 +41,8 @@ var (
 	gameService        service.GameService        = service.NewGameService(raceService, playerService, lobbyService, professionService)
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
-	cardService        service.CardService        = service.NewCardService(usedCardRepository, gameService, raceService, playerService)
-	financeService     service.FinanceService     = service.NewFinanceService(raceService, playerService)
+	cardService        service.CardService        = service.NewCardService(gameService, raceService, playerService)
+	financeService     service.FinanceService     = service.NewFinanceService(requestRepository, cardService, raceService, playerService)
 
 	// Controllers
 	gameController       controller.GameController       = controller.NewGameController(gameService)
@@ -157,7 +157,7 @@ func main() {
 		gameRoutes.POST("/start/:lobbyId", gameController.Start)
 		// @toDo Create EP for moving to big race
 		gameRoutes.POST("/move/:raceId", gameController.MoveToBigRace)
-		gameRoutes.GET("/roll-dice/:dice", gameController.RollDice)
+		gameRoutes.POST("/roll-dice", gameController.RollDice)
 		gameRoutes.GET("/re-roll-dice", gameController.RollDice)
 		gameRoutes.GET("/change-turn", gameController.ChangeTurn)
 		gameRoutes.GET("/get/tiles", gameController.GetTiles)
@@ -168,6 +168,7 @@ func main() {
 		financeRoutes.POST("/send/money", financeController.SendMoney)
 		financeRoutes.POST("/send/assets", financeController.SendAssets)
 		financeRoutes.POST("/loan/take", financeController.TakeLoan)
+		financeRoutes.POST("/ask/money", financeController.AskMoney)
 	}
 
 	playerRoutes := r.Group("api/player", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
@@ -178,6 +179,7 @@ func main() {
 	playerTestRoutes := r.Group("test/player")
 	{
 		playerTestRoutes.GET("/", playerTestController.Index)
+		playerTestRoutes.GET("/extra-money", playerTestController.AddMoney)
 		playerTestRoutes.GET("/sell-stocks", playerTestController.SellStocks)
 		playerTestRoutes.GET("/sell-business", playerTestController.SellBusiness)
 		playerTestRoutes.GET("/sell-real-estate", playerTestController.SellRealEstate)

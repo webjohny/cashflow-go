@@ -1,6 +1,7 @@
 package repository_mocks
 
 import (
+	"errors"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/storage"
 )
