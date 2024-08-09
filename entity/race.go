@@ -53,9 +53,9 @@ type RaceBankruptPlayer struct {
 }
 
 type RaceOptions struct {
-	EnableManager  bool   `json:"enable_manager"`
-	EnableWaitList bool   `json:"enable_wait_list"`
-	CardCollection string `json:"card_collection"`
+	EnableManager  bool   `json:"enable_manager,omitempty"`
+	EnableWaitList bool   `json:"enable_wait_list,omitempty"`
+	CardCollection string `json:"card_collection,omitempty"`
 }
 
 type RaceCardMap struct {

@@ -1,463 +1,1373 @@
 {
-  "bigCharity": [
+  "bigCharity":[
     {
-      "id": "bigCharity",
-      "heading": "Благотворительность",
-      "description": "Акционное предложение, заплати $100.000 и можешь кидать до 3х кубиков до конца игры.",
-      "cost": 100000,
-      "extra_dices": 2,
-      "limit": -1,
-      "type": "bigCharity",
-      "symbol": "bigCharity"
+      "id":"bigCharity",
+      "heading":"Благотворительность",
+      "description":"Акционное предложение, заплати $100.000 и можешь кидать до 3х кубиков до конца игры.",
+      "cost":100000,
+      "extra_dices":2,
+      "limit":-1,
+      "type":"bigCharity",
+      "symbol":"bigCharity"
     }
   ],
-  "cashFlowDay": [
+  "cashFlowDay":[
     {
-      "id": "cashFlowDay",
-      "heading": "Кэш-флоу день",
-      "description": "Кэш-Флоу день! Вам начислены дивиденды от инвестиций.",
-      "type": "cashFlowDay",
-      "symbol": "cashFlowDay"
+      "id":"cashFlowDay",
+      "heading":"Кэш-флоу день",
+      "description":"Кэш-Флоу день! Вам начислены дивиденды от инвестиций.",
+      "type":"cashFlowDay",
+      "symbol":"cashFlowDay"
     }
   ],
-  "business": [
+  "business":[
     {
-      "id": "bigRealEstate1",
-      "type": "business",
-      "symbol": "McDonalds",
-      "heading": "McDonalds в центре Нью-Йорка",
-      "description": "Популярный франчайз в центре самого популярного мегаполиса в мире.",
-      "cost": 5000,
-      "cash_flow": 25000
+      "id":"bigRealEstate1",
+      "type":"business",
+      "symbol":"McDonalds",
+      "heading":"McDonalds в центре Нью-Йорка",
+      "description":"Популярный франчайз в центре самого популярного мегаполиса в мире.",
+      "cost":5000,
+      "cash_flow":25000
     },
     {
-      "id": "riskBusiness",
-      "type": "riskBusiness",
-      "symbol": "Gasoline",
-      "heading": "Нефтяной танкер",
-      "description": "Американский нефтяной танкер на окраине города.",
-      "cost": 300000,
-      "asset_type": "cashflow",
-      "sub_rule": [
+      "id":"riskBusiness",
+      "type":"riskBusiness",
+      "symbol":"Gasoline",
+      "heading":"Нефтяной танкер",
+      "description":"Американский нефтяной танкер на окраине города.",
+      "cost":300000,
+      "asset_type":"cashflow",
+      "sub_rule":[
         "Кубик = 1-3, Вы прогорели",
         "Кубик = 4-6, Поздравляем вы получаете пассивный доход в размере $75.000"
       ],
-      "failure": [1, 2, 3],
-      "success": [4, 5, 6],
-      "outcome": {
-        "failure": 0,
-        "success": 75000
+      "failure":[
+        1,
+        2,
+        3
+      ],
+      "success":[
+        4,
+        5,
+        6
+      ],
+      "outcome":{
+        "failure":0,
+        "success":75000
       }
     },
     {
-      "id": "riskStock",
-      "type": "riskStock",
-      "symbol": "CryptoCurrency",
-      "heading": "Новая криптовалюта L7",
-      "description": "Развивающаяся криптокомпания даёт возможность для инвестирования. Купи 100.000 акций по 0.5$ и жди поднятия курса.",
-      "cost": 50000,
-      "asset_type": "cashflow",
-      "sub_rule": [
+      "id":"riskStock",
+      "type":"riskStock",
+      "symbol":"CryptoCurrency",
+      "heading":"Новая криптовалюта L7",
+      "description":"Развивающаяся криптокомпания даёт возможность для инвестирования. Купи 100.000 акций по 0.5$ и жди поднятия курса.",
+      "cost":50000,
+      "asset_type":"cashflow",
+      "sub_rule":[
         "Кубик = 1-3, Вы прогорели",
         "Кубик = 4-6, Поздравляем, вы получаете криптовалюты на $500.000"
       ],
-      "failure": [1, 2, 3],
-      "success": [4, 5, 6],
-      "outcome": {
-        "failure": 0,
-        "success": 500000
+      "failure":[
+        1,
+        2,
+        3
+      ],
+      "success":[
+        4,
+        5,
+        6
+      ],
+      "outcome":{
+        "failure":0,
+        "success":500000
       }
     }
   ],
-  "dream": [
+  "dream":[
     {
-      "id": "dreamWorldTrip1",
-      "heading": "Кругосветное путешествие для пары",
-      "description": "Исполните мечту всей жизни и улетите в тур из 15ти стран со своей второй половинкой.\n Таиланд, Дубай, Бали, Гонконг, США, Канада, Германия, Япония и тд.",
-      "type": "dream",
-      "cost": 5000
+      "id":"dreamWorldTrip1",
+      "heading":"Кругосветное путешествие для пары",
+      "description":"Исполните мечту всей жизни и улетите в тур из 15ти стран со своей второй половинкой.\n Таиланд, Дубай, Бали, Гонконг, США, Канада, Германия, Япония и тд.",
+      "type":"dream",
+      "cost":5000
     }
   ],
-  "tax50percent": [
+  "tax50percent":[
     {
-      "id": "tax50percent",
-      "heading": "Налоговая инспекция",
-      "description": "Произошла рейдерская атака на ваши предприятия и налоговая оштрафовала Вас на кругленькую сумму.\n Заплатите 50% с Ваших средств в банк.",
-      "type": "tax",
-      "percent": 50
+      "id":"tax50percent",
+      "heading":"Налоговая инспекция",
+      "description":"Произошла рейдерская атака на ваши предприятия и налоговая оштрафовала Вас на кругленькую сумму.\n Заплатите 50% с Ваших средств в банк.",
+      "type":"tax",
+      "percent":50
     }
   ],
-  "tax100percent": [
+  "tax100percent":[
     {
-      "id": "tax100percent",
-      "heading": "Мошенничество",
-      "description": "Вы решили инвестировать в криптовалюту почти все свои средства и доверились мошенникам, которые пообещали Вам удвоить Ваше личное состояние.\n Вместо этого вы потеряли всё что у вас было.\n Отдайте в банк все ваши личные средства.",
-      "type": "tax",
-      "percent": 100
+      "id":"tax100percent",
+      "heading":"Мошенничество",
+      "description":"Вы решили инвестировать в криптовалюту почти все свои средства и доверились мошенникам, которые пообещали Вам удвоить Ваше личное состояние.\n Вместо этого вы потеряли всё что у вас было.\n Отдайте в банк все ваши личные средства.",
+      "type":"tax",
+      "percent":100
     }
   ],
-  "bankrupt": [
+  "bankrupt":[
     {
-      "id": "bankrupt",
-      "heading": "Банкротство",
-      "description": "Вы обанкротились, потеряли всё что у вас есть.\n Поздравляем Вас, вы начинаете новую жизнь, с чистого листа.\n Возвращайтесь на малый круг, начиная жизнь с чистого листа.",
-      "type": "bankrupt",
-      "asset_type": "absolute"
+      "id":"bankrupt",
+      "heading":"Банкротство",
+      "description":"Вы обанкротились, потеряли всё что у вас есть.\n Поздравляем Вас, вы начинаете новую жизнь, с чистого листа.\n Возвращайтесь на малый круг, начиная жизнь с чистого листа.",
+      "type":"bankrupt",
+      "asset_type":"absolute"
     }
   ],
-  "smallDeal": [
+  "smallDeal":[
     {
-      "id": "life10u40",
-      "type": "stock",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "price": 30,
-      "range": [5, 30]
+      "id":"lifece01100201",
+      "type":"stock",
+      "symbol":"Brokerlife",
+      "heading":"ПАММ СЧЕТ В Brokerlife",
+      "description":"Блестящий молодой менеджер ПАММ СЧЕТА. Всеверят в его способность все превращфть в золото.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":2,
+      "range":[
+        1,
+        10
+      ]
     },
     {
-      "id": "life10u40",
-      "type": "stock",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "price": 5,
-      "range": [5, 30]
+      "id":"lifece01100501",
+      "type":"stock",
+      "symbol":"Brokerlife",
+      "heading":"ПАММ СЧЕТ В Brokerlife",
+      "description":"Новый инвестиционный пакет ПАММ СЧЕТА. Мир движется очень быстро и акции в этом портфеле обещают взлететь.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":5,
+      "range":[
+        1,
+        10
+      ]
     },
     {
-      "id": "life10u40",
-      "type": "stock",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "price": 10,
-      "range": [5, 30]
+      "id":"lifece01101001",
+      "type":"stock",
+      "symbol":"Brokerlife",
+      "heading":"ПАММ СЧЕТ В Brokerlife",
+      "description":"Инвестиционный портфель Brokerlife перекупил опытный трейдер и диверсифицировал акции в портфеле. Результат радует",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":10,
+      "range":[
+        1,
+        10
+      ]
     },
     {
-      "id": "life10u40",
-      "type": "stock",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "price": 20,
-      "range": [5, 30]
+      "id":"lifece01101501",
+      "type":"stock",
+      "symbol":"Brokerlife",
+      "heading":"ПАММ СЧЕТ И Brokrlife",
+      "description":"ПАММ Счет это отличная возможность для инвесторов. Получите сверхприбыль.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":15,
+      "range":[
+        1,
+        10
+      ]
     },
     {
-      "id": "lottery",
-      "type": "lottery",
-      "symbol": "lottery",
-      "heading": "Sister-In-Law borrows Money",
-      "description": "Sister-in-law is downsized. Needs $5,000 to make house payment.",
-      "cost": 1000,
-      "asset_type": "money",
-      "rule": "If you choose to help. Pay $5,000 and roll 1 die:",
-      "sub_rule": [
+      "id":"lifece10600501",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Третий раз собственники отпровляют машину на доработку! Совет директоров подал в отставку. Слив акций на бирже.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":5,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10601001",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Недавнее слияние понизило рыночные позиции этой компании.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":10,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10601501",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Новейшее оборудование не оправдало надежд, что стало причиной многочисленных сбоев и оттоке клиентов.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":15,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10603001",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Новых автомобилей нет! Провал рекламной кампании влечет падение курса.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":30,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10606001",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Рекордное количество новых моделей Mercedes породило рекордно высокий курс акций.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":60,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10606002",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Спрос на новый модельный ряд поднял курс акций этой Компании.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":60,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10606003",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Удачный проект по внедрению экономного двигателя для взрослых усиливает позиции Mercedes на рынке.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":60,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece10606501",
+      "type":"stock",
+      "symbol":"Mercedes",
+      "heading":"Акции Mercedes",
+      "description":"Автомобильный Бум на новый модельный ряд заметно повлиял на повышение курса акций этой Компании.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":65,
+      "range":[
+        10,
+        60
+      ]
+    },
+    {
+      "id":"lifece401500101",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Дела компании идут настолько хорошо, что компания решила провести дробление акций.",
+      "rule":"Каждый владелец акций Apple удваивает их число (общая стоимость не изменяется).",
+      "increase":2
+    },
+    {
+      "id":"lifece401500201",
+      "type":"stock",
+      "asset_type":"manipulation",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Скандал с некачественным ТЕЛЕФОНОМ. Все акционеры теряют половину прав собственности.",
+      "rule":"Каждый владелец Apple теряет половину (общая стоимость не изменяется).",
+      "decrease":2
+    },
+    {
+      "id":"lifece401503001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Биржевая паника вызвала обвал акций этого давнего поставщика компьютеров.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":30,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece401504001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Ожидание инфляции стало причиной снижения курсовой стоимости акций на рынке.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":40,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece401504002",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Высокие процентные ставки вызвали понижение курсовой стоимости акций.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":40,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece4015010001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Вышел новый планшет конкурентов и Iphone15 упал в цене.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":100,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece4015012001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Вышло новое приложение на всю линейку смартфонов.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":120,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece4015015001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Скачок на фондовом рынке подкинул цену акций на максимальный уровень.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":150,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece20070000001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Бизнес развивается настолько быстро, что компания принимает решение о дроблении своих акций!",
+      "rule":" Каждый владелец акций GOOGLE удваивает их число (общая стоимость не изменяется).",
+      "increase":2
+    },
+    {
+      "id":"lifece20070020001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Убытки из-за сверх расширения компании и проблем с управлением. Акционеры теряют половину прав собственности.",
+      "rule":" Каждый владелец акций GOOGLE теряет половину (общая стоимость не изменяется).",
+      "decrease":2
+    },
+    {
+      "id":"lifece20070010001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Интернет рынок провалился. Поисковики конкуренты не дремлют. Срочно скупайте акции (по-дешевке).",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":100,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070020001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Интернет рынок привел к ослаблению тренда и снижению курсовой стоимости акций.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":200,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070030001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Истощенный рынок привел к ослаблению тренда и снижению курсовой стоимости акций.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":300,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070040001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Высокая инфляция породила падение курса акций.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":400,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070050001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Быстрый рост продаж на интернет рынке. Это заслуга нового молодого директора, выпускника Гарварда.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":500,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070060001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Вышло новое приложение для ведения домашней бухгалтерии. Успешный финансовый отчет.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":600,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070070001",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Эта компания выкупила все интернет поисковики. Сегодня мы вне конкуренции.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":700,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20070070002",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Биржевой бум! Акции этого интернета гиганта достигли рекордной отметки.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":700,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"life10u40",
+      "type":"stock",
+      "symbol":"Lifecell",
+      "heading":"Lifecell оператор мобильной связи",
+      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":30,
+      "range":[
+        5,
+        30
+      ]
+    },
+    {
+      "id":"life10u40",
+      "type":"stock",
+      "symbol":"Lifecell",
+      "heading":"Lifecell оператор мобильной связи",
+      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":5,
+      "range":[
+        5,
+        30
+      ]
+    },
+    {
+      "id":"life10u40",
+      "type":"stock",
+      "symbol":"Lifecell",
+      "heading":"Lifecell оператор мобильной связи",
+      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":10,
+      "range":[
+        5,
+        30
+      ]
+    },
+    {
+      "id":"life10u40",
+      "type":"stock",
+      "symbol":"Lifecell",
+      "heading":"Lifecell оператор мобильной связи",
+      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":20,
+      "range":[
+        5,
+        30
+      ]
+    },
+    {
+      "id":"lottery",
+      "type":"lottery",
+      "symbol":"lottery",
+      "heading":"Sister-In-Law borrows Money",
+      "description":"Sister-in-law is downsized. Needs $5,000 to make house payment.",
+      "cost":1000,
+      "asset_type":"money",
+      "rule":"If you choose to help. Pay $5,000 and roll 1 die:",
+      "sub_rule":[
         "Die = 1-3, She never pays you back and you're out $5,000",
         "Die = 4-6, She pays you back $10,000, but family get-togethers are still awkward"
       ],
-      "failure": [1, 2, 3],
-      "success": [4, 5, 6],
-      "outcome": {
-        "failure": 0,
-        "success": 5000
+      "failure":[
+        1,
+        2,
+        3
+      ],
+      "success":[
+        4,
+        5,
+        6
+      ],
+      "outcome":{
+        "failure":0,
+        "success":5000
       }
     },
     {
-      "id": "limitedPartnership",
-      "type": "business",
-      "symbol": "limited",
-      "heading": "Магазин бутербродов",
-      "description": "Some description",
-      "asset_type": "limited",
-      "cost": 5000,
-      "limit": 10,
-      "cash_flow": 180
+      "id":"limitedPartnership",
+      "type":"business",
+      "symbol":"limited",
+      "heading":"Магазин бутербродов",
+      "description":"Some description",
+      "asset_type":"limited",
+      "cost":5000,
+      "limit":10,
+      "cash_flow":180
     },
     {
-      "id": "business",
-      "type": "business",
-      "asset_type": "startup",
-      "symbol": "startup",
-      "heading": "Вы создали IT компанию",
-      "description": "Successful 4-bay, coin-operated auto wash near busy intersection.",
-      "cost": 5000,
-      "cash_flow": 0
+      "id":"business",
+      "type":"business",
+      "asset_type":"startup",
+      "symbol":"startup",
+      "heading":"Вы создали IT компанию",
+      "description":"Successful 4-bay, coin-operated auto wash near busy intersection.",
+      "cost":5000,
+      "cash_flow":0
     },
     {
-      "id": "business",
-      "type": "business",
-      "asset_type": "business",
-      "symbol": "jewelry",
-      "heading": "Ювелиная компания",
-      "description": "Отличные продажи, можете приобрести бизнес по умеренной цене",
-      "cost": 10000,
-      "cash_flow": 300
+      "id":"business",
+      "type":"business",
+      "asset_type":"business",
+      "symbol":"jewelry",
+      "heading":"Ювелиная компания",
+      "description":"Отличные продажи, можете приобрести бизнес по умеренной цене",
+      "cost":10000,
+      "cash_flow":300
     },
     {
-      "id": "realEstate",
+      "id":"realEstate111",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"2Вг1Ва",
+      "heading":"2-х комнатная квартира в центре Софии",
+      "description":"Молодожены ожидают пополнения семейства. Они хотят поскорее продать свою квартиру и приобрести новый дом. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 38% КОИ, можете продать в будущем за 45,000$ - 65.000$ ",
+      "cost":55000,
+      "mortgage":50000,
+      "down_payment":5000,
+      "cash_flow":160
+    },
+    {
+      "id":"realEstate202",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"2Вг1Ва",
+      "heading":"Продается квартира - 2Вг1Ва",
+      "description":"Банк продает квартиру владельца лишенного права выкупа. В районе много рабочих мест и магазинов. Благоприятное финансирование со стороны банка.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 53% КОИ, можете продать в будущем за 45,000$ - 65.000$",
+      "cost":40000,
+      "mortgage":35000,
+      "down_payment":5000,
+      "cash_flow":220
+    },
+    {
+      "id":"realEstate303",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"2Вг1Ва",
+      "heading":"2-х комнатная квартира в Киеве",
+      "description":"Прежний владелец квартиры решил жениться и продать квартиру. Квартира в плохом районе. Требует ремонта.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 53% КОИ, можете продать в будущем за 45,000$ - 65.000$",
+      "cost":50000,
+      "mortgage":45000,
+      "down_payment":5000,
+      "cash_flow":100
+    },
+    {
+      "id":"realEstate40",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"2Вг1Ва",
+      "heading":"2-х комнатная квартира",
+      "description":"Родители продают квартиру, используемую их ребенком во время обучения в колледже. В этом районе большой спрос на квартиры, сдаваемые в аренду. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 42% КОИ, можете продать в будущем за 45,000$ - 65.000$",
+      "cost":40000,
+      "mortgage":36000,
+      "down_payment":4000,
+      "cash_flow":140
+    },
+    {
+      "id":"realEstate50",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"3-х комнатная квартира в Софии",
+      "description":"Продается прекрасная квартира в хорошем состоянии. На данный момент арендована.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 38% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":65000,
+      "mortgage":60000,
+      "down_payment":5000,
+      "cash_flow":160
+    },
+    {
+      "id":"realEstate60",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"Продается квартира в Киеве - 3Вг2Ва",
+      "description":"Вам достался брошенный дом, в котором не жили уже пол года. Закладная выдана с учетом оценки стоимости необходимого ремонта.",
+      "rule":"Используйте сами или продайте возможность другому игроку. ?% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":50000,
+      "mortgage":50000,
+      "down_payment":0,
+      "cash_flow":100
+    },
+    {
+      "id":"realEstate70",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"3-х комнатная квартира в Бухаресте",
+      "description":"Хозяин дома вынужден неожиданно покинуть город. Заплатите первый взнос и он ваш. Умеющий думать преуспеет. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":50000,
+      "mortgage":47000,
+      "down_payment":3000,
+      "cash_flow":100
+    },
+    {
+      "id":"realEstate80",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"Вам повезло!",
+      "description":"Государственное агентство выставило на продажу старый дом 3Вг2Ва с частичным государственным финансированием. Дом арендован.",
+      "rule":"Займите деньги в банке, НО КУПИТЕ ЕГО! 132% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":35000,
+      "mortgage":33000,
+      "down_payment":2000,
+      "cash_flow":220
+    },
+    {
+      "id":"realEstate90",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"Вам повезло!",
+      "description":"Компания продает дом 3Вг2Ва менеджера, которого перевела по службе в другой город. Дом не выставлялся на продажу 6 месяцев, что уменьшило его стоимость.",
+      "rule":"Займите деньги в банке, НО КУПИТЕ ЕГО! 150% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":45000,
+      "mortgage":43000,
+      "down_payment":2000,
+      "cash_flow":220
+    },
+    {
+      "id":"realEstate100",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"Продается дом - 3Вг2Ва",
+      "description":"Дорожный департамент продает дом в старом районе города. Рынок потерпел крах. Полное отсутствие предложений на аукционе.",
+      "rule":"Используйте сами или продайте возможность другому игроку. ?% КОИ, можете продать в будущем за 65,000$ - 135,000$",
+      "cost":50000,
+      "mortgage":50000,
+      "down_payment":0,
+      "cash_flow":-100
+    },
+    {
+      "id":"realEstate110",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"3-х комнатная квартира в Софии",
+      "description":"Хозяин дома вынужден продать дом из-за проблем с долгами. Заплатите ",
+      "cost":50000,
+      "mortgage":48000,
+      "down_payment":2000,
+      "cash_flow":300
+    },
+    {
+      "id":"realEstate120",
+      "type":"realEstate",
+      "asset_type":"single",
+      "symbol":"3Вг2Ва",
+      "heading":"3-х комнатная квартира в Софии",
+      "description":"Хозяин дома вынужден продать дом из-за проблем с долгами. Заплатите ",
+      "cost":50000,
+      "mortgage":48000,
+      "down_payment":2000,
+      "cash_flow":300
+    },
+    {
+      "id":"land20akr",
+      "type":"other",
+      "asset_type":"whole",
+      "cost":5000,
+      "count":20,
+      "symbol":"whole",
+      "heading":"20 акров земли",
+      "description":"Супер возможность на покупку 20 акров земли"
+    },
+    {
+      "id":"goldCoins",
+      "type":"other",
+      "asset_type":"piece",
+      "cost_per_one":1000,
+      "count":10,
+      "symbol":"piece",
+      "heading":"Золотые монеты 12го века",
+      "description":"Супер возможность на покупку уникальных золотых монет"
+    }
+  ],
+  "bigDeal":[
+    {
+      "id":"realEstate130",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"24КВДОМ",
+      "heading":"Продаются жилые дома",
+      "description":"Продаются два 24-х квартирных жилых дома. Владельцу пришлось расстаться с управляющим, что послужило причиной продажи домов.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 54% КОИ, можете продать в будущем за 600,000$ - 960,000$",
+      "count":24,
+      "cost":575000,
+      "mortgage":500000,
+      "down_payment":75000,
+      "cash_flow":3400
+    },
+    {
+      "id":"realEstate140",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"12КВДОМ",
+      "heading":"Многоквартирный жилой дом в Болгарии",
+      "description":"Продается 12-ти квартирный жилой дом на побережье Черного моря. Длинная очередь желающих для приобретения квартир в этом доме.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 58% КОИ, можете продать в будущем за 300,000$ - 480,000$",
+      "count":12,
+      "cost":350000,
+      "mortgage":300000,
+      "down_payment":50000,
+      "cash_flow":2400
+    },
+    {
+      "id":"realEstate150",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"24КВДОМ",
+      "heading":"24-квартирный жилой дом на Кипре",
+      "description":"Продаеться в связи с отъездом старый 24-х квартирный дом. Рядом находиться колледж. Дом полностью арендован и приносит хороший доход.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 67% КОИ, можете продать в будущем за 600,000$ - 960,000$",
+      "count":24,
+      "cost":550000,
+      "mortgage":500000,
+      "down_payment":50000,
+      "cash_flow":2800
+    },
+    {
+      "id":"realEstate155",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"8КВДОМ",
+      "heading":"Продается 8-ми квартирный жилой дом в Праге",
+      "description":"Владелец дома уходит в отставку и предлагает свой дом по хорошей цене. В доме работают специалисты по обслуживанию и управлению. Все документы в порядке",
+      "rule":"Используйте сами или продайте возможность другому игроку. 29% КОИ, можете продать в будущем за 200,000$ - 280,000$",
+      "count":8,
+      "cost":240000,
+      "mortgage":200000,
+      "down_payment":40000,
+      "cash_flow":1050
+    },
+    {
+      "id":"realEstate156",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"8КВДОМ",
+      "heading":"Жилой дом в Амстердаме",
+      "description":"Владелец предлагает свой дом на продажу по разумной цене. Все что требуется - ваш первый взнос.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 51% КОИ, можете продать в будущем за 200,000$ - 280,000$",
+      "count":8,
+      "cost":220000,
+      "mortgage":180000,
+      "down_payment":40000,
+      "cash_flow":1700
+    },
+    {
+      "id":"realEstate157",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"8КВДОМ",
+      "heading":"8-квартирный жилой дом",
+      "description":"Предпринимателю срочно требуется наличные для спасения своего бизнеса, поэтому он продает понимающего человека.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 64% КОИ, можете продать в будущем за 200,000$ - 280,000$",
+      "count":8,
+      "cost":160000,
+      "mortgage":128000,
+      "down_payment":32000,
+      "cash_flow":1700
+    },
+    {
+      "id":"realEstate158",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"8КВДОМ",
+      "heading":"Продается жилой дом в центре Софьи",
+      "description":"8-ми квартирный дом продается в связи с выездом владельца на ПМЖ в другую страну. Дом полностью арендован, вся документация в порядке.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 75% КОИ, можете продать в будущем за 200,000$ - 280,000$",
+      "count":8,
+      "cost":200000,
+      "mortgage":165000,
+      "down_payment":35000,
+      "cash_flow":2200
+    },
+    {
+      "id":"realEstate159",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"8КВДОМ",
+      "heading":"8-квартирный жилой дом",
+      "description":"У владельца неприятности с законом, которые ведут к принудительной продаже этого дома. Покупка должна производиться без получения ссуды в банке.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 48% КОИ, можете продать в будущем за 200,000$ - 280,000$",
+      "count":8,
+      "cost":200000,
+      "mortgage":160000,
+      "down_payment":40000,
+      "cash_flow":1600
+    },
+    {
+      "id":"realEstate160",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"4-х квартирный жилой дом",
+      "description":"Продается полностью заселенный дом, в хорошем районе Вроцлава. Проблем с арендаторами нет. Документация в порядке.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 54% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":135000,
+      "mortgage":120000,
+      "down_payment":15000,
+      "cash_flow":700
+    },
+    {
+      "id":"realEstate166",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"Жилой дом в Будапеште",
+      "description":"Продается старый 4-х квартирный дом, рядом построили новое шоссе. Владелец хочет переехать в более тихий район. Дом оценен для быстрой продажи. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":90000,
+      "mortgage":75000,
+      "down_payment":15000,
+      "cash_flow":500
+    },
+    {
+      "id":"realEstate167",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"4-квартирный жилой дом в Венеции",
+      "description":"Дом в отличном состоянии, в хорошем районе. Постоянные арендаторы, неплохой доход. Документация в полном порядке.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 48% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":125000,
+      "mortgage":110000,
+      "down_payment":15000,
+      "cash_flow":600
+    },
+    {
+      "id":"realEstate168",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"Продается 4-х квартирный жилой дом",
+      "description":"Продается дом, расположенный в новом районе. Владельцу приходиться продавать из-за проблем с подоходным налогом.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 24% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":80000,
+      "mortgage":60000,
+      "down_payment":20000,
+      "cash_flow":400
+    },
+    {
+      "id":"realEstate169",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"Продается жилой дом",
+      "description":"4-х квартирный дом продается принудительно из-за проблем с налогами у владельца. Не вся домовая документация в порядке.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 56% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":1200000,
+      "mortgage":1000000,
+      "down_payment":200000,
+      "cash_flow":11000
+    },
+    {
+      "id":"realEstate170",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"4КВДОМ",
+      "heading":"4-х квартирный жилой дом",
+      "description":"Дом в отличном состоянии, в новом районе. Полностью арендован. Нуждается в вашем первом взносе и терпении.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 48% КОИ, можете продать в будущем за 100,000$ - 140,000$",
+      "count":4,
+      "cost":100000,
+      "mortgage":80000,
+      "down_payment":20000,
+      "cash_flow":300
+    },
+    {
+      "id":"realEstate171",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"2-х квартирный жилой дом",
+      "description":"Помещение арендовано. Владелец имеет проблемы с полицией и вынужден срочно продать свою собственность.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 48% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":40000,
+      "mortgage":35000,
+      "down_payment":5000,
+      "cash_flow":300
+    },
+    {
+      "id":"realEstate172",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"Жилой дом в Венеции",
+      "description":"Продается добротный 2-х квартирный дом в хорошем районе, в связи с отъездом владельца. Превосходная инвестиционная возможность для понимающего покупателя. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 60% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":60000,
+      "mortgage":54000,
+      "down_payment":6000,
+      "cash_flow":300
+    },
+    {
+      "id":"realEstate173",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"2-х квартирный жилой дом",
+      "description":"В связи с пополнением в семействе, владелец с семьей переезжают в большой дом. Арендатор остается, дом в хорошем состоянии. Вокруг прекрасный пейзаж.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 36% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":50000,
+      "mortgage":42000,
+      "down_payment":8000,
+      "cash_flow":320
+    },
+    {
+      "id":"realEstate174",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"Многоквартирный жилой дом",
+      "description":"Самый лучший дом в окрестностях. Хозяйка переезжает в другой город, чтобы быть поближе к своим внукам.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 24% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":70000,
+      "mortgage":63000,
+      "down_payment":7000,
+      "cash_flow":140
+    },
+    {
+      "id":"realEstate175",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"2-х квартирный жилой дом",
+      "description":"Помещение арендовано. Владелец имеет проблемы с подоходным налогом и вынужден срочно продать.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 48% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":45000,
+      "mortgage":37000,
+      "down_payment":8000,
+      "cash_flow":320
+    },
+    {
+      "id":"realEstate176",
+      "type":"realEstate",
+      "asset_type":"building",
+      "symbol":"2КВДОМ",
+      "heading":"Продается жилой дом в Одессе",
+      "description":"Владелец вынужден продать дом, чтобы оплатить счета за лечение. Дом арендован. Хорошая инвестиционная возможность.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 50,000$ - 80,000$",
+      "count":2,
+      "cost":60000,
+      "mortgage":48000,
+      "down_payment":12000,
+      "cash_flow":400
+    },
+    {
+      "id":"autoBusiness",
+      "type":"business",
+      "asset_type":"business",
+      "symbol":"AUTO_BUSINESS",
+      "heading":"Автоматизированный бизнес",
+      "description":"Автоматизированный бизнес по продаже мороженного",
+      "cost":200000,
+      "mortgage":160000,
+      "down_payment":40000,
+      "cash_flow":1700
+    },
+    {
+      "id": "realEstate177",
       "type": "realEstate",
-      "symbol": "single",
       "asset_type": "single",
-      "heading": "3-х комнатная квартира в Софии",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "cost": 50000,
-      "mortgage": 48000,
-      "down_payment": 2000,
+      "symbol": "3Вг2Ва",
+      "heading": "Продается дом - 3Вг2Ва",
+      "description": "Если вы терпеливы, то это достаточно хорошая инвестиция, несмотря на то, что арендная плата сравнительно низка.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 45% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 65000,
+      "mortgage": 57000,
+      "down_payment": 8000,
       "cash_flow": 300
     },
     {
-      "id": "land20akr",
-      "type": "other",
-      "asset_type": "whole",
-      "cost": 5000,
-      "count": 20,
-      "symbol": "whole",
-      "heading": "20 акров земли",
-      "description": "Супер возможность на покупку 20 акров земли"
-    },
-    {
-      "id": "goldCoins",
-      "type": "other",
-      "asset_type": "piece",
-      "cost_per_one": 1000,
-      "count": 10,
-      "symbol": "piece",
-      "heading": "Золотые монеты 12го века",
-      "description": "Супер возможность на покупку уникальных золотых монет"
-    },
-    {
-      "id": "life10u40",
-      "type": "stock",
-      "asset_type": "manipulation",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "decrease": 3
-    },
-    {
-      "id": "life10u40",
-      "type": "stock",
-      "asset_type": "manipulation",
-      "symbol": "Lifecell",
-      "heading": "Lifecell оператор мобильной связи",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "increase": 3
-    }
-  ],
-  "bigDeal": [
-    {
-      "id": "realEstate",
+      "id": "realEstate178",
       "type": "realEstate",
-      "symbol": "building",
-      "asset_type": "building",
-      "heading": "24-квартирный жилой дом",
-      "description": "Research and development delays cause low share price for this longtime pharmaceutical company",
-      "count": 24,
-      "cost": 500000,
-      "mortgage": 420000,
-      "down_payment": 80000,
-      "cash_flow": 3000
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "Продается дом на окраине Рима",
+      "description": "Дом расположен рядом с полем для гольфа, что предполагает увеличение стоимости аренды и обеспечивает постоянный приток клиентов, а значит и денег.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 75000,
+      "mortgage": 68000,
+      "down_payment": 7000,
+      "cash_flow": 800
     },
     {
-      "id": "autoBusiness",
-      "type": "business",
-      "asset_type": "business",
-      "symbol": "AUTO_BUSINESS",
-      "heading": "Автоматизированный бизнес",
-      "description": "Автоматизированный бизнес по продаже мороженного",
-      "cost": 200000,
-      "mortgage": 160000,
-      "down_payment": 40000,
-      "cash_flow": 1700
+      "id": "realEstate179",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "3-х комнатный дом в Софии",
+      "description": "Продается из-за раскола между наследниками дома. Дом расположен на пути к полю для гольфа. Передаються права на членство в гольф-клубе.",
+      "rule":"Используйте сами или продайте возможность другому игроку. -12% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 115000,
+      "mortgage": 105000,
+      "down_payment": 10000,
+      "cash_flow": -100
+    },
+    {
+      "id": "realEstate180",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "Продается дом - 3Вг2Ва",
+      "description": "Бизнесмен продающий этот дом нуждается в наличных для спасения своего бизнеса. В настоящее время дом занят счастливым арендатором.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 26% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 65000,
+      "mortgage": 58000,
+      "down_payment": 7000,
+      "cash_flow": 150
+    },
+    {
+      "id": "realEstate182",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "Продается 3-х комнатный дом",
+      "description": "Уехавший профессиональный торговец содержал этот дом в превосходном состоянии. Это позволяло ему держать арендую плату самой высокой в районе.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 67000,
+      "mortgage": 55000,
+      "down_payment": 12000,
+      "cash_flow": 400
+    },
+    {
+      "id": "realEstate183",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "Продается дом - 3Вг2Ва",
+      "description": "Пониженный в должности менеджер вынужден продать этот дом, чтобы иметь возможность оплачивать свои расходы при новом заработке. Дом находится в транзитном районе. ",
+      "rule":"Используйте сами или продайте возможность другому игроку. 40% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 70000,
+      "mortgage": 61000,
+      "down_payment": 9000,
+      "cash_flow": 300
+    },
+    {
+      "id": "realEstate185",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "3-х комнатный дом в Италии",
+      "description": "Продается добротный дом из-за развода хозяев. Дом расположен в хорошо заселенном районе. В продаже уже 5 месяцев.",
+      "rule":"Используйте сами или продайте возможность другому игроку. 30% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 70000,
+      "mortgage": 50000,
+      "down_payment": 20000,
+      "cash_flow": 500
+    },
+    {
+      "id": "realEstate186",
+      "type": "realEstate",
+      "asset_type": "single",
+      "symbol": "3Вг2Ва",
+      "heading": "Продается дом - 3Вг2Ва в Гамбурге",
+      "description": "Продается прекрасный дом со всеми удобствами, есть бассейн. Расположен в районе для среднего класса. Рядом хорошие школы",
+      "rule":"Используйте сами или продайте возможность другому игроку. -6% КОИ, можете продать в будущем за 65,000$ - 135,000$" ,
+      "cost": 125000,
+      "mortgage": 105000,
+      "down_payment": 20000,
+      "cash_flow": -100
     }
   ],
-  "doodad": [
+  "doodad":[
     {
-      "id": "doodad1",
-      "type": "doodad",
-      "heading": "SEASON TICKETS",
-      "description": "PAY $1,500",
-      "cost": 1500
+      "id":"doodad1",
+      "type":"doodad",
+      "heading":"Абонемент в фитнесс-клуб",
+      "description":"Заплати $100 за абонемент в элитный фитнесс клуб в твоём районе",
+      "cost":100
     },
     {
-      "id": "doodad2",
-      "type": "doodad",
-      "heading": "DATE NIGHT: DINNER, CONCERT & DESSERT",
-      "description": "Pay $500",
-      "cost": 500
+      "id":"doodad2",
+      "type":"doodad",
+      "heading":"DATE NIGHT: DINNER, CONCERT & DESSERT",
+      "description":"Pay $500",
+      "cost":500
     },
     {
-      "id": "doodad5",
-      "type": "doodad",
-      "heading": "NEW GYM CLOTHES",
-      "description": "Pay $300",
-      "cost": 300
+      "id":"doodad5",
+      "type":"doodad",
+      "heading":"NEW GYM CLOTHES",
+      "description":"Pay $300",
+      "cost":300
     },
     {
-      "id": "doodad6",
-      "type": "doodad",
-      "heading": "BIG SCREEN TV",
-      "description": "PAY $2,500",
-      "cost": 2500
+      "id":"doodad6",
+      "type":"doodad",
+      "heading":"BIG SCREEN TV",
+      "description":"PAY $2,500",
+      "cost":2500
     },
     {
-      "id": "doodad7",
-      "type": "doodad",
-      "heading": "GOLF CLUB MEMBERSHIP",
-      "description": "Spend $2,000",
-      "cost": 2000
+      "id":"doodad7",
+      "type":"doodad",
+      "heading":"GOLF CLUB MEMBERSHIP",
+      "description":"Spend $2,000",
+      "cost":2000
     },
     {
-      "id": "doodad8",
-      "type": "doodad",
-      "heading": "PRIVATE TUTORING FOR YOUR CHILD",
-      "description": "Pay $500",
-      "cost": 500,
-      "rule": "If you have child",
+      "id":"doodad8",
+      "type":"doodad",
+      "heading":"Приватная школа английского языка для Вашего ребёнка",
+      "description":"Заплати $500 за месчное обучение",
+      "cost":500,
+      "rule":"Если есть ребёнок",
       "has_babies": true
     }
   ],
-  "payday": [
+  "payday":[
     {
-      "id": "payday",
-      "heading": "День зарплаты",
-      "description": "Вы хорошо отработали месяц и вас не уволили, поэтому получите вознаграждение.",
-      "type": "payday",
-      "symbol": "payday"
+      "id":"payday",
+      "heading":"День зарплаты",
+      "description":"Вы хорошо отработали месяц и вас не уволили, поэтому получите вознаграждение.",
+      "type":"payday",
+      "symbol":"payday"
     }
   ],
-  "charity": [
+  "charity":[
     {
-      "id": "charity",
-      "heading": "Charity",
-      "description": "Donate 10% of your total income and use 1 or 2 dice for next 3 turns",
-      "type": "charity",
-      "symbol": "charity",
+      "id":"charity",
+      "heading":"Благотворительность",
+      "description": "Заплати 10% от своего общего дохода и можешь бросать 1 или 2 кубика следующие 3 хода",
+      "type":"charity",
+      "symbol":"charity",
       "extra_dices": 1,
-      "limit": 3,
-      "percent": 10
+      "limit":3,
+      "percent":10
     }
   ],
-  "downsized": [
+  "downsized":[
     {
-      "id": "downsized",
-      "heading": "Downsized",
-      "description": "Pay the amount of your total expenses to the bank and lose 2 turns",
-      "type": "downsized",
-      "symbol": "downsized"
+      "id":"downsized",
+      "heading":"Уволен",
+      "description":"Заплати сумму своего месячного расхода и пропусти 2 хода",
+      "type":"downsized",
+      "symbol":"downsized"
     }
   ],
-  "baby": [
+  "baby":[
     {
-      "id": "baby",
-      "heading": "New Baby",
-      "description": "Congratulations! Your family has a new arrival",
-      "type": "baby",
-      "symbol": "new baby"
+      "id":"baby",
+      "heading":"У Вас родился ребёнок",
+      "description":"Поздравляем! В вашей семье произошло пополнение.",
+      "type":"baby",
+      "symbol":"new baby"
     }
   ],
-  "market": [
+  "market":[
     {
-      "id": "itCompanyMarket",
-      "type": "business",
-      "asset_type": "startup",
-      "symbol": "startup",
-      "heading": "Покупка IT компании",
-      "description": "Крупная компания по производству ПО предлагает 100,000$ за не-большую компанию.",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "cost": 100000
+      "id":"itCompanyMarket",
+      "type":"business",
+      "asset_type":"startup",
+      "symbol":"IT_COMPANY",
+      "heading":"Покупка IT компании",
+      "description":"Крупная компания по производству ПО предлагает 100,000$ за не-большую компанию.",
+      "rule": "Если ты продаёшь, убери компанию из пассивного дохода",
+      "cost":100000
     },
     {
-      "id": "jewelryMarket",
-      "type": "business",
-      "asset_type": "business",
-      "symbol": "jewelry",
-      "heading": "Покупка ювелирной компании",
-      "description": "Крупная компания по производству ПО предлагает 100,000$ за не-большую компанию.",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
-      "cost": 100000
+      "id":"jewelryMarket",
+      "type":"business",
+      "asset_type":"business",
+      "symbol":"jewelry",
+      "heading":"Покупка ювелирной компании",
+      "description":"SWAROVSKI предлагает Вам $150,000 за Вашу ювелирную компанию.",
+      "rule":"Если ты продаёшь, убери компанию из пассивного дохода",
+      "cost":150000
     },
     {
-      "id": "itCompanyMarket",
-      "type": "business",
-      "asset_type": "limited",
-      "symbol": "limited",
-      "heading": "Покупка партнёрства",
-      "description": "Крупная компания предлагает тройную стоимость за каждую долю.",
-      "rule": "Only you may buy as many shares as you want at this price. Everyone may sell at this price.",
+      "id":"itCompanyMarket",
+      "type":"business",
+      "asset_type":"limited",
+      "symbol":"limited",
+      "heading":"Покупка партнёрства",
+      "description":"Крупная компания предлагает тройную стоимость за каждую долю.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
       "cost": 3
     },
     {
-      "id": "marketRealEstate1",
-      "type": "realEstate",
-      "heading": "Покупатель на большой многоквартирный дом",
-      "symbol": "building",
-      "asset_type": "building",
-      "description": "Покупатель предлагает за каждую квартиру $40,000",
-      "cost": 40000,
-      "range": [2, 4, 8, 12, 24]
+      "id":"marketRealEstate1",
+      "type":"realEstate",
+      "heading":"Покупатель на многоквартирный дом",
+      "symbol":"24квдом",
+      "asset_type":"building",
+      "description":"Покупатель предлагает за каждую квартиру $40,000",
+      "cost":40000,
+      "range":[
+        2,
+        4,
+        8,
+        12,
+        24
+      ]
     },
     {
-      "id": "marketRealEstate2",
-      "type": "realEstate",
-      "heading": "Покупатель на 3КВ",
-      "symbol": "single",
-      "asset_type": "single",
-      "description": "Покупатель предлагает $100,000 за 3х комнатную квартиру",
-      "cost": 100000
+      "id":"marketRealEstate2",
+      "type":"realEstate",
+      "heading":"Покупатель на 3КВ",
+      "symbol":"single",
+      "asset_type":"single",
+      "description":"Покупатель предлагает $100,000 за 3х комнатную квартиру",
+      "rule": "",
+      "cost":100000
     },
     {
-      "id": "marketGoldCoins",
-      "type": "other",
-      "heading": "Покупатель на золотые монеты",
-      "symbol": "piece",
-      "asset_type": "piece",
-      "description": "Покупатель предлагает за каждую монету по $5,000",
-      "cost": 5000
+      "id":"marketGoldCoins",
+      "type":"other",
+      "heading":"Покупатель на золотые монеты",
+      "symbol":"piece",
+      "asset_type":"piece",
+      "description":"Покупатель предлагает за каждую монету по $5,000",
+      "cost":5000
     },
     {
-      "id": "damage",
-      "type": "damage",
-      "heading": "Арендатор повредил вашу собственность",
-      "symbol": "ANY",
-      "description": "Потеряв работу арендатор отказался платить и скрылся, заплатите $1000",
-      "asset_type": "anyRealEstate",
-      "cost": 1000,
-      "only_you": false
+      "id":"damage",
+      "type":"damage",
+      "heading":"Арендатор повредил вашу собственность",
+      "symbol":"ANY",
+      "description":"Потеряв работу арендатор отказался платить и скрылся, заплатите $1000",
+      "asset_type":"anyRealEstate",
+      "cost":1000
     },
     {
-      "id": "marketLand",
-      "type": "other",
-      "heading": "Покупатель на 20 акров земли",
-      "symbol": "whole",
-      "asset_type": "whole",
-      "description": "Покупатель предлагает $200,000 за 20 акров земли",
-      "cost": 200000
+      "id":"marketLand",
+      "type":"other",
+      "heading":"Покупатель на 20 акров земли",
+      "symbol":"whole",
+      "asset_type":"whole",
+      "description":"Покупатель предлагает $200,000 за 20 акров земли",
+      "cost":200000
     },
     {
-      "id": "inflation",
-      "type": "inflation",
-      "heading": "Удары инфляции!",
-      "symbol": "single",
-      "description": "Все 3Вг/2Ва дома которыми вы владеете забираются банком без права выкупа.",
-      "asset_type": "eachRealEstate",
-      "only_you": true
+      "id":"inflation",
+      "type":"inflation",
+      "heading":"Удары инфляции!",
+      "symbol":"3Вг/2Ва",
+      "description":"Все 3Вг/2Ва дома которыми вы владеете забираются банком без права выкупа.",
+      "asset_type":"eachRealEstate",
+      "only_you":true
     },
     {
-      "id": "success",
-      "type": "success",
-      "heading": "Экономический рост",
-      "symbol": "ANY",
-      "description": "Ваша созданная компания заключила важный договор и ваш пасс. дох. увеличился на $400",
-      "asset_type": "each_startup",
-      "cash_flow": 400,
-      "only_you": true
+      "id":"success",
+      "type":"success",
+      "heading":"Экономический рост",
+      "symbol":"ANY",
+      "description":"Ваша созданная компания заключила важный договор и ваш пасс. дох. увеличился на $400",
+      "asset_type":"eachStartup",
+      "cash_flow":400,
+      "only_you":true
     }
   ]
 }

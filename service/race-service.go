@@ -27,7 +27,7 @@ type RaceService interface {
 	MarketAction(raceId uint64, userId uint64, actionType string) error
 	CharityAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error
 	PayTaxAction(raceId uint64, userId uint64) error
-	BabyAction(raceId uint64, userId uint64) error
+	BabyAction(raceId uint64, userId uint64) (error, dto.MessageResponseDto)
 	DoodadAction(raceId uint64, userId uint64) error
 	DownsizedAction(raceId uint64, userId uint64) error
 	GetRaceAndPlayer(raceId uint64, userId uint64, isBigRace bool) (error, entity.Race, entity.Player)
@@ -220,6 +220,9 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 
 	if err != nil {
 		return err, dto.RiskResponseDTO{RolledDice: 0}
+	}
+	if race.CurrentCard.ID == "" {
+		return errors.New(storage.ErrorInvalidCard), dto.RiskResponseDTO{}
 	}
 
 	dice := objects.NewDice(1, 2, 6)
@@ -584,7 +587,7 @@ func (service *raceService) PayTaxAction(raceId uint64, userId uint64) error {
 	return err
 }
 
-func (service *raceService) BabyAction(raceId uint64, userId uint64) error {
+func (service *raceService) BabyAction(raceId uint64, userId uint64) (error, dto.MessageResponseDto) {
 	logger.Info("RaceService.BabyAction", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
@@ -593,21 +596,30 @@ func (service *raceService) BabyAction(raceId uint64, userId uint64) error {
 	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
 
 	if err != nil {
-		return err
+		return err, dto.MessageResponseDto{}
 	}
 
-	if player.Babies > 2 {
-		return errors.New(storage.ErrorYouHaveTooManyBabies)
+	if player.Babies <= 2 {
+		player.BornBaby()
+		err, _ = service.playerService.UpdatePlayer(&player)
+
+		if err != nil {
+			return err, dto.MessageResponseDto{}
+		}
 	}
-
-	player.BornBaby()
-
-	err, _ = service.playerService.UpdatePlayer(&player)
 
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 	err, race = service.UpdateRace(&race)
 
-	return err
+	if err != nil {
+		return err, dto.MessageResponseDto{}
+	}
+
+	if player.Babies > 2 {
+		return nil, dto.MessageResponseDto{Message: storage.MessageYouHaveTooManyBabies, Result: false}
+	}
+
+	return nil, dto.MessageResponseDto{Message: storage.MessageYouHadBaby, Result: true}
 }
 
 func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {

@@ -6,6 +6,7 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
+	"github.com/webjohny/cashflow-go/storage"
 )
 
 type FinanceController interface {
@@ -55,13 +56,26 @@ func (c *financeController) AskMoney(ctx *gin.Context) {
 	var askMoneyBodyDTO dto.AskMoneyBodyDto
 	var err error
 	var response interface{}
+	var result bool
 
 	errDTO := ctx.ShouldBind(&askMoneyBodyDTO)
 
 	if errDTO != nil {
 		response = request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 	} else if raceId != 0 && userId != 0 {
-		err = c.financeService.AskMoney(raceId, userId, askMoneyBodyDTO)
+		err, result = c.financeService.AskMoney(raceId, userId, askMoneyBodyDTO)
+
+		if result {
+			response = dto.MessageResponseDto{
+				Result:  result,
+				Message: storage.MessageMoneyRequestAccepted,
+			}
+		} else if err == nil {
+			response = dto.MessageResponseDto{
+				Result:  result,
+				Message: storage.MessageMoneyRequestInProcessing,
+			}
+		}
 	}
 
 	request.FinalResponse(ctx, err, response)

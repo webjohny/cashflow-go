@@ -17,26 +17,26 @@ type FinanceService interface {
 	SendAssets(raceId uint64, userId uint64, dto dto.SendAssetsBodyDTO) error
 	PayLoan(raceId uint64, userId uint64, amount int) error
 	TakeLoan(raceId uint64, userId uint64, amount int) error
-	AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) error
+	AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) (error, bool)
 }
 
 type financeService struct {
-	requestRepository repository.RequestRepository
-	cardService       CardService
-	raceService       RaceService
-	playerService     PlayerService
+	userRequestRepository repository.UserRequestRepository
+	cardService           CardService
+	raceService           RaceService
+	playerService         PlayerService
 }
 
-func NewFinanceService(requestRepository repository.RequestRepository, cardService CardService, raceService RaceService, playerService PlayerService) FinanceService {
+func NewFinanceService(userRequestRepository repository.UserRequestRepository, cardService CardService, raceService RaceService, playerService PlayerService) FinanceService {
 	return &financeService{
-		requestRepository: requestRepository,
-		cardService:       cardService,
-		raceService:       raceService,
-		playerService:     playerService,
+		userRequestRepository: userRequestRepository,
+		cardService:           cardService,
+		raceService:           raceService,
+		playerService:         playerService,
 	}
 }
 
-func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) error {
+func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) (error, bool) {
 	logger.Info("FinanceService.AskMoney", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
@@ -46,14 +46,14 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, false)
 
 	if err != nil {
-		return err
+		return err, false
 	}
 
 	if race.ID == 0 {
-		return errors.New(storage.ErrorUndefinedGame)
+		return errors.New(storage.ErrorUndefinedGame), false
 	}
 	if player.ID == 0 {
-		return errors.New(storage.ErrorUndefinedPlayer)
+		return errors.New(storage.ErrorUndefinedPlayer), false
 	}
 
 	if dto.Type == "" {
@@ -67,18 +67,18 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 
 		if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
 			if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
-				return errors.New(storage.ErrorWrongAmount)
+				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Salary {
 			if countPayDay == 0 || dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
-				return errors.New(storage.ErrorWrongAmount)
+				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Baby && dto.Amount != 1000 {
-			return errors.New(storage.ErrorWrongAmount)
+			return errors.New(storage.ErrorWrongAmount), false
 		}
 	}
 
-	var request entity.Request
+	var request entity.UserRequest
 
 	request.Type = dto.Type
 	request.CurrentCard = race.CurrentCard.ID
@@ -95,9 +95,19 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 		request.Approved = true
 	}
 
-	err, _ = service.requestRepository.Insert(&request)
+	err, _ = service.userRequestRepository.Insert(&request)
 
-	return err
+	if err != nil {
+		return err, false
+	}
+
+	if !race.Options.EnableManager {
+		service.playerService.UpdateCash(&player, dto.Amount, "Запрос: "+dto.Message)
+
+		return nil, true
+	}
+
+	return nil, false
 }
 
 func (service *financeService) SendMoney(raceId uint64, userId uint64, amount int, receiverUsername string) error {

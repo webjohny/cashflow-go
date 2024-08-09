@@ -120,6 +120,7 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollD
 		player.Dices = make([]int, 0)
 		player.ChangeDiceStatus(true)
 		player.Move(totalCount)
+		race.ResetResponses()
 	} else {
 		player.AddDices(dice)
 	}
@@ -249,13 +250,15 @@ func (service *gameService) ChangeTurn(raceId uint64, isBigRace bool) error {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
 
+	if race.CurrentCard.ID != "" && !race.IsReceived(race.CurrentPlayer.Username) {
+		return nil
+	}
+
 	race.NextPlayer()
 	race.ResetResponses()
 	race.IsMultiFlow = false
 
 	currentPlayer := race.CurrentPlayer
-
-	logger.Warn("CURRENT_PLAYER", currentPlayer.ID)
 
 	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, currentPlayer.UserId)
 

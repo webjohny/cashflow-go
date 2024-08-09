@@ -23,13 +23,13 @@ var (
 	db *gorm.DB = config.SetupDatabaseConnection()
 
 	// Repositories
-	raceRepository       repository.RaceRepository        = repository.NewRaceRepository(db)
-	lobbyRepository      repository.LobbyRepository       = repository.NewLobbyRepository(db)
-	userRepository       repository.UserRepository        = repository.NewUserRepository(db)
-	requestRepository    repository.RequestRepository     = repository.NewRequestRepository(db)
-	playerRepository     repository.PlayerRepository      = repository.NewPlayerRepository(db)
-	professionRepository repository.ProfessionRepository  = repository.NewProfessionRepository(os.Getenv("PROFESSIONS_PATH"))
-	trxRepository        repository.TransactionRepository = repository.NewTransactionRepository(db)
+	raceRepository        repository.RaceRepository        = repository.NewRaceRepository(db)
+	lobbyRepository       repository.LobbyRepository       = repository.NewLobbyRepository(db)
+	userRepository        repository.UserRepository        = repository.NewUserRepository(db)
+	userRequestRepository repository.UserRequestRepository = repository.NewUserRequestRepository(db)
+	playerRepository      repository.PlayerRepository      = repository.NewPlayerRepository(db)
+	professionRepository  repository.ProfessionRepository  = repository.NewProfessionRepository(os.Getenv("PROFESSIONS_PATH"))
+	trxRepository         repository.TransactionRepository = repository.NewTransactionRepository(db)
 
 	// Services
 	jwtService         service.JWTService         = service.NewJWTService()
@@ -42,7 +42,7 @@ var (
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
 	lobbyService       service.LobbyService       = service.NewLobbyService(lobbyRepository)
 	cardService        service.CardService        = service.NewCardService(gameService, raceService, playerService)
-	financeService     service.FinanceService     = service.NewFinanceService(requestRepository, cardService, raceService, playerService)
+	financeService     service.FinanceService     = service.NewFinanceService(userRequestRepository, cardService, raceService, playerService)
 
 	// Controllers
 	gameController       controller.GameController       = controller.NewGameController(gameService)
@@ -158,7 +158,6 @@ func main() {
 		// @toDo Create EP for moving to big race
 		gameRoutes.POST("/move/:raceId", gameController.MoveToBigRace)
 		gameRoutes.POST("/roll-dice", gameController.RollDice)
-		gameRoutes.GET("/re-roll-dice", gameController.RollDice)
 		gameRoutes.GET("/change-turn", gameController.ChangeTurn)
 		gameRoutes.GET("/get/tiles", gameController.GetTiles)
 	}

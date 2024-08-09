@@ -25,7 +25,7 @@ const (
 	ErrorNotFoundStocks                               = "error not found stocks"
 	ErrorNotEnoughStocks                              = "error not enough stocks"
 	ErrorUndefinedProfession                          = "error undefined profession"
-	ErrorYouHaveTooManyBabies                         = "error you have too many babies"
+	ErrorInvalidCard                                  = "error invalid card"
 	ErrorNotEnoughAsset                               = "error not enough asset"
 	ErrorPermissionDenied                             = "error permission denied"
 	ErrorWrongAmountForTakingLoan                     = "error wrong amount for taking loan"

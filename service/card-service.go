@@ -192,18 +192,16 @@ func (service *cardService) Accept(actionType string, raceId uint64, family stri
 	})
 
 	var err error
-	var response interface{}
+	var response dto.MessageResponseDto
 
-	if family == "payday" || family == "cashFlowDay" {
-		err = service.raceService.PaydayAction(raceId, userId, actionType, isBigRace)
-	} else if family == "market" && actionType == "damage" {
+	if family == "market" && actionType == "damage" {
 		err = service.raceService.MarketAction(raceId, userId, actionType)
 	} else if family == "charity" || family == "bigCharity" {
 		err = service.raceService.CharityAction(raceId, userId, actionType, isBigRace)
 	} else if family == "doodad" {
 		err = service.raceService.DoodadAction(raceId, userId)
 	} else if family == "baby" {
-		err = service.raceService.BabyAction(raceId, userId)
+		err, response = service.raceService.BabyAction(raceId, userId)
 	} else if family == "downsized" {
 		err = service.raceService.DownsizedAction(raceId, userId)
 	} else if family == "tax50percent" || family == "tax100percent" {
@@ -356,8 +354,10 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 		tile = action + "Deal"
 	}
 
+	var card entity.Card
+
 	if tile == "deals" {
-		race.CurrentCard = entity.Card{
+		card = entity.Card{
 			ID:      "deal",
 			Heading: "Выберите маленькую или большую сделку",
 			Family:  "deal",
@@ -371,8 +371,16 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 		}
 
 		race.CardMap.Next(tile)
-		race.CurrentCard = service.getCardByTile(tile, race.CardMap.Active[tile], cardList)
+		card = service.getCardByTile(tile, race.CardMap.Active[tile], cardList)
 	}
+
+	if card.Family == "market" || card.Type == "stock" {
+		race.IsMultiFlow = card.OnlyYou == false
+	} else {
+		race.IsMultiFlow = false
+	}
+
+	race.CurrentCard = card
 
 	err = service.processCard(action, race, player)
 
@@ -404,7 +412,7 @@ func (service *cardService) processCard(action string, race entity.Race, current
 				}
 			}
 		}
-	} else if action == "market" {
+	} else if card.Type == "success" {
 		players := service.playerService.GetAllPlayersByRaceId(race.ID)
 
 		for _, pl := range players {

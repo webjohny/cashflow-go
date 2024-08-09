@@ -166,6 +166,10 @@ func (e *Player) CreateResponse() RaceResponse {
 
 func (e *Player) DecrementDualDiceCount() {
 	e.DualDiceCount--
+
+	if e.DualDiceCount == 0 {
+		e.ExtraDices = 0
+	}
 }
 
 func (e *Player) AllowReRoll() {
