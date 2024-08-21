@@ -45,6 +45,7 @@ type GetRacePlayerResponseDTO struct {
 	Role            string                              `json:"role"`
 	Color           string                              `json:"color"`
 	Profile         RacePlayerProfileResponseDTO        `json:"profile"`
+	Info            entity.PlayerInfo                   `json:"info"`
 	Profession      entity.Profession                   `json:"profession"`
 	IsRolledDice    bool                                `json:"is_rolled_dice"`
 	LastPosition    uint8                               `json:"last_position"`
@@ -54,7 +55,7 @@ type GetRacePlayerResponseDTO struct {
 	Dices           []int                               `json:"dices,omitempty"`
 	DualDiceCount   int                                 `json:"dual_dice_count"`
 	SkippedTurns    uint8                               `json:"skipped_turns"`
-	CanReRoll       bool                                `json:"can_re_roll"`
+	AllowOnBigRace  bool                                `json:"allow_on_big_race"`
 	OnBigRace       bool                                `json:"on_big_race"`
 	HasBankrupt     bool                                `json:"has_bankrupt"`
 	AboutToBankrupt string                              `json:"about_to_bankrupt"`

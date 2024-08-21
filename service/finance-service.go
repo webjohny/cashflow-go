@@ -16,6 +16,7 @@ type FinanceService interface {
 	SendMoney(raceId uint64, userId uint64, amount int, player string) error
 	SendAssets(raceId uint64, userId uint64, dto dto.SendAssetsBodyDTO) error
 	PayLoan(raceId uint64, userId uint64, amount int) error
+	PayTax(raceId uint64, userId uint64, amount int) error
 	TakeLoan(raceId uint64, userId uint64, amount int) error
 	AskMoney(raceId uint64, userId uint64, dto dto.AskMoneyBodyDto) (error, bool)
 }
@@ -64,8 +65,8 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 
 	if !race.Options.EnableManager {
 		countPayDay := service.cardService.CheckPayDay(player)
-
 		if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
+
 			if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
@@ -123,46 +124,62 @@ func (service *financeService) SendMoney(raceId uint64, userId uint64, amount in
 	if err != nil {
 		return err
 	}
-	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
-
 	if sender.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
 	}
-
-	if receiver.ID == 0 {
-		return errors.New(storage.ErrorUndefinedReceiverPlayer)
-	}
-
 	if sender.Cash < amount {
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
-	service.playerService.UpdateCash(
-		&sender,
-		-amount,
-		fmt.Sprintf(
-			"Перевёл $%s игроку %s",
-			strconv.Itoa(amount),
-			helper.CamelToCapitalize(receiverUsername),
-		),
-	)
+	if receiverUsername != "" {
+		receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
 
-	service.playerService.UpdateCash(
-		&receiver,
-		amount,
-		fmt.Sprintf(
-			"%s перевёл Вам $%s",
+		if receiver.ID == 0 {
+			return errors.New(storage.ErrorUndefinedReceiverPlayer)
+		}
+
+		service.playerService.UpdateCash(
+			&sender,
+			-amount,
+			fmt.Sprintf(
+				"Перевёл $%s игроку %s",
+				strconv.Itoa(amount),
+				helper.CamelToCapitalize(receiverUsername),
+			),
+		)
+
+		service.playerService.UpdateCash(
+			&receiver,
+			amount,
+			fmt.Sprintf(
+				"%s перевёл Вам $%s",
+				helper.CamelToCapitalize(sender.Username),
+				strconv.Itoa(amount),
+			),
+		)
+
+		go service.raceService.SetTransaction(raceId, sender, "", fmt.Sprintf(
+			"%s перевёл $%s игроку %s",
 			helper.CamelToCapitalize(sender.Username),
 			strconv.Itoa(amount),
-		),
-	)
+			helper.CamelToCapitalize(receiverUsername),
+		))
+	} else {
+		service.playerService.UpdateCash(
+			&sender,
+			-amount,
+			fmt.Sprintf(
+				"Перевёл $%s банк",
+				strconv.Itoa(amount),
+			),
+		)
 
-	go service.raceService.SetTransaction(raceId, sender, "", fmt.Sprintf(
-		"%s перевёл $%s игроку %s",
-		helper.CamelToCapitalize(sender.Username),
-		strconv.Itoa(amount),
-		helper.CamelToCapitalize(receiverUsername),
-	))
+		go service.raceService.SetTransaction(raceId, sender, "", fmt.Sprintf(
+			"%s перевёл $%s в банк",
+			helper.CamelToCapitalize(sender.Username),
+			strconv.Itoa(amount),
+		))
+	}
 
 	return nil
 }
@@ -279,6 +296,45 @@ func (service *financeService) PayLoan(raceId uint64, userId uint64, amount int)
 			helper.CamelToCapitalize(player.Username),
 			strconv.Itoa(amount),
 		))
+	}
+
+	return err
+}
+
+func (service *financeService) PayTax(raceId uint64, userId uint64, amount int) error {
+	logger.Info("FinanceService.PayTax", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+		"amount": amount,
+	})
+
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, true)
+
+	if err != nil {
+		return err
+	}
+
+	card := entity.CardPayTax{}
+	card.Fill(race.CurrentCard)
+
+	var result int
+
+	if card.Percent < 100 {
+		result = int((float32(player.Cash) / 100) * float32(card.Percent))
+	} else {
+		result = player.Cash
+	}
+
+	if result != amount {
+		return errors.New(storage.ErrorWrongAmount)
+	}
+
+	service.playerService.UpdateCash(&player, -result, card.Heading)
+
+	if err == nil {
+		race.Respond(player.ID, race.CurrentPlayer.ID)
+		race.CurrentCard = entity.Card{}
+		err, _ = service.raceService.UpdateRace(&race)
 	}
 
 	return err

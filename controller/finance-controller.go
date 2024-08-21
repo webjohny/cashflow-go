@@ -41,7 +41,9 @@ func (c *financeController) SendMoney(ctx *gin.Context) {
 	} else if raceId != 0 && userId != 0 {
 		if sendMoneyBodyDTO.Player == "bankLoan" {
 			err = c.financeService.PayLoan(raceId, userId, sendMoneyBodyDTO.Amount)
-		} else if sendMoneyBodyDTO.Player != "" {
+		} else if sendMoneyBodyDTO.Player == "tax" {
+			err = c.financeService.PayTax(raceId, userId, sendMoneyBodyDTO.Amount)
+		} else {
 			err = c.financeService.SendMoney(raceId, userId, sendMoneyBodyDTO.Amount, sendMoneyBodyDTO.Player)
 		}
 	}

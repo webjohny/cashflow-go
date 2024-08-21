@@ -12,50 +12,6 @@ import (
 	"strconv"
 )
 
-type PlayerService interface {
-	Payday(player entity.Player)
-	CashFlowDay(player entity.Player)
-	Doodad(card entity.CardDoodad, player entity.Player) error
-	BuyBusiness(card entity.CardBusiness, player entity.Player, count int, updateCash bool) error
-	BuyRealEstate(card entity.CardRealEstate, player entity.Player) error
-	BuyRealEstateInPartnership(card entity.CardRealEstate, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
-	BuyBusinessInPartnership(card entity.CardBusiness, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
-	BuyLottery(card entity.CardLottery, player entity.Player, dice int) (error, bool)
-	BuyOtherAssets(card entity.CardOtherAssets, player entity.Player, count int) error
-	BuyOtherAssetsInPartnership(card entity.CardOtherAssets, owner entity.Player, players []entity.Player, parts []dto.CardPurchasePlayerActionDTO) error
-	BuyDream(card entity.CardDream, player entity.Player) error
-	BuyStocks(card entity.CardStocks, player entity.Player, updateCash bool) error
-	SellOtherAssets(ID string, card entity.CardMarketOtherAssets, player entity.Player, count int) error
-	SellStocks(card entity.CardStocks, player entity.Player, count int, updateCash bool) error
-	SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error
-	SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player, count int) (error, int)
-	TransferBusiness(ID string, sender entity.Player, receiver entity.Player, count int) error
-	TransferStocks(card entity.CardStocks, ID string, sender entity.Player, receiver entity.Player, count int) error
-	DecreaseStocks(card entity.CardStocks, player entity.Player) error
-	IncreaseStocks(card entity.CardStocks, player entity.Player) error
-	Charity(card entity.CardCharity, player entity.Player) error
-	PayTax(card entity.CardPayTax, player entity.Player) error
-	Downsized(player entity.Player) error
-	MoveToBigRace(player entity.Player) error
-	MarketDamage(card entity.CardMarket, player entity.Player) error
-	MarketManipulation(card entity.CardMarket, player entity.Player) error
-	MarketBusiness(card entity.CardMarketBusiness, player entity.Player) error
-	SellAllProperties(player entity.Player) (error, int)
-	TakeLoan(player entity.Player, amount int) error
-	PayLoan(player entity.Player, actionType string, amount int) error
-	UpdateCash(player *entity.Player, amount int, details string)
-	SetTransaction(ID uint64, currentCash int, cash int, amount int, details string)
-	GetPlayerByUsername(username string) entity.Player
-	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
-	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player)
-	GetAllPlayersByRaceId(raceId uint64) []entity.Player
-	GetProfessionById(id uint8) (error, entity.Profession)
-	GetRacePlayer(raceId uint64, userId uint64) (error, dto.GetRacePlayerResponseDTO)
-	GetFormattedPlayerResponse(player entity.Player, hasRestrictedFields bool) dto.GetRacePlayerResponseDTO
-	InsertPlayer(b *entity.Player) (error, entity.Player)
-	UpdatePlayer(b *entity.Player) (error, entity.Player)
-}
-
 type playerService struct {
 	playerRepository   repository.PlayerRepository
 	professionService  ProfessionService
@@ -195,8 +151,6 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 		return errors.New(storage.ErrorNotEnoughMoney), false
 	}
 
-	player.AllowReRoll()
-
 	if helper.Contains[int](card.Success, dice) {
 		var amount int
 
@@ -313,9 +267,15 @@ func (service *playerService) PayTax(card entity.CardPayTax, player entity.Playe
 		"card":     card,
 	})
 
-	amount := (player.Cash / 100) * card.Percent
+	var result int
 
-	service.UpdateCash(&player, -amount, card.Heading)
+	if card.Percent < 100 {
+		result = int((float32(player.Cash) / 100) * float32(card.Percent))
+	} else {
+		result = player.Cash
+	}
+
+	service.UpdateCash(&player, -result, card.Heading)
 
 	return nil
 }
@@ -338,8 +298,28 @@ func (service *playerService) Downsized(player entity.Player) error {
 	return nil
 }
 
-func (service *playerService) MoveToBigRace(player entity.Player) error {
-	logger.Info("PlayerService.MoveToBigRace", map[string]interface{}{
+func (service *playerService) BigBankrupt(player entity.Player) error {
+	logger.Info("PlayerService.BigBankrupt", map[string]interface{}{
+		"playerId": player.ID,
+	})
+
+	var profession entity.Profession
+
+	if player.ProfessionID > 0 {
+		profession = service.professionService.GetRandomProfession(&[]int{})
+	} else {
+		profession = player.Info.Profession
+	}
+
+	player.Reset(profession)
+
+	err, _ := service.UpdatePlayer(&player)
+
+	return err
+}
+
+func (service *playerService) MoveOnBigRace(player entity.Player) error {
+	logger.Info("PlayerService.MoveOnBigRace", map[string]interface{}{
 		"playerId": player.ID,
 	})
 
@@ -351,9 +331,17 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 
 	player.OnBigRace = true
 	player.CashFlow = cashFlow
-	player.Cash = cashFlow + player.Cash
 	player.TotalIncome = 0
 	player.TotalExpenses = 0
+	player.CurrentPosition = 0
+	player.LastPosition = 0
+	player.HasBankrupt = 0
+	player.IsRolledDice = 0
+	player.SkippedTurns = 0
+	player.DualDiceCount = 0
+	player.ExtraDices = 0
+	player.Salary = 0
+	player.Dices = make([]int, 0)
 	player.Expenses = make(map[string]int)
 	player.Assets = entity.PlayerAssets{
 		Savings:     0,
@@ -365,6 +353,22 @@ func (service *playerService) MoveToBigRace(player entity.Player) error {
 	}
 
 	err, _ := service.playerRepository.UpdatePlayer(&player)
+
+	return err
+}
+
+func (service *playerService) SetDream(raceId uint64, userId uint64, playerDream entity.PlayerDream) error {
+	logger.Info("PlayerService.SetDream", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+		"dream":  playerDream,
+	})
+
+	err, player := service.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	player.Info.Dream = playerDream
+
+	err, _ = service.playerRepository.UpdatePlayer(&player)
 
 	return err
 }
@@ -658,12 +662,18 @@ func (service *playerService) UpdateCash(player *entity.Player, amount int, deta
 
 	player.Cash += amount
 
-	service.SetTransaction(player.ID, currentCash, player.Cash, amount, details)
+	if details != "" {
+		service.SetTransaction(player.ID, currentCash, player.Cash, amount, details)
+	}
+
 	err, _ := service.playerRepository.UpdatePlayer(player)
 
 	if err != nil {
 		logger.Error(err, map[string]interface{}{
 			"playerId": player.ID,
+			"lastCash": currentCash,
+			"amount":   amount,
+			"details":  details,
 			"cash":     player.Cash,
 		})
 	}
@@ -781,6 +791,7 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 			PassiveIncome: player.CalculatePassiveIncome(),
 			Cash:          player.Cash,
 		},
+		Info:            player.Info,
 		Profession:      profession,
 		IsRolledDice:    player.IsRolledDice == 1,
 		LastPosition:    player.LastPosition,
@@ -789,11 +800,10 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 		ExtraDices:      player.ExtraDices,
 		DualDiceCount:   player.DualDiceCount,
 		SkippedTurns:    player.SkippedTurns,
-		CanReRoll:       player.CanReRoll == 1,
+		AllowOnBigRace:  player.ConditionsForBigRace(),
 		OnBigRace:       player.OnBigRace,
 		HasBankrupt:     player.HasBankrupt == 1,
 		AboutToBankrupt: player.AboutToBankrupt,
-		HasMlm:          player.HasMlm == 1,
 	}
 
 	if hasRestrictedFields {

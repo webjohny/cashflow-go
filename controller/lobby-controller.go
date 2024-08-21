@@ -36,7 +36,7 @@ func (c *lobbyController) GetLobby(ctx *gin.Context) {
 	var response interface{}
 
 	if userId != 0 {
-		response = c.lobbyService.GetLobby(lobbyId, userId)
+		err, response = c.lobbyService.GetLobby(lobbyId, userId)
 	}
 
 	request.FinalResponse(ctx, err, response)

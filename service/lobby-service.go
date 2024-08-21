@@ -19,7 +19,7 @@ type LobbyService interface {
 	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	Leave(ID uint64, username string) (error, entity.Lobby)
 	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
-	GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO
+	GetLobby(lobbyId uint64, userId uint64) (error, dto.GetLobbyResponseDTO)
 	GetByID(lobbyId uint64) entity.Lobby
 }
 
@@ -43,7 +43,7 @@ func (service *lobbyService) Update(lobby *entity.Lobby) (error, entity.Lobby) {
 	return service.lobbyRepository.UpdateLobby(lobby)
 }
 
-func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) dto.GetLobbyResponseDTO {
+func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) (error, dto.GetLobbyResponseDTO) {
 	logger.Info("LobbyService.GetLobby", map[string]interface{}{
 		"lobbyId": lobbyId,
 		"userId":  userId,
@@ -52,9 +52,13 @@ func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) dto.GetLobb
 	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
 	player := lobby.GetPlayer(userId)
 
+	if player.ID == 0 {
+		return errors.New(storage.ErrorUndefinedPlayer), dto.GetLobbyResponseDTO{}
+	}
+
 	response := dto.GetLobbyResponseDTO{
 		Username: player.Username,
-		You:      lobby.GetPlayer(userId),
+		You:      player,
 		Players:  lobby.Players,
 		Status:   lobby.Status,
 		LobbyId:  lobby.ID,
@@ -62,7 +66,7 @@ func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) dto.GetLobb
 		Hash:     helper.CreateHashByJson(lobby),
 	}
 
-	return response
+	return nil, response
 }
 
 func (service *lobbyService) Create(username string, userId uint64) (error, entity.Lobby) {

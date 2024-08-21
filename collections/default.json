@@ -4,9 +4,9 @@
       "id":"bigCharity",
       "heading":"Благотворительность",
       "description":"Акционное предложение, заплати $100.000 и можешь кидать до 3х кубиков до конца игры.",
-      "cost":100000,
+      "cost": 100000,
       "extra_dices":2,
-      "limit":-1,
+      "limit": -1,
       "type":"bigCharity",
       "symbol":"bigCharity"
     }

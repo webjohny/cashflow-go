@@ -4,7 +4,6 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/objects"
 	"gorm.io/datatypes"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -52,10 +51,18 @@ type RaceBankruptPlayer struct {
 	CountDices int    `json:"count_dices"`
 }
 
+type BigRaceConditions struct {
+	CashFlow      bool            `json:"cashFlow,omitempty"`
+	RequiredDeals map[string]bool `json:"requiredDeals,omitempty"`
+	CashPerMonths int             `json:"cashPerMonths,omitempty"`
+}
+
 type RaceOptions struct {
-	EnableManager  bool   `json:"enable_manager,omitempty"`
-	EnableWaitList bool   `json:"enable_wait_list,omitempty"`
-	CardCollection string `json:"card_collection,omitempty"`
+	BigRaceGoalForPassiveIncome int               `json:"bigRaceGoalForPassiveIncome,omitempty"`
+	BigRaceConditions           BigRaceConditions `json:"bigRaceConditions,omitempty"`
+	EnableManager               bool              `json:"enableManager,omitempty"`
+	EnableWaitList              bool              `json:"enableWaitList,omitempty"`
+	CardCollection              string            `json:"cardCollection,omitempty"`
 }
 
 type RaceCardMap struct {
@@ -110,8 +117,6 @@ func (rcm *RaceCardMap) Next(action string) {
 	if index > len(rcm.Map[action])-1 {
 		nextItem = 0
 	}
-
-	log.Println(action, nextItem)
 
 	rcm.Active[action] = rcm.Map[action][nextItem]
 }

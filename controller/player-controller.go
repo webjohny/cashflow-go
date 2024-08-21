@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
@@ -9,6 +10,8 @@ import (
 
 type PlayerController interface {
 	GetRacePlayer(ctx *gin.Context)
+	MoveOnBigRace(ctx *gin.Context)
+	SetDream(ctx *gin.Context)
 }
 
 type playerController struct {
@@ -30,6 +33,45 @@ func (c *playerController) GetRacePlayer(ctx *gin.Context) {
 
 	if userId != 0 {
 		err, response = c.playerService.GetRacePlayer(raceId, userId)
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) MoveOnBigRace(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+	var response interface{}
+
+	if userId != 0 {
+		var player entity.Player
+
+		err, player = c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+		if err == nil {
+			err = c.playerService.MoveOnBigRace(player)
+		}
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) SetDream(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+	var response interface{}
+	var playerDream entity.PlayerDream
+
+	errDTO := ctx.ShouldBind(&playerDream)
+
+	if errDTO != nil {
+		response = request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
+	} else if userId != 0 {
+		err = c.playerService.SetDream(raceId, userId, playerDream)
 	}
 
 	request.FinalResponse(ctx, err, response)

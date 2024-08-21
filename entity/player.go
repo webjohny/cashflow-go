@@ -40,6 +40,33 @@ type PlayerLiabilities struct {
 	CreditCardDebt int `json:"creditCardDebt"`
 }
 
+type PlayerAccountInfo struct {
+	Credits       []int `json:"credits"`
+	Expenses      []int `json:"expenses"`
+	CommonIncome  []int `json:"commonIncome"`
+	PassiveIncome []int `json:"passiveIncome"`
+	CashFlow      []int `json:"cashFlow"`
+}
+
+type PlayerDream struct {
+	ID    int    `json:"id" form:"id"`
+	Name  string `json:"name" form:"name"`
+	Price int    `json:"price" form:"price"`
+}
+
+type PlayerInfo struct {
+	ID          uint64            `json:"id"`
+	Profession  Profession        `json:"profession"`
+	Babies      int               `json:"babies"`
+	Dream       PlayerDream       `json:"dream"`
+	FullName    string            `json:"fullName"`
+	Profile     interface{}       `json:"profile"`
+	Assets      interface{}       `json:"assets"`
+	Liabilities interface{}       `json:"liabilities"`
+	Account     PlayerAccountInfo `json:"account"`
+	Conditions  BigRaceConditions `json:"conditions"`
+}
+
 type Player struct {
 	ID              uint64            `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID          uint64            `gorm:"uniqueIndex:idx_username" json:"user_id"`
@@ -53,11 +80,9 @@ type Player struct {
 	Assets          PlayerAssets      `gorm:"type:json;serializer:json" json:"assets"`
 	Liabilities     PlayerLiabilities `gorm:"type:json;serializer:json" json:"liabilities"`
 	Cash            int               `json:"cash" gorm:"allowzero"`
-	TotalIncome     int               `json:"total_income" gorm:"allowzero"`
-	TotalExpenses   int               `json:"total_expenses" gorm:"allowzero"`
 	CashFlow        int               `json:"cash_flow" gorm:"allowzero"`
-	PassiveIncome   int               `json:"passive_income" gorm:"allowzero"`
 	ProfessionID    uint8             `json:"profession_id"`
+	Info            PlayerInfo        `gorm:"type:json;serializer:json" json:"Info"`
 	Profession      Profession        `gorm:"-" json:"profession"`
 	LastPosition    uint8             `json:"last_position" gorm:"allowzero"`
 	CurrentPosition uint8             `json:"current_position" gorm:"allowzero"`
@@ -66,12 +91,14 @@ type Player struct {
 	Dices           []int             `json:"dices" gorm:"type:json;serializer:json"`
 	SkippedTurns    uint8             `json:"skipped_turns" gorm:"allowzero"`
 	IsRolledDice    uint8             `json:"is_rolled_dice"`
-	CanReRoll       uint8             `json:"can_re_roll"`
 	OnBigRace       bool              `gorm:"default:false" json:"on_big_race"`
 	HasBankrupt     uint8             `json:"has_bankrupt"`
 	AboutToBankrupt string            `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
-	HasMlm          uint8             `json:"has_mlm"`
 	CreatedAt       datatypes.Date    `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+
+	PassiveIncome int `json:"passive_income" gorm:"-"`
+	TotalExpenses int `json:"total_expenses" gorm:"-"`
+	TotalIncome   int `json:"total_income" gorm:"-"`
 }
 
 func (r *Player) CalculateDices() int {
@@ -141,7 +168,6 @@ func (e *Player) Reset(profession Profession) {
 
 	if profession.ID != 0 {
 		e.Salary = profession.Income.Salary
-		e.Babies = uint8(profession.Babies)
 		e.Expenses = profession.Expenses
 		e.Assets = profession.Assets
 		e.Liabilities = profession.Liabilities
@@ -150,9 +176,15 @@ func (e *Player) Reset(profession Profession) {
 		e.Assets.Savings = 0
 	}
 
+	e.CashFlow = 0
 	e.CurrentPosition = 0
+	e.LastPosition = 0
 	e.SkippedTurns = 0
-	e.SkippedTurns = 0
+	e.IsRolledDice = 0
+	e.DualDiceCount = 0
+	e.ExtraDices = 0
+	e.Dices = make([]int, 0)
+	e.OnBigRace = false
 }
 
 func (e *Player) CreateResponse() RaceResponse {
@@ -170,16 +202,6 @@ func (e *Player) DecrementDualDiceCount() {
 	if e.DualDiceCount == 0 {
 		e.ExtraDices = 0
 	}
-}
-
-func (e *Player) AllowReRoll() {
-	e.ChangeDiceStatus(false)
-	e.CanReRoll = 1
-}
-
-func (e *Player) DeactivateReRoll() {
-	e.ChangeDiceStatus(true)
-	e.CanReRoll = 0
 }
 
 func (e *Player) InitializeSkippedTurns() {
@@ -397,13 +419,11 @@ func (e *Player) RemoveBusiness(id string) CardBusiness {
 func (e *Player) SplitStocks(card string) {
 	_, stock := e.FindStocksBySymbol(card)
 	stock.Count *= 2
-	e.DeactivateReRoll()
 }
 
 func (e *Player) ReverseSplitStocks(card string) {
 	_, stock := e.FindStocksBySymbol(card)
 	stock.Count = int(math.Ceil(float64(stock.Count) / 2))
-	e.DeactivateReRoll()
 }
 
 func (e *Player) CanContinue() bool {
@@ -411,11 +431,33 @@ func (e *Player) CanContinue() bool {
 }
 
 func (e *Player) ConditionsForBigRace() bool {
-	return e.IsIncomeStable()
+	return e.IsIncomeStable() && e.RequiredDeals() && e.CashPerMonths()
 }
 
 func (e *Player) IsIncomeStable() bool {
-	return e.CalculatePassiveIncome() < e.CalculateTotalExpenses()
+	return e.CalculatePassiveIncome() > e.CalculateTotalExpenses()
+}
+
+func (e *Player) RequiredDeals() bool {
+	deals := e.Info.Conditions.RequiredDeals
+
+	for _, deal := range deals {
+		if !deal {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (e *Player) CashPerMonths() bool {
+	months := e.Info.Conditions.CashPerMonths
+
+	if months > 0 {
+		return e.Cash >= e.CalculateTotalExpenses()*months
+	}
+
+	return true
 }
 
 func (e *Player) IsBankrupt() bool {
@@ -441,7 +483,7 @@ func (e *Player) CalculatePassiveIncome() int {
 		}
 	}
 
-	return passiveIncome
+	return passiveIncome + e.CashFlow
 }
 
 func (e *Player) CalculateTotalIncome() int {

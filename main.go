@@ -155,8 +155,6 @@ func main() {
 		gameRoutes.GET("/cancel/:raceId", gameController.Cancel)
 		gameRoutes.GET("/reset/:raceId", gameController.Reset)
 		gameRoutes.POST("/start/:lobbyId", gameController.Start)
-		// @toDo Create EP for moving to big race
-		gameRoutes.POST("/move/:raceId", gameController.MoveToBigRace)
 		gameRoutes.POST("/roll-dice", gameController.RollDice)
 		gameRoutes.GET("/change-turn", gameController.ChangeTurn)
 		gameRoutes.GET("/get/tiles", gameController.GetTiles)
@@ -173,6 +171,8 @@ func main() {
 	playerRoutes := r.Group("api/player", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		playerRoutes.GET("/info", playerController.GetRacePlayer)
+		playerRoutes.POST("/on-big-race/:raceId", playerController.MoveOnBigRace)
+		playerRoutes.POST("/dream/:raceId", playerController.SetDream)
 	}
 
 	playerTestRoutes := r.Group("test/player")

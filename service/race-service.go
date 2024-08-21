@@ -5,6 +5,7 @@ import (
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
+	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/objects"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
@@ -26,10 +27,10 @@ type RaceService interface {
 	PaydayAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error
 	MarketAction(raceId uint64, userId uint64, actionType string) error
 	CharityAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error
-	PayTaxAction(raceId uint64, userId uint64) error
 	BabyAction(raceId uint64, userId uint64) (error, dto.MessageResponseDto)
 	DoodadAction(raceId uint64, userId uint64) error
 	DownsizedAction(raceId uint64, userId uint64) error
+	BigBankruptAction(raceId uint64, userId uint64) error
 	GetRaceAndPlayer(raceId uint64, userId uint64, isBigRace bool) (error, entity.Race, entity.Player)
 	GetRaceByRaceId(raceId uint64, isBigRace bool) entity.Race
 	GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO
@@ -257,14 +258,16 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 		return err, response
 	}
 
-	if status && race.CurrentCard.Type == entity.BigBusinessTypes.RiskBusiness {
-		go service.SetTransaction(race.ID, player, entity.TxTypes.Business, storage.MessageSuccessRiskDeal)
+	checkRiskDeal := helper.Contains([]string{entity.BigBusinessTypes.RiskBusiness, entity.BigBusinessTypes.RiskStocks}, race.CurrentCard.Type)
+
+	if status && checkRiskDeal {
+		go service.SetTransaction(race.ID, player, race.CurrentCard.Type, storage.MessageSuccessRiskDeal)
 		response.Message = storage.MessageSuccessRiskDeal
 	} else if status && race.CurrentCard.Type == entity.SmallDealTypes.Lottery {
 		go service.SetTransaction(race.ID, player, entity.SmallDealTypes.Lottery, storage.MessageSuccessRiskDeal)
 		response.Message = storage.MessageSuccessLottery
-	} else if !status && race.CurrentCard.Type == entity.BigBusinessTypes.RiskBusiness {
-		go service.SetTransaction(race.ID, player, entity.TxTypes.Business, storage.MessageFailRiskDeal)
+	} else if !status && checkRiskDeal {
+		go service.SetTransaction(race.ID, player, race.CurrentCard.Type, storage.MessageFailRiskDeal)
 		response.Error = storage.MessageFailRiskDeal
 	} else if !status && race.CurrentCard.Type == entity.SmallDealTypes.Lottery {
 		go service.SetTransaction(race.ID, player, entity.SmallDealTypes.Lottery, storage.MessageFailLottery)
@@ -562,31 +565,6 @@ func (service *raceService) CharityAction(raceId uint64, userId uint64, actionTy
 	return err
 }
 
-func (service *raceService) PayTaxAction(raceId uint64, userId uint64) error {
-	logger.Info("RaceService.PayTaxAction", map[string]interface{}{
-		"raceId": raceId,
-		"userId": userId,
-	})
-
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, true)
-
-	if err != nil {
-		return err
-	}
-
-	card := entity.CardPayTax{}
-	card.Fill(race.CurrentCard)
-
-	err = service.playerService.PayTax(card, player)
-
-	if err == nil {
-		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err, _ = service.UpdateRace(&race)
-	}
-
-	return err
-}
-
 func (service *raceService) BabyAction(raceId uint64, userId uint64) (error, dto.MessageResponseDto) {
 	logger.Info("RaceService.BabyAction", map[string]interface{}{
 		"raceId": raceId,
@@ -669,6 +647,28 @@ func (service *raceService) DownsizedAction(raceId uint64, userId uint64) error 
 	}
 
 	err = service.playerService.Downsized(player)
+
+	if err == nil {
+		race.Respond(player.ID, race.CurrentPlayer.ID)
+		err, _ = service.UpdateRace(&race)
+	}
+
+	return err
+}
+
+func (service *raceService) BigBankruptAction(raceId uint64, userId uint64) error {
+	logger.Info("RaceService.BigBankruptAction", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
+	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+
+	if err != nil {
+		return err
+	}
+
+	err = service.playerService.BigBankrupt(player)
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)

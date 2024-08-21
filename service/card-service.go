@@ -88,7 +88,7 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 
 	tileName := action
 
-	if !isBigRace {
+	if !player.OnBigRace {
 		if tileName == "small" || tileName == "big" {
 			tileName = "deals"
 		}
@@ -138,24 +138,27 @@ func (service *cardService) CheckPayDay(player entity.Player) int {
 	current := int(player.CurrentPosition)
 	last := int(player.LastPosition)
 
+	countTiles := 24
+
 	if player.OnBigRace {
 		tiles = service.bigRace.Tiles["cashFlowDay"]
+		countTiles = 46
 	} else {
 		tiles = service.ratRace.Tiles["payday"]
 	}
 
 	for i := last + 1; i != current+1; i++ {
-		key := i % 24
+		key := i % countTiles
 
 		if key == 0 {
-			key = 24
+			key = countTiles
 		}
 
 		if helper.Contains[int](tiles, key) {
 			count++
 		}
 
-		if i == 24 {
+		if i == countTiles {
 			i = 0
 		}
 	}
@@ -204,8 +207,8 @@ func (service *cardService) Accept(actionType string, raceId uint64, family stri
 		err, response = service.raceService.BabyAction(raceId, userId)
 	} else if family == "downsized" {
 		err = service.raceService.DownsizedAction(raceId, userId)
-	} else if family == "tax50percent" || family == "tax100percent" {
-		err = service.raceService.PayTaxAction(raceId, userId)
+	} else if family == "bankrupt" {
+		err = service.raceService.BigBankruptAction(raceId, userId)
 	} else {
 		err = service.raceService.SkipAction(raceId, userId, isBigRace)
 	}
@@ -263,6 +266,8 @@ func (service *cardService) Purchase(actionType string, raceId uint64, userId ui
 
 	case "lottery", "riskBusiness", "riskStock":
 		err, response = service.raceService.LotteryAction(raceId, userId, isBigRace)
+
+		logger.Warn(err, response)
 		break
 
 	case "mlm":
@@ -340,18 +345,18 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 
 	var tile string
 
-	if isBigRace {
+	if player.OnBigRace {
 		tile = service.getBigCardType(int(player.CurrentPosition))
 	} else {
 		tile = service.getRatCardType(int(player.CurrentPosition))
-	}
 
-	if action == "big" && player.Cash < 10000 {
-		return errors.New(storage.ErrorCannotTakeBigDeals), entity.Card{}
-	}
+		if action == "big" && player.Cash < 10000 {
+			return errors.New(storage.ErrorCannotTakeBigDeals), entity.Card{}
+		}
 
-	if action != "" && (action == "small" || action == "big") {
-		tile = action + "Deal"
+		if action != "" && (action == "small" || action == "big") {
+			tile = action + "Deal"
+		}
 	}
 
 	var card entity.Card
@@ -466,6 +471,7 @@ func (service *cardService) getCardByTile(cardType string, currentPosition int, 
 		"baby",
 		"downsized",
 		"payday",
+		"cashFlowDay",
 		"business",
 		"dream",
 		"tax50percent",
