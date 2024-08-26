@@ -128,9 +128,8 @@ func (c *gameController) Cancel(ctx *gin.Context) {
 
 func (c *gameController) ChangeTurn(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
-	bigRace := helper.GetBigRace(ctx)
 
-	err := c.gameService.ChangeTurn(raceId, bigRace)
+	err := c.gameService.ChangeTurn(raceId)
 
 	request.FinalResponse(ctx, err, nil)
 }

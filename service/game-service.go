@@ -16,7 +16,7 @@ type GameService interface {
 	Start(lobbyId uint64) (error, entity.Race)
 	RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto, isBigRace bool) (error, []int)
 	GetGame(raceId uint64, userId uint64, isBigRace bool) (error, dto.GetGameResponseDTO)
-	ChangeTurn(raceId uint64, isBigRace bool) error
+	ChangeTurn(raceId uint64) error
 	Cancel(raceId uint64, userId uint64) error
 	Reset(raceId uint64, userId uint64) error
 	GetTiles(raceId uint64, isBigRace bool) []string
@@ -84,7 +84,7 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollD
 		"dto":    dto,
 	})
 
-	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, []int{}
@@ -138,7 +138,7 @@ func (service *gameService) Cancel(raceId uint64, userId uint64) error {
 	})
 
 	players := service.playerService.GetAllPlayersByRaceId(raceId)
-	race := service.raceService.GetRaceByRaceId(raceId, false)
+	race := service.raceService.GetRaceByRaceId(raceId)
 
 	if race.ID == 0 {
 		return errors.New(storage.ErrorUndefinedGame)
@@ -163,7 +163,7 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	})
 
 	players := service.playerService.GetAllPlayersByRaceId(raceId)
-	race := service.raceService.GetRaceByRaceId(raceId, false)
+	race := service.raceService.GetRaceByRaceId(raceId)
 
 	if race.ID == 0 {
 		return errors.New(storage.ErrorUndefinedGame)
@@ -239,72 +239,18 @@ func (service *gameService) GetTiles(raceId uint64, isBigRace bool) []string {
 	}
 }
 
-func (service *gameService) ChangeTurn(raceId uint64, isBigRace bool) error {
+func (service *gameService) ChangeTurn(raceId uint64) error {
 	logger.Info("GameService.ChangeTurn", map[string]interface{}{
 		"raceId": raceId,
 	})
 
-	race := service.raceService.GetRaceByRaceId(raceId, isBigRace)
+	race := service.raceService.GetRaceByRaceId(raceId)
 
 	if race.ID == 0 {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
 
-	if race.CurrentCard.ID != "" && !race.IsReceived(race.CurrentPlayer.Username) {
-		return nil
-	}
-
-	race.NextPlayer()
-	race.ResetResponses()
-	race.IsMultiFlow = false
-
-	currentPlayer := race.CurrentPlayer
-
-	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, currentPlayer.UserId)
-
-	if err != nil {
-		return err
-	}
-
-	player.ChangeDiceStatus(false)
-
-	err, _ = service.playerService.UpdatePlayer(&player)
-
-	if err != nil {
-		return err
-	}
-
-	race.CurrentCard = entity.Card{}
-	race.Notifications = make([]entity.RaceNotification, 0)
-	race.Responses = service.createResponses(raceId, currentPlayer.ID)
-
-	err, race = service.raceService.UpdateRace(&race)
-
-	if err != nil {
-		return err
-	}
-
-	if player.SkippedTurns > 0 {
-		player.DecrementSkippedTurns()
-
-		if player.DualDiceCount > 0 {
-			player.DecrementDualDiceCount()
-		}
-
-		err, _ = service.playerService.UpdatePlayer(&player)
-
-		if err != nil {
-			return err
-		}
-
-		err = service.ChangeTurn(raceId, isBigRace)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return service.raceService.ChangeTurn(race)
 }
 
 func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
@@ -408,7 +354,6 @@ func (service *gameService) createResponses(raceId uint64, currentPlayerId uint6
 
 			if player.OnBigRace && player.ID != currentPlayerId {
 				response.Responded = true
-				logger.Warn("RESPONDED", player.ID)
 			}
 			responses = append(responses, response)
 		}

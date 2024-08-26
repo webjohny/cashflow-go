@@ -364,6 +364,12 @@ func (service *playerService) SetDream(raceId uint64, userId uint64, playerDream
 		"dream":  playerDream,
 	})
 
+	anotherPlayer := service.playerRepository.FindPlayerByRaceIdAndInfoDreamId(raceId, playerDream.ID)
+
+	if anotherPlayer.ID != 0 {
+		return errors.New(storage.ErrorDreamPlaceHasAlreadyTaken)
+	}
+
 	err, player := service.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 	player.Info.Dream = playerDream
@@ -679,11 +685,11 @@ func (service *playerService) UpdateCash(player *entity.Player, amount int, deta
 	}
 }
 
-func (service *playerService) SetTransaction(ID uint64, currentCash int, cash int, amount int, details string) {
+func (service *playerService) SetTransaction(ID uint64, currentCash int, newCash int, amount int, details string) {
 	logger.Info("PlayerService.SetTransaction", map[string]interface{}{
 		"playerId":    ID,
 		"currentCash": currentCash,
-		"cash":        cash,
+		"cash":        newCash,
 		"details":     details,
 	})
 
@@ -691,7 +697,7 @@ func (service *playerService) SetTransaction(ID uint64, currentCash int, cash in
 		PlayerID:    ID,
 		Details:     details,
 		CurrentCash: currentCash,
-		Cash:        cash,
+		Cash:        newCash,
 		Amount:      amount,
 	})
 }

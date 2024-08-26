@@ -19,10 +19,10 @@ type RaceService interface {
 	StocksAction(raceId uint64, userId uint64, count int) error
 	LotteryAction(raceId uint64, userId uint64, isBigRace bool) (error, dto.RiskResponseDTO)
 	MlmAction(raceId uint64, userId uint64, isBigRace bool) error
-	SellBusiness(raceId uint64, userId uint64, assetId string, count int) error
-	SellRealEstate(raceId uint64, userId uint64, realEstateId string) error
-	SellStocks(raceId uint64, userId uint64, count int) error
-	SellOtherAssets(raceId uint64, userId uint64, assetId string, count int) error
+	SellBusinessAction(raceId uint64, userId uint64, assetId string, count int) error
+	SellRealEstateAction(raceId uint64, userId uint64, realEstateId string) error
+	SellStocksAction(raceId uint64, userId uint64, count int) error
+	SellOtherAssetsAction(raceId uint64, userId uint64, assetId string, count int) error
 	SkipAction(raceId uint64, userId uint64, isBigRace bool) error
 	PaydayAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error
 	MarketAction(raceId uint64, userId uint64, actionType string) error
@@ -31,8 +31,9 @@ type RaceService interface {
 	DoodadAction(raceId uint64, userId uint64) error
 	DownsizedAction(raceId uint64, userId uint64) error
 	BigBankruptAction(raceId uint64, userId uint64) error
-	GetRaceAndPlayer(raceId uint64, userId uint64, isBigRace bool) (error, entity.Race, entity.Player)
-	GetRaceByRaceId(raceId uint64, isBigRace bool) entity.Race
+	ChangeTurn(race entity.Race) error
+	GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player)
+	GetRaceByRaceId(raceId uint64) entity.Race
 	GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO
 	GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO
 	SetTransaction(ID uint64, player entity.Player, txType string, details string)
@@ -66,8 +67,8 @@ func (service *raceService) UpdateRace(b *entity.Race) (error, entity.Race) {
 	return service.raceRepository.UpdateRace(b)
 }
 
-func (service *raceService) GetRaceAndPlayer(raceId uint64, userId uint64, isBigRace bool) (error, entity.Race, entity.Player) {
-	race := service.GetRaceByRaceId(raceId, isBigRace)
+func (service *raceService) GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player) {
+	race := service.GetRaceByRaceId(raceId)
 	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 	if err != nil {
@@ -85,7 +86,7 @@ func (service *raceService) BusinessAction(raceId uint64, userId uint64, isBigRa
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -136,7 +137,7 @@ func (service *raceService) RealEstateAction(raceId uint64, userId uint64, isBig
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -186,7 +187,7 @@ func (service *raceService) DreamAction(raceId uint64, userId uint64) error {
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, true)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -217,7 +218,7 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, dto.RiskResponseDTO{RolledDice: 0}
@@ -282,14 +283,75 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 	return err, response
 }
 
-func (service *raceService) SellRealEstate(raceId uint64, userId uint64, realEstateId string) error {
+func (service *raceService) ChangeTurn(race entity.Race) error {
+	logger.Info("RaceService.ChangeTurn", map[string]interface{}{
+		"raceId": race.ID,
+	})
+
+	if race.CurrentCard.ID != "" && !race.IsReceived(race.CurrentPlayer.Username) {
+		return nil
+	}
+
+	race.NextPlayer()
+	race.ResetResponses()
+	race.IsMultiFlow = false
+
+	currentPlayer := race.CurrentPlayer
+
+	err, player := service.playerService.GetPlayerByUserIdAndRaceId(race.ID, currentPlayer.UserId)
+
+	if err != nil {
+		return err
+	}
+
+	player.ChangeDiceStatus(false)
+
+	err, _ = service.playerService.UpdatePlayer(&player)
+
+	if err != nil {
+		return err
+	}
+
+	race.CurrentCard = entity.Card{}
+	race.Notifications = make([]entity.RaceNotification, 0)
+
+	err, race = service.UpdateRace(&race)
+
+	if err != nil {
+		return err
+	}
+
+	if player.SkippedTurns > 0 {
+		player.DecrementSkippedTurns()
+
+		if player.DualDiceCount > 0 {
+			player.DecrementDualDiceCount()
+		}
+
+		err, _ = service.playerService.UpdatePlayer(&player)
+
+		if err != nil {
+			return err
+		}
+
+		err = service.ChangeTurn(race)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (service *raceService) SellRealEstateAction(raceId uint64, userId uint64, realEstateId string) error {
 	logger.Info("RaceService.SellRealEstate", map[string]interface{}{
 		"raceId":       raceId,
 		"userId":       userId,
 		"realEstateId": realEstateId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -316,14 +378,14 @@ func (service *raceService) SellRealEstate(raceId uint64, userId uint64, realEst
 	return err
 }
 
-func (service *raceService) SellStocks(raceId uint64, userId uint64, count int) error {
-	logger.Info("RaceService.SellStocks", map[string]interface{}{
+func (service *raceService) SellStocksAction(raceId uint64, userId uint64, count int) error {
+	logger.Info("RaceService.SellStocksAction", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
 		"count":  count,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -353,14 +415,14 @@ func (service *raceService) SellStocks(raceId uint64, userId uint64, count int) 
 	return err
 }
 
-func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, assetId string, count int) error {
-	logger.Info("RaceService.SellOtherAssets", map[string]interface{}{
+func (service *raceService) SellOtherAssetsAction(raceId uint64, userId uint64, assetId string, count int) error {
+	logger.Info("RaceService.SellOtherAssetsAction", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
 		"count":  count,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -387,14 +449,14 @@ func (service *raceService) SellOtherAssets(raceId uint64, userId uint64, assetI
 	return err
 }
 
-func (service *raceService) SellBusiness(raceId uint64, userId uint64, assetId string, count int) error {
-	logger.Info("RaceService.SellBusiness", map[string]interface{}{
+func (service *raceService) SellBusinessAction(raceId uint64, userId uint64, assetId string, count int) error {
+	logger.Info("RaceService.SellBusinessAction", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
 		"count":  count,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -429,7 +491,7 @@ func (service *raceService) StocksAction(raceId uint64, userId uint64, count int
 		"count":  count,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -443,11 +505,7 @@ func (service *raceService) StocksAction(raceId uint64, userId uint64, count int
 	race.CurrentCard.Count = count
 	cardStocks.Fill(race.CurrentCard)
 
-	if race.CurrentCard.Increase > 0 {
-		err = service.playerService.IncreaseStocks(cardStocks, player)
-	} else if race.CurrentCard.Decrease > 0 {
-		err = service.playerService.DecreaseStocks(cardStocks, player)
-	} else {
+	if count > 0 {
 		err = service.playerService.BuyStocks(cardStocks, player, true)
 	}
 
@@ -468,7 +526,7 @@ func (service *raceService) OtherAssetsAction(raceId uint64, userId uint64, dto 
 		"dto":    dto,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -514,7 +572,7 @@ func (service *raceService) MlmAction(raceId uint64, userId uint64, isBigRace bo
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
@@ -530,7 +588,7 @@ func (service *raceService) SkipAction(raceId uint64, userId uint64, isBigRace b
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
@@ -546,7 +604,7 @@ func (service *raceService) CharityAction(raceId uint64, userId uint64, actionTy
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -559,7 +617,7 @@ func (service *raceService) CharityAction(raceId uint64, userId uint64, actionTy
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err, _ = service.UpdateRace(&race)
+		err = service.ChangeTurn(race)
 	}
 
 	return err
@@ -571,7 +629,7 @@ func (service *raceService) BabyAction(raceId uint64, userId uint64) (error, dto
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, dto.MessageResponseDto{}
@@ -606,7 +664,7 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -625,10 +683,10 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 	}, player)
 
 	if err == nil || err.Error() == storage.ErrorYouHaveNoBabies {
-		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err, _ = service.UpdateRace(&race)
-
 		go service.SetTransaction(race.ID, player, entity.TxTypes.Other, race.CurrentCard.Heading)
+
+		race.Respond(player.ID, race.CurrentPlayer.ID)
+		err = service.ChangeTurn(race)
 	}
 
 	return err
@@ -640,7 +698,7 @@ func (service *raceService) DownsizedAction(raceId uint64, userId uint64) error 
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -662,7 +720,7 @@ func (service *raceService) BigBankruptAction(raceId uint64, userId uint64) erro
 		"userId": userId,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -685,7 +743,7 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 		"actionType": actionType,
 	})
 
-	err, race, player := service.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -723,7 +781,7 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 		"actionType": actionType,
 	})
 
-	err, _, player := service.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, _, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -738,7 +796,7 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 	return nil
 }
 
-func (service *raceService) GetRaceByRaceId(raceId uint64, isBigRace bool) entity.Race {
+func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {
 	return service.raceRepository.FindRaceById(raceId)
 }
 
@@ -756,7 +814,7 @@ func (service *raceService) GetRacePlayersByRaceId(raceId uint64) []dto.GetRaceP
 }
 
 func (service *raceService) GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO {
-	race := service.GetRaceByRaceId(raceId, isBigRace)
+	race := service.GetRaceByRaceId(raceId)
 	logs := service.transactionService.GetRaceLogs(raceId)
 	players := service.GetRacePlayersByRaceId(raceId)
 	err, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId)

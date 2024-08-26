@@ -44,7 +44,7 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 		"dto":    dto,
 	})
 
-	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, false)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, false
@@ -65,13 +65,31 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 
 	if !race.Options.EnableManager {
 		countPayDay := service.cardService.CheckPayDay(player)
-		if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
+
+		logger.Info("FinanceService.AskMoney: have no manager", map[string]interface{}{
+			"playerId":        player.ID,
+			"lastPosition":    player.LastPosition,
+			"currentPosition": player.CurrentPosition,
+			"playerCashFlow":  player.CalculateCashFlow(),
+			"countPayDay":     countPayDay,
+			"dto.Amount":      dto.Amount,
+			"dto.Type":        dto.Type,
+		})
+
+		if player.LastPosition == 0 && player.CurrentPosition == 0 {
+			if dto.Amount != (player.CalculateCashFlow() + player.Assets.Savings) {
+				return errors.New(storage.ErrorWrongAmount), false
+			}
+		} else if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
 
 			if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Salary {
-			if countPayDay == 0 || dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
+
+			if countPayDay == 0 {
+				return errors.New(storage.ErrorTransactionDeclined), false
+			} else if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Baby && dto.Amount != 1000 {
@@ -198,7 +216,7 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, dto dto.
 	}
 
 	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, dto.Player)
-	race := service.raceService.GetRaceByRaceId(raceId, false)
+	race := service.raceService.GetRaceByRaceId(raceId)
 
 	if sender.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
@@ -308,7 +326,7 @@ func (service *financeService) PayTax(raceId uint64, userId uint64, amount int) 
 		"amount": amount,
 	})
 
-	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, true)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err

@@ -17,7 +17,7 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 
 	totalCost := card.Price * card.Count
 
-	if player.Cash < totalCost {
+	if updateCash && player.Cash < totalCost {
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
@@ -94,7 +94,7 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 }
 
 func (service *playerService) DecreaseStocks(card entity.CardStocks, player entity.Player) error {
-	logger.Info("PlayerService.SellRealEstate", map[string]interface{}{
+	logger.Info("PlayerService.DecreaseStocks", map[string]interface{}{
 		"playerId": player.ID,
 		"card":     card,
 	})
@@ -142,7 +142,7 @@ func (service *playerService) IncreaseStocks(card entity.CardStocks, player enti
 }
 
 func (service *playerService) TransferStocks(card entity.CardStocks, ID string, sender entity.Player, receiver entity.Player, count int) error {
-	logger.Info("PlayerService.TransferStocks", map[string]interface{}{
+	logger.Info("TransferStocks: init", map[string]interface{}{
 		"ID":         ID,
 		"senderId":   sender.ID,
 		"receiverId": receiver.ID,
@@ -154,6 +154,12 @@ func (service *playerService) TransferStocks(card entity.CardStocks, ID string, 
 	}
 
 	_, item := sender.FindStocksBySymbol(card.Symbol)
+
+	logger.Info("TransferStocks: getting info about a sender", map[string]interface{}{
+		"senderId":    sender.ID,
+		"playerCount": item.Count,
+		"count":       count,
+	})
 
 	if item.Count < count {
 		return errors.New(storage.ErrorNotEnoughStocks)

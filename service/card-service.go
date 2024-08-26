@@ -78,7 +78,7 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 		"userId": userId,
 		"action": action,
 	})
-	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, entity.Card{}
@@ -187,7 +187,7 @@ func (service *cardService) Prepare(actionType string, raceId uint64, family str
 }
 
 func (service *cardService) Accept(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{}) {
-	logger.Info("CardService.Accept", map[string]interface{}{
+	logger.Info("Accept", map[string]interface{}{
 		"raceId":     raceId,
 		"family":     family,
 		"actionType": actionType,
@@ -299,28 +299,28 @@ func (service *cardService) Selling(actionType string, raceId uint64, userId uin
 			return errors.New(storage.ErrorIsNotValidRealEstate), nil
 		}
 
-		err = service.raceService.SellRealEstate(raceId, userId, dto.ID)
+		err = service.raceService.SellRealEstateAction(raceId, userId, dto.ID)
 		break
 	case "business":
 		if dto.ID == "" {
 			return errors.New(storage.ErrorIsNotValidBusiness), nil
 		}
 
-		err = service.raceService.SellBusiness(raceId, userId, dto.ID, dto.Count)
+		err = service.raceService.SellBusinessAction(raceId, userId, dto.ID, dto.Count)
 		break
 	case "stock":
 		if dto.Count < 1 {
 			return errors.New(storage.ErrorIsNotValidCountValue), nil
 		}
 
-		err = service.raceService.SellStocks(raceId, userId, dto.Count)
+		err = service.raceService.SellStocksAction(raceId, userId, dto.Count)
 		break
 	case "other":
 		if dto.ID == "" {
 			return errors.New(storage.ErrorIsNotValidOtherAssets), nil
 		}
 
-		err = service.raceService.SellOtherAssets(raceId, userId, dto.ID, dto.Count)
+		err = service.raceService.SellOtherAssetsAction(raceId, userId, dto.ID, dto.Count)
 		break
 	default:
 		err = service.raceService.SkipAction(raceId, userId, isBigRace)
@@ -337,7 +337,7 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 		"action": action,
 	})
 
-	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId, isBigRace)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err, entity.Card{}
@@ -472,6 +472,7 @@ func (service *cardService) getCardByTile(cardType string, currentPosition int, 
 		"downsized",
 		"payday",
 		"cashFlowDay",
+		"bigCharity",
 		"business",
 		"dream",
 		"tax50percent",

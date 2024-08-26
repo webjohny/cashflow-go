@@ -14,6 +14,7 @@ type PlayerRepository interface {
 	AllByRaceId(raceId uint64) []entity.Player
 	DeletePlayer(b *entity.Player) error
 	IsCurrentPlayerOnTheRace(player entity.Player) bool
+	FindPlayerByRaceIdAndInfoDreamId(raceId uint64, dreamId int) entity.Player
 	FindPlayerById(ID uint64) entity.Player
 	FindPlayerByUsername(username string) entity.Player
 	FindPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
@@ -97,6 +98,19 @@ func (db *playerConnection) DeletePlayer(b *entity.Player) error {
 	}
 
 	return nil
+}
+
+func (db *playerConnection) FindPlayerByRaceIdAndInfoDreamId(raceId uint64, dreamId int) entity.Player {
+	logger.Info("PlayerRepository.FindPlayerByRaceIdAndInfoDreamId", map[string]interface{}{
+		"raceId":  raceId,
+		"dreamId": dreamId,
+	})
+
+	var player entity.Player
+
+	db.connection.Where("JSON_EXTRACT(info, '$.dream.id') = ?", dreamId).Where("race_id = ?", raceId).Find(&player)
+
+	return player
 }
 
 func (db *playerConnection) FindPlayerById(ID uint64) entity.Player {
