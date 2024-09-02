@@ -54,3 +54,7 @@ func FinalResponse(ctx *gin.Context, err error, response interface{}) {
 	}
 	ctx.JSON(http.StatusOK, SuccessResponse(response))
 }
+
+func TooManyRequests(ctx *gin.Context) {
+	ctx.JSON(http.StatusTooManyRequests, BuildResponse(false, "", nil))
+}

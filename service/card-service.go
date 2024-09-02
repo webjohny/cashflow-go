@@ -138,6 +138,10 @@ func (service *cardService) CheckPayDay(player entity.Player) int {
 	current := int(player.CurrentPosition)
 	last := int(player.LastPosition)
 
+	if current == 0 && last == 0 {
+		return 1
+	}
+
 	countTiles := 24
 
 	if player.OnBigRace {
@@ -147,7 +151,7 @@ func (service *cardService) CheckPayDay(player entity.Player) int {
 		tiles = service.ratRace.Tiles["payday"]
 	}
 
-	for i := last + 1; i != current+1; i++ {
+	for i := last + 1; ; i++ {
 		key := i % countTiles
 
 		if key == 0 {
@@ -158,8 +162,8 @@ func (service *cardService) CheckPayDay(player entity.Player) int {
 			count++
 		}
 
-		if i == countTiles {
-			i = 0
+		if key == current {
+			break
 		}
 	}
 
@@ -417,7 +421,7 @@ func (service *cardService) processCard(action string, race entity.Race, current
 				}
 			}
 		}
-	} else if card.Type == "success" {
+	} else if card.Type == "success" || card.Type == "inflation" {
 		players := service.playerService.GetAllPlayersByRaceId(race.ID)
 
 		for _, pl := range players {

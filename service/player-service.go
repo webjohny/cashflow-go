@@ -84,7 +84,10 @@ func (service *playerService) AreYouBankrupt(player entity.Player) error {
 			}
 		}
 
-		player.Reset(entity.Profession{})
+		profession := service.professionService.GetRandomProfession(&[]int{
+			int(player.ProfessionID),
+		})
+		player.Reset(profession)
 		player.HasBankrupt = 1
 
 		err, _ := service.playerRepository.UpdatePlayer(&player)
@@ -295,7 +298,7 @@ func (service *playerService) Downsized(player entity.Player) error {
 
 	service.UpdateCash(&player, -amount, "Уволен")
 
-	return nil
+	return service.AreYouBankrupt(player)
 }
 
 func (service *playerService) BigBankrupt(player entity.Player) error {
@@ -385,11 +388,11 @@ func (service *playerService) MarketDamage(card entity.CardMarket, player entity
 		"card":     card,
 	})
 
-	if player.Cash < card.Cost {
-		return errors.New(storage.ErrorNotEnoughMoney)
-	}
-
 	if player.HasOwnRealEstates() {
+		if player.Cash < card.Cost {
+			return errors.New(storage.ErrorNotEnoughMoney)
+		}
+
 		realEstates := player.Assets.RealEstates
 
 		if card.Symbol != "ANY" {
@@ -610,8 +613,9 @@ func (service *playerService) TakeLoan(player entity.Player, amount int) error {
 
 func (service *playerService) PayLoan(player entity.Player, actionType string, amount int) error {
 	logger.Info("PlayerService.PayLoan", map[string]interface{}{
-		"playerId": player.ID,
-		"amount":   amount,
+		"playerId":   player.ID,
+		"actionType": actionType,
+		"amount":     amount,
 	})
 
 	if player.Cash < amount {
@@ -622,6 +626,7 @@ func (service *playerService) PayLoan(player entity.Player, actionType string, a
 		"homeMortgage":   "homeMortgage",
 		"schoolLoans":    "schoolLoans",
 		"carLoans":       "carLoans",
+		"bankLoan":       "bankLoan",
 		"creditCardDebt": "creditCardDebt",
 	}
 
@@ -639,17 +644,32 @@ func (service *playerService) PayLoan(player entity.Player, actionType string, a
 		liabilityAmount = player.Liabilities.BankLoan
 	}
 
-	if liabilityAmount > amount {
+	if liabilityAmount >= amount {
 		liabilityAmount -= amount
 	} else {
 		liabilityAmount = 0
 	}
 
-	if actionType == "bankLoan" {
-		player.Expenses["bankLoan"] = liabilityAmount / 10
-	} else {
-		player.Expenses[loanMapper[actionType]] = liabilityAmount
+	logger.Info("PlayerService.PayLoan: dividing", map[string]interface{}{
+		"playerId":        player.ID,
+		"amount":          amount,
+		"liabilityAmount": liabilityAmount,
+		"actionType":      loanMapper[actionType],
+	})
+
+	if actionType == "homeMortgage" {
+		player.Liabilities.HomeMortgage = liabilityAmount
+	} else if actionType == "schoolLoans" {
+		player.Liabilities.SchoolLoans = liabilityAmount
+	} else if actionType == "carLoans" {
+		player.Liabilities.CarLoans = liabilityAmount
+	} else if actionType == "creditCardDebt" {
+		player.Liabilities.CreditCardDebt = liabilityAmount
+	} else if actionType == "bankLoan" {
+		player.Liabilities.BankLoan = liabilityAmount
 	}
+
+	player.Expenses[loanMapper[actionType]] = liabilityAmount / 10
 
 	service.UpdateCash(&player, -amount, "Оплата по кредиту")
 

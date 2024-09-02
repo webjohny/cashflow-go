@@ -5,9 +5,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/objects"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
+	"time"
 )
 
 type CardController interface {
@@ -23,16 +25,24 @@ type CardController interface {
 
 type cardController struct {
 	cardService service.CardService
+	mutex       *objects.MutexMap
 }
 
 func NewCardController(cardService service.CardService) CardController {
 	return &cardController{
 		cardService: cardService,
+		mutex:       &objects.MutexMap{},
 	}
 }
 
 func (c *cardController) Type(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
+
+	if !c.mutex.LockMethodRace("CardType", raceId, time.Second) {
+		request.TooManyRequests(ctx)
+		return
+	}
+
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
 

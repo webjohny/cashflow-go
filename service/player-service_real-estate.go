@@ -143,8 +143,8 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 
 	player.RemoveRealEstate(ID)
 
-	if totalCost > 0 {
-		service.UpdateCash(&player, totalCost, card.Heading)
+	if totalCost > 0 && totalCost >= realEstate.Mortgage {
+		service.UpdateCash(&player, totalCost-realEstate.Mortgage, card.Heading)
 	}
 
 	players := service.GetAllPlayersByRaceId(player.RaceID)

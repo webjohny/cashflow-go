@@ -1196,8 +1196,8 @@
       "id":"doodad2",
       "type":"doodad",
       "heading":"DATE NIGHT: DINNER, CONCERT & DESSERT",
-      "description":"Pay $500",
-      "cost":500
+      "description":"Заплати $500",
+      "cost":200
     },
     {
       "id":"doodad5",
@@ -1210,15 +1210,15 @@
       "id":"doodad6",
       "type":"doodad",
       "heading":"BIG SCREEN TV",
-      "description":"PAY $2,500",
-      "cost":2500
+      "description":"PAY $200",
+      "cost":200
     },
     {
       "id":"doodad7",
       "type":"doodad",
       "heading":"GOLF CLUB MEMBERSHIP",
-      "description":"Spend $2,000",
-      "cost":2000
+      "description":"Spend $50",
+      "cost":50
     },
     {
       "id":"doodad8",
@@ -1304,7 +1304,7 @@
       "id":"marketRealEstate1",
       "type":"realEstate",
       "heading":"Покупатель на многоквартирный дом",
-      "symbol":"24квдом",
+      "symbol":"МногоКвДом",
       "asset_type":"building",
       "description":"Покупатель предлагает за каждую квартиру $40,000",
       "cost":40000,
@@ -1320,7 +1320,7 @@
       "id":"marketRealEstate2",
       "type":"realEstate",
       "heading":"Покупатель на 3КВ",
-      "symbol":"single",
+      "symbol":"3Вг2Ва",
       "asset_type":"single",
       "description":"Покупатель предлагает $100,000 за 3х комнатную квартиру",
       "rule": "",
@@ -1357,7 +1357,7 @@
       "id":"inflation",
       "type":"inflation",
       "heading":"Удары инфляции!",
-      "symbol":"3Вг/2Ва",
+      "symbol":"3Вг2Ва",
       "description":"Все 3Вг/2Ва дома которыми вы владеете забираются банком без права выкупа.",
       "asset_type":"eachRealEstate",
       "only_you":true

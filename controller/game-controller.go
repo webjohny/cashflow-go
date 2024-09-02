@@ -4,18 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/objects"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
+	"time"
 )
 
 type GameController interface {
 	Start(ctx *gin.Context)
 	Cancel(ctx *gin.Context)
 	Reset(ctx *gin.Context)
-	MoveToBigRace(ctx *gin.Context)
 	RollDice(ctx *gin.Context)
-	ReRollDice(ctx *gin.Context)
 	GetGame(ctx *gin.Context)
 	ChangeTurn(ctx *gin.Context)
 	GetTiles(ctx *gin.Context)
@@ -23,11 +23,13 @@ type GameController interface {
 
 type gameController struct {
 	gameService service.GameService
+	mutex       *objects.MutexMap
 }
 
 func NewGameController(gameService service.GameService) GameController {
 	return &gameController{
 		gameService: gameService,
+		mutex:       &objects.MutexMap{},
 	}
 }
 
@@ -76,6 +78,12 @@ func (c *gameController) Start(ctx *gin.Context) {
 
 func (c *gameController) RollDice(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
+
+	if !c.mutex.LockMethodRace("RollDice", raceId, time.Second) {
+		request.TooManyRequests(ctx)
+		return
+	}
+
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
 
@@ -87,34 +95,11 @@ func (c *gameController) RollDice(ctx *gin.Context) {
 		return
 	}
 
-	err, diceValues := c.gameService.RollDice(raceId, userId, body, bigRace)
+	var err error
 
-	if err == nil {
-		response = dto.RollDiceResponseDto{
-			DiceValues: diceValues,
-		}
-	}
+	err, response.DiceValues = c.gameService.RollDice(raceId, userId, body, bigRace)
 
 	request.FinalResponse(ctx, err, response)
-}
-
-func (c *gameController) ReRollDice(ctx *gin.Context) {
-	//dice, _ := strconv.Atoi(ctx.Param("dice"))
-	//raceId := request.GetRaceId(ctx)
-	//userId := request.GetUserId(ctx)
-	//bigRace := request.GetBigRace(ctx)
-	//
-	//var response dto.RollDiceResponseDto
-	//
-	//err, diceValues := c.gameService.RollDice(raceId, userId, dice, bigRace)
-	//
-	//if err == nil {
-	//	response = dto.RollDiceResponseDto{
-	//		DiceValues: diceValues,
-	//	}
-	//}
-
-	request.FinalResponse(ctx, nil, nil)
 }
 
 func (c *gameController) Cancel(ctx *gin.Context) {
@@ -129,7 +114,14 @@ func (c *gameController) Cancel(ctx *gin.Context) {
 func (c *gameController) ChangeTurn(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 
-	err := c.gameService.ChangeTurn(raceId)
+	if !c.mutex.LockMethodRace("ChangeTurn", raceId, time.Second) {
+		request.TooManyRequests(ctx)
+		return
+	}
+
+	var err error
+
+	err = c.gameService.ChangeTurn(raceId)
 
 	request.FinalResponse(ctx, err, nil)
 }
@@ -143,18 +135,4 @@ func (c *gameController) GetTiles(ctx *gin.Context) {
 	request.FinalResponse(ctx, nil, map[string][]string{
 		"tiles": tiles,
 	})
-}
-
-func (c *gameController) MoveToBigRace(ctx *gin.Context) {
-	//lobbyId := uint64(ctx.GetInt("lobbyId"))
-
-	var response request.Response
-
-	//err, _ := c.gameService.MoveToBigRace(lobbyId)
-	//
-	//if err == nil {
-	//	response = request.RedirectResponse(storage.PathShowProfession)
-	//}
-
-	request.FinalResponse(ctx, nil, response)
 }

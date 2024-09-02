@@ -771,7 +771,6 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 	}
 
 	return err
-
 }
 
 func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionType string, isBigRace bool) error {
@@ -781,7 +780,7 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 		"actionType": actionType,
 	})
 
-	err, _, player := service.GetRaceAndPlayer(raceId, userId)
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -793,7 +792,7 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 		service.playerService.CashFlowDay(player)
 	}
 
-	return nil
+	return service.ChangeTurn(race)
 }
 
 func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {

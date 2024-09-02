@@ -80,16 +80,18 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, dto dto.As
 			if dto.Amount != (player.CalculateCashFlow() + player.Assets.Savings) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
+
+			player.Assets.Savings = 0
 		} else if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
 
-			if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
+			if dto.Amount != player.CalculateCashFlow() && dto.Amount != (player.CalculateCashFlow()*countPayDay) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Salary {
 
 			if countPayDay == 0 {
 				return errors.New(storage.ErrorTransactionDeclined), false
-			} else if dto.Amount != player.CalculateCashFlow() || dto.Amount != (player.CalculateCashFlow()*countPayDay) {
+			} else if dto.Amount != player.CalculateCashFlow() && dto.Amount != (player.CalculateCashFlow()*countPayDay) {
 				return errors.New(storage.ErrorWrongAmount), false
 			}
 		} else if dto.Type == entity.UserRequestTypes.Baby && dto.Amount != 1000 {

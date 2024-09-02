@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/helper"
+	"github.com/webjohny/cashflow-go/objects"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
+	"time"
 )
 
 type FinanceController interface {
@@ -18,17 +20,24 @@ type FinanceController interface {
 
 type financeController struct {
 	financeService service.FinanceService
+	mutex          *objects.MutexMap
 }
 
 func NewFinanceController(financeService service.FinanceService) FinanceController {
 	return &financeController{
 		financeService: financeService,
+		mutex:          &objects.MutexMap{},
 	}
 }
 
 func (c *financeController) SendMoney(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 	userId := helper.GetUserId(ctx)
+
+	if !c.mutex.LockMethodRace("SendMoney", raceId, time.Second) {
+		request.TooManyRequests(ctx)
+		return
+	}
 
 	var sendMoneyBodyDTO dto.SendMoneyBodyDTO
 	var err error
@@ -54,6 +63,11 @@ func (c *financeController) SendMoney(ctx *gin.Context) {
 func (c *financeController) AskMoney(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 	userId := helper.GetUserId(ctx)
+
+	if !c.mutex.LockMethodRace("AskMoney", raceId, time.Second) {
+		request.TooManyRequests(ctx)
+		return
+	}
 
 	var askMoneyBodyDTO dto.AskMoneyBodyDto
 	var err error
