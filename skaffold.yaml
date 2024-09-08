@@ -11,7 +11,7 @@ build:
           - command: [ "bash", "./cmd/check_conditions.sh" ]
             os: [ linux, darwin, windows ]
       docker:
-        dockerfile: Dockerfile.dev
+        dockerfile: Dockerfile.prod.dev
 deploy:
   kubectl:
     manifests:

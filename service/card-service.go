@@ -9,6 +9,7 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
 	"os"
+	"strconv"
 )
 
 type CardService interface {
@@ -270,8 +271,6 @@ func (service *cardService) Purchase(actionType string, raceId uint64, userId ui
 
 	case "lottery", "riskBusiness", "riskStock":
 		err, response = service.raceService.LotteryAction(raceId, userId, isBigRace)
-
-		logger.Warn(err, response)
 		break
 
 	case "mlm":
@@ -380,7 +379,26 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 		}
 
 		race.CardMap.Next(tile)
-		card = service.getCardByTile(tile, race.CardMap.Active[tile], cardList)
+
+		if tile == "dream" {
+			players := service.raceService.GetRacePlayersByRaceId(raceId)
+
+			for _, currentPlayer := range players {
+				if currentPlayer.Info.Dream.ID == int(player.CurrentPosition) {
+					card = entity.Card{
+						ID:        "own-dream-" + strconv.Itoa(int(currentPlayer.ID)),
+						Heading:   currentPlayer.Info.Dream.Name,
+						Type:      "dream",
+						AssetType: "personal",
+						Cost:      currentPlayer.Info.Dream.Price,
+					}
+				}
+			}
+		}
+
+		if card.ID == "" {
+			card = service.getCardByTile(tile, race.CardMap.Active[tile], cardList)
+		}
 	}
 
 	if card.Family == "market" || card.Type == "stock" {

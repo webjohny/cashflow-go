@@ -436,8 +436,6 @@ func (c *playerTestController) BuyBusinessInPartnership(ctx *gin.Context) {
 		})
 	}
 
-	logger.Warn(parts)
-
 	err := c.playerService.BuyBusinessInPartnership(card, players[1], players, parts)
 
 	if err != nil {

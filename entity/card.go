@@ -302,6 +302,7 @@ type CardDream struct {
 	Heading     string `json:"heading"`
 	Description string `json:"description"`
 	Type        string `json:"type"`
+	AssetType   string `json:"asset_type,omitempty"`
 	Cost        int    `json:"cost"`
 }
 

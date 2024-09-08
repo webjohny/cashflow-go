@@ -35,12 +35,13 @@ func NewAuthController(authService service.AuthService, jwtService service.JWTSe
 func (c *authController) Login(ctx *gin.Context) {
 	var loginDTO dto.LoginDTO
 	errDTO := ctx.ShouldBind(&loginDTO)
+
 	if errDTO != nil {
 		response := request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	helper.LogPrintJson(loginDTO)
+
 	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
 	if v, ok := authResult.(entity.User); ok {
 		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10), v.Email, v.Profile, v.Jk, v.Name)
