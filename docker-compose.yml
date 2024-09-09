@@ -1,16 +1,21 @@
 version: '3'
 services:
   golang:
-    build: .
+    build:
+      context: .
+      target: production
+    # env_file:
+    #  - .env  # Points to the .env file containing the DB credentials
+    environment:
+      - DB_HOST=mysql  # You can specify more env vars if needed
+      - DB_PORT=3306
+    networks:
+      - cashcome  # Uses the shared network
     ports:
       - "8080:8080"
-    restart: always
+    restart: on-failure
 
-  mysql:
-    image: mysql:8
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: E|#,78b@8F@=6}8RcZ!G
-      MYSQL_DATABASE: cashcome_db
-    restart: always
+networks:
+  cashcome:
+    external:
+      name: cashcome
