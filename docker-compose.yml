@@ -4,11 +4,27 @@ services:
     build:
       context: .
       target: production
-    # env_file:
-    #  - .env  # Points to the .env file containing the DB credentials
+    env_file:
+      - .env  # Points to the .env file containing the DB credentials
     environment:
-      - DB_HOST=mysql  # You can specify more env vars if needed
-      - DB_PORT=3306
+      - DB_HOST=mysql
+      - PORT=${PORT}
+
+      - CARDS_PATH=${CARDS_PATH}
+      - PROFESSIONS_PATH=${PROFESSIONS_PATH}
+
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+
+      - SECRET=${SECRET}
+      - ENV=${ENV}
+      - REDIS_URL=${REDIS_URL}
+
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - cashcome  # Uses the shared network
     ports:

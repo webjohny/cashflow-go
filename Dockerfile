@@ -15,7 +15,6 @@ WORKDIR /app/
 COPY --from=builder /app/main main
 COPY ./collections collections
 COPY ./professions.json .
-COPY .env .
 EXPOSE 8080
 RUN chmod +x ./main  # Ensure binary is executable
 RUN ls -l ./
