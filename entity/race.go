@@ -35,7 +35,7 @@ type RaceLog struct {
 type RaceResponse struct {
 	ID        uint64 `json:"id,omitempty"`
 	UserId    uint64 `json:"user_id,omitempty"`
-	Username  string `json:"username"`
+	Username  string `json:"username,omitempty"`
 	Responded bool   `json:"responded"`
 }
 
@@ -160,6 +160,17 @@ func (r *Race) ResetResponses() {
 	}
 }
 
+func (r *Race) RemoveResponsePlayer(playerId uint64) {
+	if len(r.Responses) > 0 {
+		for i := 0; i < len(r.Responses); i++ {
+			if r.Responses[i].ID == playerId {
+				r.Responses = append(r.Responses[:i], r.Responses[i+1:]...)
+				return
+			}
+		}
+	}
+}
+
 func (r *Race) IsReceived(username string) bool {
 	if r.IsMultiFlow {
 		return r.AreReceived()
@@ -216,6 +227,22 @@ func (r *Race) NextPlayer() {
 		if player.Username == username {
 			nextIndex := (i + 1) % len(players)
 			next = players[nextIndex]
+		}
+	}
+
+	r.CurrentPlayer.ID = next.ID
+	r.CurrentPlayer.UserId = next.UserId
+	r.CurrentPlayer.Username = next.Username
+}
+
+func (r *Race) PickCurrentPlayer(playerId int) {
+	players := r.Responses
+
+	var next RaceResponse
+
+	for i, player := range players {
+		if int(player.ID) == playerId {
+			next = players[i]
 		}
 	}
 

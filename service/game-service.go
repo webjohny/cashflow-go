@@ -61,7 +61,7 @@ func (service *gameService) GetGame(raceId uint64, userId uint64, isBigRace bool
 		BankruptedPlayers: make([]dto.GetRacePlayerResponseDTO, 0),
 	}
 
-	race := service.raceService.GetFormattedRaceResponse(raceId, isBigRace)
+	race := service.raceService.GetFormattedRaceResponse(raceId)
 	response.TurnResponses = race.TurnResponses
 	response.Players = race.Players
 	response.CurrentCard = &race.CurrentCard
@@ -250,7 +250,7 @@ func (service *gameService) ChangeTurn(raceId uint64) error {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
 
-	return service.raceService.ChangeTurn(race)
+	return service.raceService.ChangeTurn(race, 0)
 }
 
 func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {

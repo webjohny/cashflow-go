@@ -705,6 +705,25 @@ func (service *playerService) UpdateCash(player *entity.Player, amount int, deta
 	}
 }
 
+func (service *playerService) BecomeModerator(raceId uint64, userId uint64) error {
+	logger.Info("PlayerService.BecomeModerator", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
+	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
+
+	if player.ID == 0 {
+		return errors.New(storage.ErrorUndefinedPlayer)
+	}
+
+	player.Role = entity.PlayerRoles.Moderator
+
+	err, _ := service.playerRepository.UpdatePlayer(&player)
+
+	return err
+}
+
 func (service *playerService) SetTransaction(ID uint64, currentCash int, newCash int, amount int, details string) {
 	logger.Info("PlayerService.SetTransaction", map[string]interface{}{
 		"playerId":    ID,
@@ -754,6 +773,16 @@ func (service *playerService) GetAllPlayersByRaceId(raceId uint64) []entity.Play
 
 func (service *playerService) GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player) {
 	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
+
+	if player.ID == 0 {
+		return errors.New(storage.ErrorUndefinedPlayer), entity.Player{}
+	}
+
+	return nil, player
+}
+
+func (service *playerService) GetPlayerByPlayerIdAndRaceId(raceId uint64, playerId uint64) (error, entity.Player) {
+	player := service.playerRepository.FindPlayerByPlayerIdAndRaceId(raceId, playerId)
 
 	if player.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer), entity.Player{}
@@ -817,19 +846,22 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 			PassiveIncome: player.CalculatePassiveIncome(),
 			Cash:          player.Cash,
 		},
-		Info:            player.Info,
-		Profession:      profession,
-		IsRolledDice:    player.IsRolledDice == 1,
-		LastPosition:    player.LastPosition,
-		Transactions:    transactions,
-		CurrentPosition: player.CurrentPosition,
-		ExtraDices:      player.ExtraDices,
-		DualDiceCount:   player.DualDiceCount,
-		SkippedTurns:    player.SkippedTurns,
-		AllowOnBigRace:  player.ConditionsForBigRace(),
-		OnBigRace:       player.OnBigRace,
-		HasBankrupt:     player.HasBankrupt == 1,
-		AboutToBankrupt: player.AboutToBankrupt,
+		Info:              player.Info,
+		Profession:        profession,
+		IsRolledDice:      player.IsRolledDice == 1,
+		LastPosition:      player.LastPosition,
+		Transactions:      transactions,
+		CurrentPosition:   player.CurrentPosition,
+		ExtraDices:        player.ExtraDices,
+		DualDiceCount:     player.DualDiceCount,
+		SkippedTurns:      player.SkippedTurns,
+		AllowOnBigRace:    player.ConditionsForBigRace(),
+		GameIsCompleted:   player.ConditionsForCompletedBigRace(),
+		GoalPassiveIncome: player.GoalPassiveIncomeOnBigRace(),
+		GoalPersonalDream: player.GoalPersonalDream(),
+		OnBigRace:         player.OnBigRace,
+		HasBankrupt:       player.HasBankrupt == 1,
+		AboutToBankrupt:   player.AboutToBankrupt,
 	}
 
 	if hasRestrictedFields {

@@ -94,8 +94,8 @@ func (l *Lobby) AddOwner(userId uint64, username string) {
 	l.AddPlayer(userId, username, PlayerRoles.Owner)
 }
 
-func (l *Lobby) AddAdmin(userId uint64, username string) {
-	l.AddPlayer(userId, username, PlayerRoles.Admin)
+func (l *Lobby) AddModerator(userId uint64, username string) {
+	l.AddPlayer(userId, username, PlayerRoles.Moderator)
 }
 
 func (l *Lobby) GetPlayer(userId uint64) LobbyPlayer {
@@ -139,12 +139,12 @@ func (l *Lobby) AvailableToStart() bool {
 
 	for i := 0; i < len(l.Players); i++ {
 		player := l.Players[i]
-		if player.Role != PlayerRoles.Admin {
+		if player.Role != PlayerRoles.Moderator {
 			count++
 		}
 	}
 
-	return count >= 2
+	return count >= 1
 }
 
 func (l *Lobby) RemovePlayer(username string) {

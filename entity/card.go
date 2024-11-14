@@ -29,6 +29,7 @@ type Card struct {
 	Lottery       string        `json:"lottery,omitempty"`
 	Failure       []int         `json:"failure,omitempty"`
 	Percent       int           `json:"percent,omitempty"`
+	PlayerId      int           `json:"player_id,omitempty"`
 	Success       []int         `json:"success,omitempty"`
 	CostPerOne    int           `json:"cost_per_one,omitempty"`
 	ExtraDices    int           `json:"extra_dices,omitempty"`
@@ -304,6 +305,7 @@ type CardDream struct {
 	Type        string `json:"type"`
 	AssetType   string `json:"asset_type,omitempty"`
 	Cost        int    `json:"cost"`
+	PlayerId    int    `json:"player_id,omitempty"`
 }
 
 type CardCharity struct {

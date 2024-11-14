@@ -6,8 +6,8 @@ import (
 
 type UserRequest struct {
 	ID            uint64                 `gorm:"primary_key:auto_increment" json:"id"`
-	RaceID        uint64                 `gorm:"uniqueIndex:user_index;index" json:"race_id"`
-	UserID        uint64                 `gorm:"uniqueIndex:user_index;index" json:"user_id"`
+	RaceID        uint64                 `gorm:"type:int(11)" json:"race_id"`
+	UserID        uint64                 `gorm:"type:int(11)" json:"user_id"`
 	Type          string                 `gorm:"type:varchar(20)" json:"type"`
 	CurrentCard   string                 `gorm:"type:varchar(150)" json:"current_card"`
 	Amount        int                    `gorm:"type:int(11)" json:"amount"`

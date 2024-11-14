@@ -19,6 +19,7 @@ type PlayerRepository interface {
 	FindPlayerByUsername(username string) entity.Player
 	FindPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
 	FindPlayerByUserIdAndRaceId(raceId uint64, userId uint64) entity.Player
+	FindPlayerByPlayerIdAndRaceId(raceId uint64, playerId uint64) entity.Player
 }
 
 const PlayerTable = "players"
@@ -54,7 +55,7 @@ func (db *playerConnection) AllByRaceId(raceId uint64) []entity.Player {
 	//})
 
 	var players []entity.Player
-	db.connection.Where("race_id = ?", raceId).Find(&players)
+	db.connection.Where("race_id = ? AND role != 'moderator'", raceId).Find(&players)
 	return players
 }
 
@@ -108,7 +109,7 @@ func (db *playerConnection) FindPlayerByRaceIdAndInfoDreamId(raceId uint64, drea
 
 	var player entity.Player
 
-	db.connection.Where("JSON_EXTRACT(info, '$.dream.id') = ?", dreamId).Where("race_id = ?", raceId).Find(&player)
+	db.connection.Where("JSON_EXTRACT(info, '$.dream.id') = ?", dreamId).Where("race_id = ? AND role != 'moderator'", raceId).Find(&player)
 
 	return player
 }
@@ -132,7 +133,7 @@ func (db *playerConnection) IsCurrentPlayerOnTheRace(player entity.Player) bool 
 
 	var count int64
 	db.connection.Model(&entity.Race{}).
-		Where("id = ? AND JSON_EXTRACT(current_player, '$.id') = ?", player.RaceID, player.ID).
+		Where("id = ? AND role != 'moderator' AND JSON_EXTRACT(current_player, '$.id') = ?", player.RaceID, player.ID).
 		Count(&count)
 
 	return count > 0
@@ -172,6 +173,19 @@ func (db *playerConnection) FindPlayerByUserIdAndRaceId(raceId uint64, userId ui
 	var player entity.Player
 
 	db.connection.Where("`user_id` = ? AND `race_id` = ?", userId, raceId).Find(&player)
+
+	return player
+}
+
+func (db *playerConnection) FindPlayerByPlayerIdAndRaceId(raceId uint64, playerId uint64) entity.Player {
+	logger.Info("PlayerRepository.FindPlayerByPlayerIdAndRaceId", map[string]interface{}{
+		"raceId":   raceId,
+		"playerId": playerId,
+	})
+
+	var player entity.Player
+
+	db.connection.Where("`id` = ? AND `race_id` = ?", playerId, raceId).Find(&player)
 
 	return player
 }

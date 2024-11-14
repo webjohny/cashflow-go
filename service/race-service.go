@@ -31,12 +31,13 @@ type RaceService interface {
 	DoodadAction(raceId uint64, userId uint64) error
 	DownsizedAction(raceId uint64, userId uint64) error
 	BigBankruptAction(raceId uint64, userId uint64) error
-	ChangeTurn(race entity.Race) error
+	ChangeTurn(race entity.Race, definedPlayerId int) error
 	GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player)
 	GetRaceByRaceId(raceId uint64) entity.Race
 	GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO
-	GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO
+	GetFormattedRaceResponse(raceId uint64) dto.GetRaceResponseDTO
 	SetTransaction(ID uint64, player entity.Player, txType string, details string)
+	RemovePlayer(raceId uint64, userId uint64) error
 	InsertRace(b *entity.Race) (error, entity.Race)
 	UpdateRace(b *entity.Race) (error, entity.Race)
 }
@@ -283,16 +284,19 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 	return err, response
 }
 
-func (service *raceService) ChangeTurn(race entity.Race) error {
+func (service *raceService) ChangeTurn(race entity.Race, definedPlayerId int) error {
 	logger.Info("RaceService.ChangeTurn", map[string]interface{}{
 		"raceId": race.ID,
 	})
 
-	if race.CurrentCard.ID != "" && !race.IsReceived(race.CurrentPlayer.Username) {
+	if definedPlayerId > 0 {
+		race.PickCurrentPlayer(definedPlayerId)
+	} else if race.CurrentCard.ID != "" && !race.IsReceived(race.CurrentPlayer.Username) {
 		return nil
+	} else {
+		race.NextPlayer()
 	}
 
-	race.NextPlayer()
 	race.ResetResponses()
 	race.IsMultiFlow = false
 
@@ -334,7 +338,7 @@ func (service *raceService) ChangeTurn(race entity.Race) error {
 			return err
 		}
 
-		err = service.ChangeTurn(race)
+		err = service.ChangeTurn(race, 0)
 
 		if err != nil {
 			return err
@@ -617,7 +621,7 @@ func (service *raceService) CharityAction(raceId uint64, userId uint64, actionTy
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err = service.ChangeTurn(race)
+		err = service.ChangeTurn(race, 0)
 	}
 
 	return err
@@ -686,7 +690,7 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 		go service.SetTransaction(race.ID, player, entity.TxTypes.Other, race.CurrentCard.Heading)
 
 		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err = service.ChangeTurn(race)
+		err = service.ChangeTurn(race, 0)
 	}
 
 	return err
@@ -792,7 +796,30 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 		service.playerService.CashFlowDay(player)
 	}
 
-	return service.ChangeTurn(race)
+	return service.ChangeTurn(race, 0)
+}
+
+func (service *raceService) RemovePlayer(raceId uint64, userId uint64) error {
+	logger.Info("RaceService.RemovePlayer", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
+	err, race, player := service.GetRaceAndPlayer(raceId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	race.RemoveResponsePlayer(player.ID)
+
+	if race.CurrentPlayer.ID == player.ID {
+		race.PickCurrentPlayer(int(race.Responses[0].ID))
+	}
+
+	err, _ = service.UpdateRace(&race)
+
+	return err
 }
 
 func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {
@@ -812,7 +839,7 @@ func (service *raceService) GetRacePlayersByRaceId(raceId uint64) []dto.GetRaceP
 	return racePlayers
 }
 
-func (service *raceService) GetFormattedRaceResponse(raceId uint64, isBigRace bool) dto.GetRaceResponseDTO {
+func (service *raceService) GetFormattedRaceResponse(raceId uint64) dto.GetRaceResponseDTO {
 	race := service.GetRaceByRaceId(raceId)
 	logs := service.transactionService.GetRaceLogs(raceId)
 	players := service.GetRacePlayersByRaceId(raceId)

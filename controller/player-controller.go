@@ -12,15 +12,18 @@ type PlayerController interface {
 	GetRacePlayer(ctx *gin.Context)
 	MoveOnBigRace(ctx *gin.Context)
 	SetDream(ctx *gin.Context)
+	BecomeModerator(ctx *gin.Context)
 }
 
 type playerController struct {
 	playerService service.PlayerService
+	raceService   service.RaceService
 }
 
-func NewPlayerController(playerService service.PlayerService) PlayerController {
+func NewPlayerController(playerService service.PlayerService, raceService service.RaceService) PlayerController {
 	return &playerController{
 		playerService: playerService,
+		raceService:   raceService,
 	}
 }
 
@@ -73,6 +76,25 @@ func (c *playerController) SetDream(ctx *gin.Context) {
 	} else if userId != 0 {
 		err = c.playerService.SetDream(raceId, userId, playerDream)
 	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) BecomeModerator(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+	var response interface{}
+
+	err = c.playerService.BecomeModerator(raceId, userId)
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	err = c.raceService.RemovePlayer(raceId, userId)
 
 	request.FinalResponse(ctx, err, response)
 }

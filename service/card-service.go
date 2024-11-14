@@ -391,6 +391,7 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 						Type:      "dream",
 						AssetType: "personal",
 						Cost:      currentPlayer.Info.Dream.Price,
+						PlayerId:  int(currentPlayer.ID),
 					}
 				}
 			}

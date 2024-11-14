@@ -7,6 +7,7 @@ import (
 
 type PlayerService interface {
 	Payday(player entity.Player)
+	BecomeModerator(raceId uint64, userId uint64) error
 	CashFlowDay(player entity.Player)
 	Doodad(card entity.CardDoodad, player entity.Player) error
 	BigBankrupt(player entity.Player) error
@@ -43,6 +44,7 @@ type PlayerService interface {
 	GetPlayerByUsername(username string) entity.Player
 	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
 	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player)
+	GetPlayerByPlayerIdAndRaceId(raceId uint64, playerId uint64) (error, entity.Player)
 	GetAllPlayersByRaceId(raceId uint64) []entity.Player
 	GetProfessionById(id uint8) (error, entity.Profession)
 	GetRacePlayer(raceId uint64, userId uint64) (error, dto.GetRacePlayerResponseDTO)

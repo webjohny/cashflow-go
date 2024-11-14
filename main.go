@@ -1,22 +1,17 @@
 package main
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/config"
 	"github.com/webjohny/cashflow-go/controller"
-	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/middleware"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
-	"github.com/webjohny/cashflow-go/storage"
 	"gorm.io/gorm"
-	"net/http"
 	"os"
-	"strconv"
 )
 
 var (
@@ -46,7 +41,8 @@ var (
 
 	// Controllers
 	gameController       controller.GameController       = controller.NewGameController(gameService)
-	playerController     controller.PlayerController     = controller.NewPlayerController(playerService)
+	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService)
+	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService)
 	playerTestController controller.PlayerTestController = controller.NewPlayerTestController(playerService)
 	lobbyController      controller.LobbyController      = controller.NewLobbyController(lobbyService)
 	financeController    controller.FinanceController    = controller.NewFinanceController(financeService)
@@ -54,46 +50,6 @@ var (
 	authController       controller.AuthController       = controller.NewAuthController(authService, jwtService)
 	userController       controller.UserController       = controller.NewUserController(userService, jwtService)
 )
-
-var globalToken string
-
-func switchUser(ctx *gin.Context) {
-	var token *jwt.Token
-
-	if globalToken != "" {
-		token, _ = jwtService.ValidateToken(globalToken)
-	}
-
-	var email string
-	password := "qwerty"
-
-	if token != nil && token.Valid {
-		claims := token.Claims.(jwt.MapClaims)
-
-		if claims["user_id"] == "1" {
-			email = "webtoolteam@gmail.com"
-		}
-	}
-
-	if email == "" {
-		email = "geryh213921@gmail.com"
-	}
-
-	authResult := authService.VerifyCredential(email, password)
-	if v, ok := authResult.(entity.User); ok {
-		generatedToken := jwtService.GenerateToken(strconv.FormatUint(v.ID, 10), v.Email, v.Profile, v.Jk, v.Name)
-		v.Token = generatedToken
-
-		globalToken = v.Token
-		response := request.BuildResponse(true, "OK", v)
-		ctx.JSON(http.StatusOK, response)
-		return
-	} else {
-		ctx.JSON(http.StatusBadRequest, map[string]string{
-			"error": storage.ErrorForbidden,
-		})
-	}
-}
 
 func init() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true})
@@ -111,6 +67,10 @@ func main() {
 	r := gin.Default()
 	//gin.ReleaseMode
 	gin.SetMode("debug")
+
+	r.GET("/health", func(ctx *gin.Context) {
+		request.FinalResponse(ctx, nil, nil)
+	})
 
 	cardRoutes := r.Group("api/card", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
@@ -133,9 +93,18 @@ func main() {
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
 	{
-		userRoutes.GET("/switch", switchUser)
 		userRoutes.GET("/profile", userController.Profile)
 		userRoutes.PUT("/profile", userController.Update)
+		// userRoutes.POST("/picture", userController.SaveFile)
+	}
+
+	moderatorRoutes := r.Group("api/moderator", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
+	{
+		moderatorRoutes.GET("/:raceId/race", moderatorController.GetRace)
+		moderatorRoutes.GET("/:raceId/player", moderatorController.GetRacePlayer)
+		moderatorRoutes.GET("/:raceId/players", moderatorController.GetRacePlayers)
+		moderatorRoutes.PUT("/:raceId/player/:playerId", moderatorController.UpdatePlayer)
+		moderatorRoutes.PUT("/:raceId/race", moderatorController.UpdateRace)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 
@@ -173,6 +142,7 @@ func main() {
 		playerRoutes.GET("/info", playerController.GetRacePlayer)
 		playerRoutes.POST("/on-big-race/:raceId", playerController.MoveOnBigRace)
 		playerRoutes.POST("/dream/:raceId", playerController.SetDream)
+		playerRoutes.POST("/moderator/:raceId", playerController.BecomeModerator)
 	}
 
 	playerTestRoutes := r.Group("test/player")

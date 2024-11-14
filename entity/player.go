@@ -1,20 +1,22 @@
 package entity
 
 import (
+	"github.com/webjohny/cashflow-go/helper"
 	"gorm.io/datatypes"
 	"math"
+	"reflect"
 )
 
 var PlayerRoles = struct {
-	Guest    string
-	WaitList string
-	Owner    string
-	Admin    string
+	Guest     string
+	WaitList  string
+	Owner     string
+	Moderator string
 }{
-	Guest:    "guest",
-	WaitList: "wait_list",
-	Owner:    "owner",
-	Admin:    "admin",
+	Guest:     "guest",
+	WaitList:  "wait_list",
+	Owner:     "owner",
+	Moderator: "moderator",
 }
 
 type PlayerIncome struct {
@@ -69,9 +71,9 @@ type PlayerInfo struct {
 
 type Player struct {
 	ID              uint64            `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserID          uint64            `gorm:"uniqueIndex:idx_username" json:"user_id"`
-	RaceID          uint64            `gorm:"index" json:"race_id"`
-	Username        string            `gorm:"uniqueIndex:idx_username;type:varchar(255)" json:"username"`
+	UserID          uint64            `gorm:"uniqueIndex:idx_player" json:"user_id"`
+	RaceID          uint64            `gorm:"uniqueIndex:idx_player" json:"race_id"`
+	Username        string            `gorm:"uniqueIndex:idx_player;type:varchar(255)" json:"username"`
 	Role            string            `gorm:"type:varchar(255)" json:"role"`
 	Color           string            `gorm:"type:varchar(255)" json:"color"`
 	Salary          int               `json:"salary" gorm:"allowzero"`
@@ -239,7 +241,7 @@ func (e *Player) FindBusinessBySymbol(symbol string) (int, *CardBusiness) {
 		}
 	}
 
-	return 0, &CardBusiness{}
+	return -1, &CardBusiness{}
 }
 
 func (e *Player) FindBusinessByID(ID string) (int, *CardBusiness) {
@@ -249,7 +251,17 @@ func (e *Player) FindBusinessByID(ID string) (int, *CardBusiness) {
 		}
 	}
 
-	return 0, &CardBusiness{}
+	return -1, &CardBusiness{}
+}
+
+func (e *Player) FindStocksByID(ID string) (int, *CardStocks) {
+	for i := 0; i < len(e.Assets.Stocks); i++ {
+		if ID == e.Assets.Stocks[i].ID {
+			return i, &e.Assets.Stocks[i]
+		}
+	}
+
+	return -1, &CardStocks{}
 }
 
 func (e *Player) FindAllBusinessBySymbol(symbol string) []CardBusiness {
@@ -313,7 +325,7 @@ func (e *Player) FindRealEstateBySymbol(symbol string) (int, *CardRealEstate) {
 		}
 	}
 
-	return 0, &CardRealEstate{}
+	return -1, &CardRealEstate{}
 }
 
 func (e *Player) FindAllRealEstateBySymbol(symbol string) []CardRealEstate {
@@ -346,6 +358,67 @@ func (e *Player) FindOtherAssetsByID(ID string) (int, *CardOtherAssets) {
 	}
 
 	return -1, &CardOtherAssets{}
+}
+
+func (e *Player) CreateOrUpdateOtherAssetByID(newAsset CardOtherAssets) *CardOtherAssets {
+	index, existingAsset := e.FindOtherAssetsByID(newAsset.ID)
+
+	if index != -1 && existingAsset != nil {
+		helper.AssignIfDifferent(&existingAsset.Count, newAsset.Count)
+		helper.AssignIfDifferent(&existingAsset.Heading, newAsset.Heading)
+		return existingAsset
+	}
+
+	e.Assets.OtherAssets = append(e.Assets.OtherAssets, newAsset)
+	return &e.Assets.OtherAssets[len(e.Assets.OtherAssets)-1]
+}
+
+func (e *Player) CreateOrUpdateRealEstateByID(newAsset CardRealEstate) *CardRealEstate {
+	existingAsset := e.FindRealEstateByID(newAsset.ID)
+
+	if existingAsset != nil {
+		helper.AssignIfDifferent(&existingAsset.Heading, newAsset.Heading)
+		helper.AssignIfDifferent(&existingAsset.CashFlow, newAsset.CashFlow)
+		helper.AssignIfDifferent(&existingAsset.Percent, newAsset.Percent)
+		helper.AssignIfDifferent(&existingAsset.Count, newAsset.Count)
+		return existingAsset
+	}
+
+	e.Assets.RealEstates = append(e.Assets.RealEstates, newAsset)
+	return &e.Assets.RealEstates[len(e.Assets.RealEstates)-1]
+}
+
+func (e *Player) CreateOrUpdateBusinessByID(newAsset CardBusiness) *CardBusiness {
+	index, existingAsset := e.FindBusinessByID(newAsset.ID)
+
+	if index != -1 && existingAsset != nil {
+		helper.AssignIfDifferent(&existingAsset.Heading, newAsset.Heading)
+		helper.AssignIfDifferent(&existingAsset.Count, newAsset.Count)
+		helper.AssignIfDifferent(&existingAsset.CashFlow, newAsset.CashFlow)
+		helper.AssignIfDifferent(&existingAsset.Percent, newAsset.Percent)
+		return existingAsset
+	}
+
+	e.Assets.Business = append(e.Assets.Business, newAsset)
+	return &e.Assets.Business[len(e.Assets.Business)-1]
+}
+
+func (e *Player) CreateOrUpdateStocksByID(newStock CardStocks) *CardStocks {
+	index, existingStock := e.FindStocksByID(newStock.ID)
+
+	if index != -1 && existingStock != nil {
+		helper.AssignIfDifferent(&existingStock.Heading, newStock.Heading)
+		helper.AssignIfDifferent(&existingStock.Count, newStock.Count)
+
+		if !reflect.DeepEqual(existingStock.History, newStock.History) {
+			existingStock.History = newStock.History
+		}
+
+		return existingStock
+	}
+
+	e.Assets.Stocks = append(e.Assets.Stocks, newStock)
+	return &e.Assets.Stocks[len(e.Assets.Stocks)-1]
 }
 
 func (e *Player) UpdateAsset(symbol string, card CardOtherAssets) {
@@ -432,6 +505,24 @@ func (e *Player) CanContinue() bool {
 
 func (e *Player) ConditionsForBigRace() bool {
 	return e.IsIncomeStable() && e.RequiredDeals() && e.CashPerMonths()
+}
+
+func (e *Player) ConditionsForCompletedBigRace() bool {
+	return e.GoalPassiveIncomeOnBigRace() && e.GoalPersonalDream()
+}
+
+func (e *Player) GoalPassiveIncomeOnBigRace() bool {
+	return (e.CashFlow + 100_000) <= e.CalculatePassiveIncome()
+}
+
+func (e *Player) GoalPersonalDream() bool {
+	for _, dream := range e.Assets.Dreams {
+		if dream.PlayerId == int(e.ID) && dream.AssetType == "personal" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (e *Player) IsIncomeStable() bool {
