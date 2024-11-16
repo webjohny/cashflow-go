@@ -25,8 +25,8 @@ func (d *Die) Roll() int {
 	rand.Seed(time.Now().UnixNano())
 
 	// Simulate rolling the die
-	//d.face = rand.Intn(d.numberOfSides) + 1
-	d.face = 2
+	d.face = rand.Intn(d.numberOfSides) + 1
+	//d.face = 2
 
 	return d.face
 }

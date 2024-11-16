@@ -71,9 +71,9 @@ type PlayerInfo struct {
 
 type Player struct {
 	ID              uint64            `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserID          uint64            `gorm:"uniqueIndex:idx_player" json:"user_id"`
-	RaceID          uint64            `gorm:"uniqueIndex:idx_player" json:"race_id"`
-	Username        string            `gorm:"uniqueIndex:idx_player;type:varchar(255)" json:"username"`
+	UserID          uint64            `gorm:"index:idx_player" json:"user_id"`
+	RaceID          uint64            `gorm:"index:idx_player" json:"race_id"`
+	Username        string            `gorm:"index:idx_player;type:varchar(255)" json:"username"`
 	Role            string            `gorm:"type:varchar(255)" json:"role"`
 	Color           string            `gorm:"type:varchar(255)" json:"color"`
 	Salary          int               `json:"salary" gorm:"allowzero"`

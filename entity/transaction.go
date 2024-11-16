@@ -37,8 +37,8 @@ type TransactionData struct {
 
 type Transaction struct {
 	ID              uint             `gorm:"primaryKey;autoIncrement" json:"id"`
-	PlayerID        *uint64          `gorm:"index" json:"player_id,omitempty"`
-	RaceID          *uint64          `gorm:"index" json:"race_id,omitempty"`
+	PlayerID        *uint64          `gorm:"index:idx_player" json:"player_id,omitempty"`
+	RaceID          *uint64          `gorm:"index:idx_player" json:"race_id,omitempty"`
 	TransactionType string           `gorm:"type:varchar(20)" json:"transaction_type"` // Handle enum in application logic
 	Details         string           `gorm:"type:varchar(255)" json:"description"`
 	Data            *TransactionData `gorm:"type:json;serializer:json" json:"data,omitempty"`
