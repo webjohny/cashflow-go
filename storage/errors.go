@@ -38,6 +38,7 @@ const (
 	ErrorLimitedPartnership                           = "error limited partnership"
 	ErrorIncorrectCount                               = "error incorrect count"
 	ErrorUndefinedTypeOfDeal                          = "error undefined type of deal"
+	ErrorTransactionAlreadyExists                     = "error transaction already exists"
 	ErrorInsufficientPlayers                          = "error insufficient players"
 	ErrorMovingBigRaceDeclined                        = "error moving big race declined"
 	ErrorYouAreBankrupt                               = "error you are bankrupt"

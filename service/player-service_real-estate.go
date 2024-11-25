@@ -21,7 +21,15 @@ func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player e
 
 	player.Assets.RealEstates = append(player.Assets.RealEstates, card)
 
-	service.UpdateCash(&player, -card.DownPayment, card.Heading)
+	err := service.UpdateCash(&player, -card.DownPayment, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.RealEstate,
+		Details:  card.Heading,
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return service.AreYouBankrupt(player)
 }
@@ -76,7 +84,15 @@ func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEst
 		currentPlayer.Assets.RealEstates = append(currentPlayer.Assets.RealEstates, card)
 
 		if owner.ID == currentPlayer.ID {
-			service.UpdateCash(&currentPlayer, -cardCost, card.Heading)
+			err := service.UpdateCash(&currentPlayer, -cardCost, &dto.TransactionDTO{
+				CardID:   &card.ID,
+				CardType: entity.TransactionCardType.RealEstate,
+				Details:  card.Heading,
+			})
+
+			if err != nil {
+				return err
+			}
 		} else {
 			err, player := service.UpdatePlayer(&currentPlayer)
 
@@ -144,7 +160,15 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 	player.RemoveRealEstate(ID)
 
 	if totalCost > 0 && totalCost >= realEstate.Mortgage {
-		service.UpdateCash(&player, totalCost-realEstate.Mortgage, card.Heading)
+		err := service.UpdateCash(&player, totalCost-realEstate.Mortgage, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.RealEstate,
+			Details:  card.Heading,
+		})
+
+		if err != nil {
+			return err
+		}
 	}
 
 	players := service.GetAllPlayersByRaceId(player.RaceID)

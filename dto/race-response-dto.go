@@ -17,7 +17,7 @@ type RacePlayerProfileResponseDTO struct {
 
 type RacePlayerTransactionsResponseDTO struct {
 	CurrentCash int    `json:"current_cash"`
-	Cash        int    `json:"cash"`
+	UpdatedCash int    `json:"updated_cash"`
 	Amount      int    `json:"amount"`
 	Details     string `json:"details"`
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"strconv"
+	"time"
 )
 
 type playerService struct {
@@ -26,20 +27,28 @@ func NewPlayerService(playerRepo repository.PlayerRepository, professionService 
 	}
 }
 
-func (service *playerService) Payday(player entity.Player) {
+func (service *playerService) Payday(player entity.Player, card entity.Card) error {
 	logger.Info("PlayerService.Payday", map[string]interface{}{
 		"playerId": player.ID,
 	})
 
-	service.UpdateCash(&player, player.CalculateCashFlow(), "Зарплата")
+	return service.UpdateCash(&player, player.CalculateCashFlow(), &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Doodad,
+		Details:  card.Heading,
+	})
 }
 
-func (service *playerService) CashFlowDay(player entity.Player) {
+func (service *playerService) CashFlowDay(player entity.Player, card entity.Card) error {
 	logger.Info("PlayerService.CashFlowDay", map[string]interface{}{
 		"playerId": player.ID,
 	})
 
-	service.UpdateCash(&player, player.CalculateCashFlow(), "Кэш-флоу день")
+	return service.UpdateCash(&player, player.CalculateCashFlow(), &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Doodad,
+		Details:  card.Heading,
+	})
 }
 
 func (service *playerService) AreYouBankrupt(player entity.Player) error {
@@ -120,9 +129,11 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
-	service.UpdateCash(&player, -cost, "Растраты")
-
-	return nil
+	return service.UpdateCash(&player, -cost, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Doodad,
+		Details:  card.Heading,
+	})
 }
 
 func (service *playerService) BuyDream(card entity.CardDream, player entity.Player) error {
@@ -139,9 +150,11 @@ func (service *playerService) BuyDream(card entity.CardDream, player entity.Play
 
 	player.Assets.Dreams = append(player.Assets.Dreams, card)
 
-	service.UpdateCash(&player, -cost, "Мечта")
-
-	return nil
+	return service.UpdateCash(&player, -cost, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Dream,
+		Details:  card.Heading,
+	})
 }
 
 func (service *playerService) BuyLottery(card entity.CardLottery, player entity.Player, dice int) (error, bool) {
@@ -173,14 +186,22 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 
 			player.Assets.Business = append(player.Assets.Business, business)
 		}
-		service.UpdateCash(&player, amount, card.Symbol)
+		err := service.UpdateCash(&player, amount, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.Lottery,
+			Details:  card.Heading,
+		})
 
-		return nil, true
+		return err, true
 	}
 
-	service.UpdateCash(&player, -card.Cost, card.Symbol)
+	err := service.UpdateCash(&player, -card.Cost, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Lottery,
+		Details:  card.Heading,
+	})
 
-	return nil, false
+	return err, false
 }
 
 func (service *playerService) SellOtherAssets(ID string, card entity.CardMarketOtherAssets, player entity.Player, count int) error {
@@ -215,7 +236,15 @@ func (service *playerService) SellOtherAssets(ID string, card entity.CardMarketO
 	}
 
 	if totalCost > 0 {
-		service.UpdateCash(&player, totalCost, card.Heading)
+		err := service.UpdateCash(&player, totalCost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.MarketOther,
+			Details:  card.Heading,
+		})
+
+		if err != nil {
+			return err
+		}
 	}
 
 	if asset.AssetType == entity.OtherAssetTypes.Piece {
@@ -259,9 +288,11 @@ func (service *playerService) Charity(card entity.CardCharity, player entity.Pla
 	player.DualDiceCount += card.Limit
 	player.ExtraDices = card.ExtraDices + 1
 
-	service.UpdateCash(&player, -amount, card.Heading)
-
-	return nil
+	return service.UpdateCash(&player, -amount, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Charity,
+		Details:  card.Heading,
+	})
 }
 
 func (service *playerService) PayTax(card entity.CardPayTax, player entity.Player) error {
@@ -278,12 +309,20 @@ func (service *playerService) PayTax(card entity.CardPayTax, player entity.Playe
 		result = player.Cash
 	}
 
-	service.UpdateCash(&player, -result, card.Heading)
+	err := service.UpdateCash(&player, -result, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.PayTax,
+		Details:  card.Heading,
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (service *playerService) Downsized(player entity.Player) error {
+func (service *playerService) Downsized(player entity.Player, card entity.Card) error {
 	logger.Info("PlayerService.Downsized", map[string]interface{}{
 		"playerId": player.ID,
 	})
@@ -296,9 +335,45 @@ func (service *playerService) Downsized(player entity.Player) error {
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
-	service.UpdateCash(&player, -amount, "Уволен")
+	err := service.UpdateCash(&player, -amount, &dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Downsized,
+		Details:  card.Heading,
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return service.AreYouBankrupt(player)
+}
+
+func (service *playerService) BornBaby(player entity.Player, card entity.Card) (error, bool) {
+	logger.Info("PlayerService.BornBaby", map[string]interface{}{
+		"playerId": player.ID,
+	})
+
+	if player.Babies > 2 {
+		return errors.New(storage.MessageYouHaveTooManyBabies), true
+	}
+
+	transaction := dto.TransactionDTO{
+		CardID:   &card.ID,
+		CardType: entity.TransactionCardType.Baby,
+		Details:  card.Heading,
+	}
+
+	var err error
+
+	if err = service.SetTransaction(player, transaction); err != nil {
+		return err, false
+	}
+
+	player.BornBaby()
+
+	err, _ = service.UpdatePlayer(&player)
+
+	return err, false
 }
 
 func (service *playerService) BigBankrupt(player entity.Player) error {
@@ -406,11 +481,22 @@ func (service *playerService) MarketDamage(card entity.CardMarket, player entity
 			}
 		}
 
+		var cost int
+
 		if card.AssetType == entity.MarketTypes.AnyRealEstate {
-			service.UpdateCash(&player, -card.Cost, "Имущество поврежденно")
+			cost = card.Cost
 		} else if card.AssetType == entity.MarketTypes.EachRealEstate {
-			cost := card.Cost * len(realEstates)
-			service.UpdateCash(&player, -cost, "Каждое имущество поврежденно")
+			cost = card.Cost * len(realEstates)
+		}
+
+		err := service.UpdateCash(&player, -cost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.Damage,
+			Details:  card.Heading,
+		})
+
+		if err != nil {
+			return err
 		}
 	}
 
@@ -529,7 +615,15 @@ func (service *playerService) BuyOtherAssets(card entity.CardOtherAssets, player
 	}
 
 	if card.IsOwner && card.WholeCost > 0 {
-		service.UpdateCash(&player, -card.WholeCost, "Другие активы: "+card.Heading)
+		err = service.UpdateCash(&player, -card.WholeCost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.Other,
+			Details:  card.Heading,
+		})
+
+		if err != nil {
+			return err
+		}
 	} else {
 		err, _ = service.UpdatePlayer(&player)
 	}
@@ -603,10 +697,17 @@ func (service *playerService) TakeLoan(player entity.Player, amount int) error {
 	player.Liabilities.BankLoan += amount
 	player.Expenses["bankLoan"] = player.Liabilities.BankLoan / 10
 
-	service.UpdateCash(&player, amount, fmt.Sprintf(
-		"Взял(а) в кредит $%s",
-		strconv.Itoa(amount),
-	))
+	err := service.UpdateCash(&player, amount, &dto.TransactionDTO{
+		CardType: entity.TransactionCardType.TakeLoan,
+		Details: fmt.Sprintf(
+			"Взял(а) в кредит $%s",
+			strconv.Itoa(amount),
+		),
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return service.AreYouBankrupt(player)
 }
@@ -671,38 +772,38 @@ func (service *playerService) PayLoan(player entity.Player, actionType string, a
 
 	player.Expenses[loanMapper[actionType]] = liabilityAmount / 10
 
-	service.UpdateCash(&player, -amount, "Оплата по кредиту")
-
-	return nil
+	return service.UpdateCash(&player, -amount, &dto.TransactionDTO{
+		CardType: entity.TransactionCardType.PayLoan,
+		Details:  "Оплата по кредиту",
+	})
 }
 
-func (service *playerService) UpdateCash(player *entity.Player, amount int, details string) {
+func (service *playerService) UpdateCash(player *entity.Player, amount int, data *dto.TransactionDTO) error {
 	logger.Info("PlayerService.UpdateCash", map[string]interface{}{
 		"playerId": player.ID,
 		"cash":     player.Cash,
 		"amount":   amount,
-		"details":  details,
+		"details":  &data.Details,
 	})
 
 	currentCash := player.Cash
 
 	player.Cash += amount
 
-	if details != "" {
-		service.SetTransaction(player.ID, currentCash, player.Cash, amount, details)
+	if &data != nil {
+		data.Amount = &amount
+		data.CurrentCash = &currentCash
+		data.UpdatedCash = &player.Cash
+		err := service.SetTransaction(*player, *data)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	err, _ := service.playerRepository.UpdatePlayer(player)
 
-	if err != nil {
-		logger.Error(err, map[string]interface{}{
-			"playerId": player.ID,
-			"lastCash": currentCash,
-			"amount":   amount,
-			"details":  details,
-			"cash":     player.Cash,
-		})
-	}
+	return err
 }
 
 func (service *playerService) BecomeModerator(raceId uint64, userId uint64) error {
@@ -724,25 +825,22 @@ func (service *playerService) BecomeModerator(raceId uint64, userId uint64) erro
 	return err
 }
 
-func (service *playerService) SetTransaction(ID uint64, currentCash int, newCash int, amount int, details string) {
-	logger.Info("PlayerService.SetTransaction", map[string]interface{}{
-		"playerId":    ID,
-		"currentCash": currentCash,
-		"cash":        newCash,
-		"details":     details,
-	})
-
-	service.transactionService.InsertPlayerTransaction(dto.TransactionCreatePlayerDTO{
-		PlayerID:    ID,
-		Details:     details,
-		CurrentCash: currentCash,
-		Cash:        newCash,
-		Amount:      amount,
-	})
-}
-
 func (service *playerService) InsertPlayer(b *entity.Player) (error, entity.Player) {
 	return service.playerRepository.InsertPlayer(b)
+}
+
+func (service *playerService) SetTransaction(player entity.Player, data dto.TransactionDTO) error {
+	if data.CardID == nil {
+		cardId := helper.CreateHash(data.Details + data.CardType + strconv.Itoa(int(time.Now().Unix())))
+		data.CardID = &cardId
+	}
+
+	data.PlayerID = player.ID
+	data.RaceID = player.RaceID
+	data.Username = player.Username
+	data.Color = player.Color
+	data.CurrentCash = &player.Cash
+	return service.transactionService.InsertTransaction(data)
 }
 
 func (service *playerService) UpdatePlayer(b *entity.Player) (error, entity.Player) {
@@ -803,18 +901,6 @@ func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error
 
 func (service *playerService) GetFormattedPlayerResponse(player entity.Player, hasRestrictedFields bool) dto.GetRacePlayerResponseDTO {
 	profession := service.professionService.GetByID(uint64(player.ProfessionID))
-	transactionsQuery := service.transactionService.GetPlayerTransactions(player.ID)
-
-	transactions := make([]dto.RacePlayerTransactionsResponseDTO, 0)
-
-	for i := 0; i < len(transactionsQuery); i++ {
-		transactions = append(transactions, dto.RacePlayerTransactionsResponseDTO{
-			CurrentCash: *transactionsQuery[i].Data.CurrentCash,
-			Cash:        *transactionsQuery[i].Data.Cash,
-			Amount:      *transactionsQuery[i].Data.Amount,
-			Details:     transactionsQuery[i].Details,
-		})
-	}
 
 	response := dto.GetRacePlayerResponseDTO{
 		ID:       player.ID,
@@ -850,7 +936,7 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 		Profession:        profession,
 		IsRolledDice:      player.IsRolledDice == 1,
 		LastPosition:      player.LastPosition,
-		Transactions:      transactions,
+		Transactions:      make([]dto.RacePlayerTransactionsResponseDTO, 0),
 		CurrentPosition:   player.CurrentPosition,
 		ExtraDices:        player.ExtraDices,
 		DualDiceCount:     player.DualDiceCount,

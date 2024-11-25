@@ -171,7 +171,11 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 			return errors.New(storage.ErrorNotEnoughMoney)
 		}
 
-		service.UpdateCash(&player, -cost, card.Heading)
+		err = service.UpdateCash(&player, -cost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.Business,
+			Details:  card.Heading,
+		})
 	} else {
 		err, _ = service.UpdatePlayer(&player)
 	}
@@ -279,7 +283,15 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 	}
 
 	if totalCash > 0 {
-		service.UpdateCash(&player, totalCash, card.Heading)
+		err := service.UpdateCash(&player, totalCash, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.MarketBusiness,
+			Details:  card.Heading,
+		})
+
+		if err != nil {
+			return err, 0
+		}
 	}
 
 	if business.AssetType == entity.BusinessTypes.Limited {
@@ -337,7 +349,11 @@ func (service *playerService) MarketBusiness(card entity.CardMarketBusiness, pla
 	var err error
 
 	if card.Cost > 0 {
-		service.UpdateCash(&player, -card.Cost, card.Heading)
+		err = service.UpdateCash(&player, -card.Cost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.MarketBusiness,
+			Details:  card.Heading,
+		})
 	} else {
 		err, _ = service.UpdatePlayer(&player)
 	}

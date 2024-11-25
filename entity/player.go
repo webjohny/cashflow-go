@@ -230,6 +230,18 @@ func (e *Player) HasOwnRealEstates() bool {
 	return false
 }
 
+func (e *Player) HasOwnBusiness() bool {
+	if len(e.Assets.Business) > 0 {
+		for i := 0; i < len(e.Assets.Business); i++ {
+			if e.Assets.Business[i].IsOwner {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (e *Player) HasBusiness() bool {
 	return len(e.Assets.Business) > 0
 }

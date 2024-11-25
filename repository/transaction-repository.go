@@ -2,6 +2,7 @@ package repository
 
 import (
 	logger "github.com/sirupsen/logrus"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
@@ -12,12 +13,13 @@ import (
 )
 
 type TransactionRepository interface {
-	InsertTransaction(b *entity.Transaction) entity.Transaction
+	InsertTransaction(b *entity.Transaction) error
 	UpdateTransaction(b *entity.Transaction) entity.Transaction
 	GetPlayerTransactions(playerId uint64) []entity.Transaction
 	GetRaceTransactions(raceId uint64) []entity.Transaction
 	DeleteTransaction(b *entity.Transaction)
 	FindTransactionByPlayerId(ID uint64) entity.Transaction
+	FindRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction
 }
 
 const TransactionsTable = "transactions"
@@ -32,18 +34,18 @@ func NewTransactionRepository(dbConn *gorm.DB) TransactionRepository {
 	}
 }
 
-func (db *transactionConnection) InsertTransaction(b *entity.Transaction) entity.Transaction {
+func (db *transactionConnection) InsertTransaction(b *entity.Transaction) error {
 	b.CreatedAt = datatypes.Date(time.Now())
 	result := db.connection.Save(&b)
 
 	if result.Error != nil {
 		logger.Error(result.Error, helper.JsonSerialize(b))
 
-		return entity.Transaction{}
+		return result.Error
 	}
 
 	db.connection.Find(&b)
-	return *b
+	return nil
 }
 
 func (db *transactionConnection) GetPlayerTransactions(playerId uint64) []entity.Transaction {
@@ -89,6 +91,20 @@ func (db *transactionConnection) DeleteTransaction(b *entity.Transaction) {
 	if result.Error != nil {
 		logger.Error(result.Error, helper.JsonSerialize(b))
 	}
+}
+
+func (db *transactionConnection) FindRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction {
+	var transaction entity.Transaction
+
+	db.connection.Model(TransactionsTable).
+		Where("race_id", player.RaceID).
+		Where("player_id", player.ID).
+		Where("details", data.Details).
+		Where("card_type", data.CardType).
+		Where("card_id", data.CardID).
+		Scan(&transaction)
+
+	return transaction
 }
 
 func (db *transactionConnection) FindTransactionByPlayerId(ID uint64) entity.Transaction {

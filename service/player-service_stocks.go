@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	logger "github.com/sirupsen/logrus"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/storage"
 	"math"
@@ -47,7 +48,11 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 	var err error
 
 	if updateCash {
-		service.UpdateCash(&player, -totalCost, card.Symbol)
+		err = service.UpdateCash(&player, -totalCost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.RealEstate,
+			Details:  card.Heading,
+		})
 	} else {
 		err, _ = service.UpdatePlayer(&player)
 	}
@@ -85,7 +90,11 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 	var err error
 
 	if updateCash {
-		service.UpdateCash(&player, totalCost, card.Symbol)
+		err = service.UpdateCash(&player, totalCost, &dto.TransactionDTO{
+			CardID:   &card.ID,
+			CardType: entity.TransactionCardType.RealEstate,
+			Details:  card.Heading,
+		})
 	} else {
 		err, _ = service.UpdatePlayer(&player)
 	}

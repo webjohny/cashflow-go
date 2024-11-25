@@ -9,10 +9,12 @@ import (
 )
 
 type TransactionService interface {
-	InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) entity.Transaction
-	InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction
+	InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) error
+	InsertTransaction(b dto.TransactionDTO) error
+	InsertRaceTransaction(b dto.TransactionCreateRaceDTO) error
 	UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction
 	Delete(b entity.Transaction)
+	GetRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction
 	GetPlayerTransactions(playerId uint64) []entity.Transaction
 	GetRaceTransactions(raceId uint64) []entity.Transaction
 	GetRaceLogs(raceId uint64) []entity.RaceLog
@@ -28,33 +30,54 @@ func NewTransactionService(transactionRepo repository.TransactionRepository) Tra
 	}
 }
 
-func (service *transactionService) InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) entity.Transaction {
+func (service *transactionService) InsertPlayerTransaction(b dto.TransactionCreatePlayerDTO) error {
 	trx := entity.Transaction{}
 	trx.PlayerID = &b.PlayerID
 	trx.TransactionType = entity.TransactionType.PLAYER
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
 		CurrentCash: &b.CurrentCash,
-		Cash:        &b.Cash,
+		UpdatedCash: &b.Cash,
 		Amount:      &b.Amount,
 	}
-	res := service.transactionRepository.InsertTransaction(&trx)
-	return res
+	return service.transactionRepository.InsertTransaction(&trx)
 }
 
-func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreateRaceDTO) entity.Transaction {
+func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreateRaceDTO) error {
 	trx := entity.Transaction{}
 	trx.RaceID = &b.RaceID
+	trx.CardID = b.CardID
+	trx.CardType = b.CardType
 	trx.PlayerID = &b.PlayerID
 	trx.TransactionType = entity.TransactionType.RACE
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
-		TxType:   &b.TxType,
 		Color:    &b.Color,
 		Username: &b.Username,
 	}
-	res := service.transactionRepository.InsertTransaction(&trx)
-	return res
+	return service.transactionRepository.InsertTransaction(&trx)
+}
+
+func (service *transactionService) InsertTransaction(b dto.TransactionDTO) error {
+	trx := entity.Transaction{}
+	trx.RaceID = &b.RaceID
+	trx.CardID = *b.CardID
+	trx.CardType = b.CardType
+	trx.PlayerID = &b.PlayerID
+	trx.TransactionType = entity.TransactionType.PLAYER
+	trx.Details = b.Details
+	trx.Data = &entity.TransactionData{
+		Color:       &b.Color,
+		Username:    &b.Username,
+		CurrentCash: b.CurrentCash,
+		UpdatedCash: b.UpdatedCash,
+		Amount:      b.Amount,
+	}
+	return service.transactionRepository.InsertTransaction(&trx)
+}
+
+func (service *transactionService) GetRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction {
+	return service.transactionRepository.FindRaceTransaction(player, data)
 }
 
 func (service *transactionService) GetPlayerTransactions(playerId uint64) []entity.Transaction {

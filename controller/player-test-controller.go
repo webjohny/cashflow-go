@@ -1212,7 +1212,7 @@ func (c *playerTestController) addCashForPlayer(player *entity.Player, cash int,
 	}
 	player.Cash = cash
 
-	c.playerService.UpdateCash(player, 0, "Прибавка к зп")
+	c.playerService.UpdatePlayer(player)
 }
 
 func (c *playerTestController) fillAmounts(players []entity.Player, count int, min int, max int, key string) []dto.CardPurchasePlayerActionDTO {

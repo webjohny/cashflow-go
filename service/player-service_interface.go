@@ -6,9 +6,9 @@ import (
 )
 
 type PlayerService interface {
-	Payday(player entity.Player)
+	Payday(player entity.Player, card entity.Card) error
 	BecomeModerator(raceId uint64, userId uint64) error
-	CashFlowDay(player entity.Player)
+	CashFlowDay(player entity.Player, card entity.Card) error
 	Doodad(card entity.CardDoodad, player entity.Player) error
 	BigBankrupt(player entity.Player) error
 	BuyBusiness(card entity.CardBusiness, player entity.Player, count int, updateCash bool) error
@@ -30,17 +30,18 @@ type PlayerService interface {
 	IncreaseStocks(card entity.CardStocks, player entity.Player) error
 	Charity(card entity.CardCharity, player entity.Player) error
 	PayTax(card entity.CardPayTax, player entity.Player) error
-	Downsized(player entity.Player) error
+	Downsized(player entity.Player, card entity.Card) error
+	BornBaby(player entity.Player, card entity.Card) (error, bool)
 	MoveOnBigRace(player entity.Player) error
 	SetDream(raceId uint64, userId uint64, playerDream entity.PlayerDream) error
 	MarketDamage(card entity.CardMarket, player entity.Player) error
 	MarketManipulation(card entity.CardMarket, player entity.Player) error
 	MarketBusiness(card entity.CardMarketBusiness, player entity.Player) error
 	SellAllProperties(player entity.Player) (error, int)
+	SetTransaction(player entity.Player, data dto.TransactionDTO) error
 	TakeLoan(player entity.Player, amount int) error
 	PayLoan(player entity.Player, actionType string, amount int) error
-	UpdateCash(player *entity.Player, amount int, details string)
-	SetTransaction(ID uint64, currentCash int, cash int, amount int, details string)
+	UpdateCash(player *entity.Player, amount int, data *dto.TransactionDTO) error
 	GetPlayerByUsername(username string) entity.Player
 	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
 	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player)
