@@ -14,6 +14,7 @@ type TransactionService interface {
 	InsertRaceTransaction(b dto.TransactionCreateRaceDTO) error
 	UpdateTransaction(b dto.TransactionUpdateDTO) entity.Transaction
 	Delete(b entity.Transaction)
+	GetTransaction(data dto.TransactionDTO) entity.Transaction
 	GetRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction
 	GetPlayerTransactions(playerId uint64) []entity.Transaction
 	GetRaceTransactions(raceId uint64) []entity.Transaction
@@ -78,6 +79,10 @@ func (service *transactionService) InsertTransaction(b dto.TransactionDTO) error
 
 func (service *transactionService) GetRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction {
 	return service.transactionRepository.FindRaceTransaction(player, data)
+}
+
+func (service *transactionService) GetTransaction(data dto.TransactionDTO) entity.Transaction {
+	return service.transactionRepository.FindTransaction(data)
 }
 
 func (service *transactionService) GetPlayerTransactions(playerId uint64) []entity.Transaction {

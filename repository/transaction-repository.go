@@ -20,6 +20,7 @@ type TransactionRepository interface {
 	DeleteTransaction(b *entity.Transaction)
 	FindTransactionByPlayerId(ID uint64) entity.Transaction
 	FindRaceTransaction(player entity.Player, data dto.TransactionCardDTO) entity.Transaction
+	FindTransaction(data dto.TransactionDTO) entity.Transaction
 }
 
 const TransactionsTable = "transactions"
@@ -99,6 +100,20 @@ func (db *transactionConnection) FindRaceTransaction(player entity.Player, data 
 	db.connection.Model(TransactionsTable).
 		Where("race_id", player.RaceID).
 		Where("player_id", player.ID).
+		Where("details", data.Details).
+		Where("card_type", data.CardType).
+		Where("card_id", data.CardID).
+		Scan(&transaction)
+
+	return transaction
+}
+
+func (db *transactionConnection) FindTransaction(data dto.TransactionDTO) entity.Transaction {
+	var transaction entity.Transaction
+
+	db.connection.Model(TransactionsTable).
+		Where("race_id", data.RaceID).
+		Where("player_id", data.PlayerID).
 		Where("details", data.Details).
 		Where("card_type", data.CardType).
 		Where("card_id", data.CardID).

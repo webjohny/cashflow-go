@@ -142,7 +142,7 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 	}
 
 	if int(race.CurrentPlayer.ID) != body.CurrentPlayer || len(race.Responses) == 1 {
-		err = c.raceService.ChangeTurn(race, body.CurrentPlayer)
+		err = c.raceService.ChangeTurn(race, false, body.CurrentPlayer)
 	} else {
 		err, race = c.raceService.UpdateRace(&race)
 	}

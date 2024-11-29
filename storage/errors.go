@@ -39,6 +39,7 @@ const (
 	ErrorIncorrectCount                               = "error incorrect count"
 	ErrorUndefinedTypeOfDeal                          = "error undefined type of deal"
 	ErrorTransactionAlreadyExists                     = "error transaction already exists"
+	ErrorItsNotYourMoveNow                            = "error its not your move now"
 	ErrorInsufficientPlayers                          = "error insufficient players"
 	ErrorMovingBigRaceDeclined                        = "error moving big race declined"
 	ErrorYouAreBankrupt                               = "error you are bankrupt"

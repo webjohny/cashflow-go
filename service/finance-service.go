@@ -104,6 +104,22 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 		}
 	}
 
+	updatedCash := player.Cash - data.Amount
+
+	transaction := dto.TransactionDTO{
+		CardID:      &race.CurrentCard.ID,
+		CardType:    cardType,
+		Details:     "",
+		PlayerID:    player.ID,
+		RaceID:      player.RaceID,
+		CurrentCash: &player.Cash,
+		UpdatedCash: &updatedCash,
+	}
+
+	if trx := service.playerService.GetTransaction(transaction); trx.ID != 0 {
+		return errors.New(storage.ErrorTransactionAlreadyExists), false
+	}
+
 	var request entity.UserRequest
 
 	request.Type = data.Type
@@ -128,10 +144,7 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 	}
 
 	if !race.Options.EnableManager {
-		err = service.playerService.UpdateCash(&player, data.Amount, &dto.TransactionDTO{
-			CardType: cardType,
-			Details:  data.Message,
-		})
+		err = service.playerService.UpdateCash(&player, data.Amount, &transaction)
 
 		return err, true
 	}

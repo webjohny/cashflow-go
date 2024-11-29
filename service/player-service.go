@@ -34,7 +34,7 @@ func (service *playerService) Payday(player entity.Player, card entity.Card) err
 
 	return service.UpdateCash(&player, player.CalculateCashFlow(), &dto.TransactionDTO{
 		CardID:   &card.ID,
-		CardType: entity.TransactionCardType.Doodad,
+		CardType: entity.TransactionCardType.Payday,
 		Details:  card.Heading,
 	})
 }
@@ -46,7 +46,7 @@ func (service *playerService) CashFlowDay(player entity.Player, card entity.Card
 
 	return service.UpdateCash(&player, player.CalculateCashFlow(), &dto.TransactionDTO{
 		CardID:   &card.ID,
-		CardType: entity.TransactionCardType.Doodad,
+		CardType: entity.TransactionCardType.CashFlowDay,
 		Details:  card.Heading,
 	})
 }
@@ -129,11 +129,19 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
-	return service.UpdateCash(&player, -cost, &dto.TransactionDTO{
+	transaction := dto.TransactionDTO{
 		CardID:   &card.ID,
 		CardType: entity.TransactionCardType.Doodad,
 		Details:  card.Heading,
-	})
+		PlayerID: player.ID,
+		RaceID:   player.RaceID,
+	}
+
+	if trx := service.GetTransaction(transaction); trx.ID != 0 {
+		return errors.New(storage.ErrorTransactionAlreadyExists)
+	}
+
+	return service.UpdateCash(&player, -cost, &transaction)
 }
 
 func (service *playerService) BuyDream(card entity.CardDream, player entity.Player) error {
@@ -361,6 +369,12 @@ func (service *playerService) BornBaby(player entity.Player, card entity.Card) (
 		CardID:   &card.ID,
 		CardType: entity.TransactionCardType.Baby,
 		Details:  card.Heading,
+		PlayerID: player.ID,
+		RaceID:   player.RaceID,
+	}
+
+	if trx := service.GetTransaction(transaction); trx.ID != 0 {
+		return errors.New(storage.ErrorTransactionAlreadyExists), false
 	}
 
 	var err error
@@ -867,6 +881,10 @@ func (service *playerService) GetPlayerByUsernameAndRaceId(raceId uint64, userna
 
 func (service *playerService) GetAllPlayersByRaceId(raceId uint64) []entity.Player {
 	return service.playerRepository.AllByRaceId(raceId)
+}
+
+func (service *playerService) GetTransaction(data dto.TransactionDTO) entity.Transaction {
+	return service.transactionService.GetTransaction(data)
 }
 
 func (service *playerService) GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player) {

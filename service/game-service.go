@@ -90,6 +90,10 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollD
 		return err, []int{}
 	}
 
+	if player.ID != race.CurrentPlayer.ID {
+		return errors.New(storage.ErrorItsNotYourMoveNow), []int{}
+	}
+
 	getDice := race.GetDice()
 
 	var dice = make([]int, 0)
@@ -250,7 +254,7 @@ func (service *gameService) ChangeTurn(raceId uint64) error {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
 
-	return service.raceService.ChangeTurn(race, 0)
+	return service.raceService.ChangeTurn(race, false, 0)
 }
 
 func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {

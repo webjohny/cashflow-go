@@ -42,6 +42,7 @@ type PlayerService interface {
 	TakeLoan(player entity.Player, amount int) error
 	PayLoan(player entity.Player, actionType string, amount int) error
 	UpdateCash(player *entity.Player, amount int, data *dto.TransactionDTO) error
+	GetTransaction(data dto.TransactionDTO) entity.Transaction
 	GetPlayerByUsername(username string) entity.Player
 	GetPlayerByUsernameAndRaceId(raceId uint64, username string) entity.Player
 	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player)
