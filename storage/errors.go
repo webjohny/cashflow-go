@@ -18,7 +18,6 @@ const (
 	ErrorIsNotValidOtherAssets                        = "error is not valid other assets"
 	ErrorInvalidTypeOfCard                            = "error invalid type of card"
 	ErrorWrongAmount                                  = "error wrong amount"
-	ErrorYouHaveNoBabies                              = "error you have no babies"
 	ErrorTooManyAssets                                = "error too many assets"
 	ErrorNotFoundAssets                               = "error not found assets"
 	ErrorNotEnoughMoney                               = "error not enough money"

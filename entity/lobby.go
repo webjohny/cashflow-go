@@ -147,11 +147,11 @@ func (l *Lobby) AvailableToStart() bool {
 	return count >= 1
 }
 
-func (l *Lobby) RemovePlayer(username string) {
+func (l *Lobby) RemovePlayer(userId uint64) {
 	index := -1
 
 	for i, player := range l.Players {
-		if player.Username == username {
+		if player.ID == userId {
 			index = i
 			break
 		}

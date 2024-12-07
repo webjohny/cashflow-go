@@ -26,7 +26,7 @@ func (d *Die) Roll() int {
 
 	// Simulate rolling the die
 	d.face = rand.Intn(d.numberOfSides) + 1
-	//d.face = 2
+	//d.face = 4
 
 	return d.face
 }

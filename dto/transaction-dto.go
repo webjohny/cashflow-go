@@ -23,6 +23,7 @@ type TransactionDTO struct {
 	CardID      *string `json:"card_id" form:"card_id" binding:"omitempty"`
 	CardType    string  `json:"card_type" form:"card_type" binding:"required"`
 	PlayerID    uint64  `json:"player_id" form:"player_id" binding:"required"`
+	SenderID    *uint64 `json:"sender_id" form:"sender_id" binding:"omitempty"`
 	Details     string  `json:"details" form:"details" binding:"required"`
 	Username    string  `json:"username" form:"username" binding:"required"`
 	Color       string  `json:"color" form:"color" binding:"required"`

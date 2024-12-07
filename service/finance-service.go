@@ -160,7 +160,7 @@ func (service *financeService) SendMoney(raceId uint64, userId uint64, amount in
 		"receiverUsername": receiverUsername,
 	})
 
-	err, sender := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+	err, race, sender := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -172,26 +172,7 @@ func (service *financeService) SendMoney(raceId uint64, userId uint64, amount in
 		return errors.New(storage.ErrorNotEnoughMoney)
 	}
 
-	if receiverUsername != "" {
-		receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
-
-		if receiver.ID == 0 {
-			return errors.New(storage.ErrorUndefinedReceiverPlayer)
-		}
-
-		err = service.playerService.UpdateCash(
-			&receiver,
-			amount,
-			&dto.TransactionDTO{
-				CardType: entity.TransactionCardType.ReceiveMoney,
-				Details: fmt.Sprintf(
-					"%s перевёл Вам $%s",
-					helper.CamelToCapitalize(receiver.Username),
-					strconv.Itoa(amount),
-				),
-			},
-		)
-	} else {
+	if receiverUsername == "" {
 		err = service.playerService.UpdateCash(
 			&sender,
 			-amount,
@@ -203,9 +184,54 @@ func (service *financeService) SendMoney(raceId uint64, userId uint64, amount in
 				),
 			},
 		)
+
+		return err
 	}
 
-	return err
+	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, receiverUsername)
+
+	if receiver.ID == 0 {
+		return errors.New(storage.ErrorUndefinedReceiverPlayer)
+	}
+
+	var transactionData = dto.TransactionDTO{
+		CardType: entity.TransactionCardType.SendMoney,
+		Details: fmt.Sprintf(
+			"Перевёл $%s игроку %s (#%s)",
+			strconv.Itoa(amount),
+			helper.CamelToCapitalize(receiverUsername),
+			receiver.GetStringID(),
+		),
+	}
+
+	if race.CurrentCard.ID != "" {
+		cardID := fmt.Sprintf("%s-%s", race.CurrentCard.ID, strconv.Itoa(helper.Random(1000)))
+		transactionData.CardID = &cardID
+	}
+
+	err = service.playerService.UpdateCash(
+		&sender,
+		-amount,
+		&transactionData,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	transactionData.CardType = entity.TransactionCardType.ReceiveMoney
+	transactionData.Details = fmt.Sprintf(
+		"%s (#%s) перевёл Вам $%s",
+		helper.CamelToCapitalize(sender.Username),
+		sender.GetStringID(),
+		strconv.Itoa(amount),
+	)
+
+	return service.playerService.UpdateCash(
+		&receiver,
+		amount,
+		&transactionData,
+	)
 }
 
 func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto.SendAssetsBodyDTO) error {
@@ -215,14 +241,17 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto
 		"dto":    data,
 	})
 
-	err, sender := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+	err, race, sender := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
 	}
 
-	receiver := service.playerService.GetPlayerByUsernameAndRaceId(raceId, data.Player)
-	race := service.raceService.GetRaceByRaceId(raceId)
+	err, receiver := service.playerService.GetPlayerByPlayerIdAndRaceId(raceId, uint64(data.Player))
+
+	if err != nil {
+		return errors.New(storage.ErrorUndefinedReceiverPlayer)
+	}
 
 	if sender.ID == 0 {
 		return errors.New(storage.ErrorUndefinedPlayer)
@@ -236,19 +265,17 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto
 	var transactionReceiverMessage string
 
 	if data.Asset == "stock" {
-		cardStocks := entity.CardStocks{}
-		cardStocks.Fill(race.CurrentCard)
-		err = service.playerService.TransferStocks(cardStocks, data.AssetId, sender, receiver, data.Amount)
+		err = service.playerService.TransferStocks(data.AssetId, sender, receiver, data.Amount)
 
 		if err == nil {
 			transactionSenderMessage = fmt.Sprintf(
 				"Перевёл акции (%s шт.) игроку %s",
 				strconv.Itoa(data.Amount),
-				helper.CamelToCapitalize(data.Player),
+				helper.CamelToCapitalize(receiver.Username),
 			)
 			transactionReceiverMessage = fmt.Sprintf(
 				"%s перевёл Вам (%s шт.) акций",
-				helper.CamelToCapitalize(data.Player),
+				helper.CamelToCapitalize(receiver.Username),
 				strconv.Itoa(data.Amount),
 			)
 		}
@@ -259,34 +286,40 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto
 			transactionSenderMessage = fmt.Sprintf(
 				"Перевёл акции (%s шт.) игроку %s",
 				strconv.Itoa(data.Amount),
-				helper.CamelToCapitalize(data.Player),
+				helper.CamelToCapitalize(receiver.Username),
 			)
 			transactionReceiverMessage = fmt.Sprintf(
 				"%s перевёл Вам (%s шт.) акций",
-				helper.CamelToCapitalize(data.Player),
+				helper.CamelToCapitalize(receiver.Username),
 				strconv.Itoa(data.Amount),
 			)
 		}
 	}
 
 	if err == nil {
-		err = service.playerService.SetTransaction(sender, dto.TransactionDTO{
+		transactionData := dto.TransactionDTO{
 			CardType:    entity.TransactionCardType.SendAssets,
 			Details:     transactionSenderMessage,
 			CurrentCash: &sender.Cash,
 			Amount:      &data.Amount,
-		})
+		}
+
+		if race.CurrentCard.ID != "" {
+			cardID := fmt.Sprintf("%s-%s", race.CurrentCard.ID, strconv.Itoa(helper.Random(1000)))
+			transactionData.CardID = &cardID
+		}
+
+		err = service.playerService.SetTransaction(sender, transactionData)
 
 		if err != nil {
 			return err
 		}
 
-		err = service.playerService.SetTransaction(receiver, dto.TransactionDTO{
-			CardType:    entity.TransactionCardType.ReceiveAssets,
-			Details:     transactionReceiverMessage,
-			CurrentCash: &receiver.Cash,
-			Amount:      &data.Amount,
-		})
+		transactionData.CardType = entity.TransactionCardType.ReceiveAssets
+		transactionData.Details = transactionReceiverMessage
+		transactionData.CurrentCash = &receiver.Cash
+
+		err = service.playerService.SetTransaction(receiver, transactionData)
 	}
 
 	return err

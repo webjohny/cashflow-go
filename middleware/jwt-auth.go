@@ -29,6 +29,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 
 			c.Set("userId", claims["user_id"])
 			c.Set("username", claims["profile"])
+			c.Set("name", claims["name"])
 		} else {
 			log.Println(err)
 			response := request.BuildErrorResponse("Token is not valid", err.Error(), nil)

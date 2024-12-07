@@ -17,7 +17,7 @@ type LobbyService interface {
 	Create(username string, userId uint64) (error, entity.Lobby)
 	Update(lobby *entity.Lobby) (error, entity.Lobby)
 	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
-	Leave(ID uint64, username string) (error, entity.Lobby)
+	Leave(ID uint64, userId uint64) (error, entity.Lobby)
 	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
 	GetLobby(lobbyId uint64, userId uint64) (error, dto.GetLobbyResponseDTO)
 	GetByID(lobbyId uint64) entity.Lobby
@@ -148,20 +148,20 @@ func (service *lobbyService) Join(ID uint64, username string, userId uint64) (er
 	return nil, player
 }
 
-func (service *lobbyService) Leave(ID uint64, username string) (error, entity.Lobby) {
+func (service *lobbyService) Leave(ID uint64, userId uint64) (error, entity.Lobby) {
 	logger.Info("LobbyService.Leave", map[string]interface{}{
-		"lobbyId":  ID,
-		"username": username,
+		"lobbyId": ID,
+		"userID":  userId,
 	})
 
 	lobby := service.lobbyRepository.FindLobbyById(ID)
 
-	log.Println("LobbyService.Leave:", lobby.ID, ID, username)
+	log.Println("LobbyService.Leave:", lobby.ID, ID, userId)
 
 	if lobby.ID != 0 {
-		log.Println("LobbyService.Leave: exists lobby", lobby.CountPlayers(), ID, username)
+		log.Println("LobbyService.Leave: exists lobby", lobby.CountPlayers(), ID, userId)
 
-		lobby.RemovePlayer(username)
+		lobby.RemovePlayer(userId)
 
 		if lobby.CountPlayers() == 0 {
 			service.lobbyRepository.DeleteLobby(&lobby)

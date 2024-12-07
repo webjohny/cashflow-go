@@ -44,7 +44,7 @@ func (c *lobbyController) GetLobby(ctx *gin.Context) {
 
 func (c *lobbyController) Create(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
-	username := ctx.GetString("username")
+	username := ctx.GetString("name")
 
 	var err error
 	var lobby entity.Lobby
@@ -58,7 +58,7 @@ func (c *lobbyController) Create(ctx *gin.Context) {
 
 func (c *lobbyController) Join(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
-	username := ctx.GetString("username")
+	username := ctx.GetString("name")
 	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
@@ -72,13 +72,13 @@ func (c *lobbyController) Join(ctx *gin.Context) {
 }
 
 func (c *lobbyController) Leave(ctx *gin.Context) {
-	username := ctx.GetString("username")
+	userId := helper.GetUserId(ctx)
 	lobbyId := helper.GetLobbyId(ctx)
 
 	var err error
 
-	if username != "" {
-		err, _ = c.lobbyService.Leave(lobbyId, username)
+	if userId > 0 {
+		err, _ = c.lobbyService.Leave(lobbyId, userId)
 	} else {
 		err = errors.New(storage.ErrorUndefinedUser)
 	}

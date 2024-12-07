@@ -643,8 +643,9 @@ func (service *raceService) BabyAction(raceId uint64, userId uint64) (error, dto
 	}
 
 	race.Respond(player.ID, race.CurrentPlayer.ID)
+	err = service.ChangeTurn(race, false, 0)
 
-	return nil, dto.MessageResponseDto{Message: storage.MessageYouHadBaby, Result: true}
+	return err, dto.MessageResponseDto{Message: storage.MessageYouHadBaby, Result: true}
 }
 
 func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
@@ -659,8 +660,16 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 		return err
 	}
 
+	race.Respond(player.ID, race.CurrentPlayer.ID)
+
 	if player.Babies == 0 && race.CurrentCard.HasBabies {
-		return errors.New(storage.ErrorYouHaveNoBabies)
+		err = service.ChangeTurn(race, false, 0)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(storage.WarnYouHaveNoBabies)
 	}
 
 	err = service.playerService.Doodad(entity.CardDoodad{
@@ -676,8 +685,7 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 	}, player)
 
 	if err == nil {
-		race.Respond(player.ID, race.CurrentPlayer.ID)
-		err = service.ChangeTurn(race, false, 0)
+		return service.ChangeTurn(race, false, 0)
 	}
 
 	return err
@@ -795,9 +803,6 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 	if actionErr != nil {
 		return actionErr
 	}
-
-	// Update race
-	race.Respond(player.ID, race.CurrentPlayer.ID)
 
 	if err, _ = service.UpdateRace(&race); err != nil {
 		return err

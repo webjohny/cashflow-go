@@ -122,7 +122,7 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 	cost := card.Cost
 
 	if card.HasBabies && player.Babies <= 0 {
-		return errors.New(storage.ErrorYouHaveNoBabies)
+		return errors.New(storage.WarnYouHaveNoBabies)
 	}
 
 	if player.Cash < cost {

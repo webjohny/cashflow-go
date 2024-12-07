@@ -5,6 +5,7 @@ import (
 	"gorm.io/datatypes"
 	"math"
 	"reflect"
+	"strconv"
 )
 
 var PlayerRoles = struct {
@@ -101,6 +102,10 @@ type Player struct {
 	PassiveIncome int `json:"passive_income" gorm:"-"`
 	TotalExpenses int `json:"total_expenses" gorm:"-"`
 	TotalIncome   int `json:"total_income" gorm:"-"`
+}
+
+func (r *Player) GetStringID() string {
+	return strconv.Itoa(int(r.ID))
 }
 
 func (r *Player) CalculateDices() int {

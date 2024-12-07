@@ -25,7 +25,7 @@ type PlayerService interface {
 	SellRealEstate(ID string, card entity.CardMarketRealEstate, player entity.Player) error
 	SellBusiness(ID string, card entity.CardMarketBusiness, player entity.Player, count int) (error, int)
 	TransferBusiness(ID string, sender entity.Player, receiver entity.Player, count int) error
-	TransferStocks(card entity.CardStocks, ID string, sender entity.Player, receiver entity.Player, count int) error
+	TransferStocks(ID string, sender entity.Player, receiver entity.Player, count int) error
 	DecreaseStocks(card entity.CardStocks, player entity.Player) error
 	IncreaseStocks(card entity.CardStocks, player entity.Player) error
 	Charity(card entity.CardCharity, player entity.Player) error

@@ -16,4 +16,5 @@ const (
 	MessageMoneyRequestInProcessing = "money request in processing"
 	MessageYouHadBaby               = "you had baby"
 	MessageYouHaveTooManyBabies     = "you have too many babies"
+	WarnYouHaveNoBabies             = "you have no babies"
 )
