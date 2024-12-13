@@ -366,7 +366,7 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 
 	if tile == "deals" {
 		card = entity.Card{
-			ID:      "deal",
+			ID:      helper.Uuid("deal"),
 			Heading: "Выберите маленькую или большую сделку",
 			Family:  "deal",
 			Type:    "deal",
