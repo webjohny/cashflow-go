@@ -876,7 +876,7 @@
       "id":"business",
       "type":"business",
       "asset_type":"startup",
-      "symbol":"startup",
+      "symbol":"IT_COMPANY",
       "heading":"Вы создали IT компанию",
       "description":"Successful 4-bay, coin-operated auto wash near busy intersection.",
       "cost":5000,

@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
+	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
@@ -15,17 +16,24 @@ type ModeratorController interface {
 	GetRacePlayers(ctx *gin.Context)
 	UpdatePlayer(ctx *gin.Context)
 	UpdateRace(ctx *gin.Context)
+	HandleUserRequest(ctx *gin.Context)
 }
 
 type moderatorController struct {
-	playerService service.PlayerService
-	raceService   service.RaceService
+	playerService      service.PlayerService
+	raceService        service.RaceService
+	userRequestService service.UserRequestService
 }
 
-func NewModeratorController(playerService service.PlayerService, raceService service.RaceService) ModeratorController {
+func NewModeratorController(
+	playerService service.PlayerService,
+	raceService service.RaceService,
+	userRequestService service.UserRequestService,
+) ModeratorController {
 	return &moderatorController{
-		playerService: playerService,
-		raceService:   raceService,
+		playerService:      playerService,
+		raceService:        raceService,
+		userRequestService: userRequestService,
 	}
 }
 
@@ -33,10 +41,14 @@ func (c *moderatorController) GetRace(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 
 	var err error
-	var response interface{}
+	var response dto.GetRaceResponseDTO
 
 	if raceId != 0 {
-		response = c.raceService.GetFormattedRaceResponse(raceId)
+		response = c.raceService.GetFormattedRaceResponse(raceId, true)
+
+		if response.GameId > 0 {
+			response.UserRequests = c.userRequestService.GetAllByRaceId(raceId)
+		}
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -150,4 +162,43 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 	request.FinalResponse(ctx, err, map[string]interface{}{
 		"race": race,
 	})
+}
+
+func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
+	var err error
+
+	var body dto.HandleUserRequestBodyDto
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	var userRequest entity.UserRequest
+	var player entity.Player
+
+	err, userRequest = c.userRequestService.HandleUserRequest(body)
+
+	if userRequest.ID > 0 && err == nil {
+		err, player = c.playerService.GetPlayerByUserIdAndRaceId(userRequest.RaceID, userRequest.UserID)
+
+		cardType := entity.TransactionCardType.Payday
+
+		if userRequest.Type == "baby" {
+			cardType = entity.TransactionCardType.Baby
+		}
+
+		if player.ID > 0 && err == nil {
+			err = c.playerService.UpdateCash(
+				&player,
+				userRequest.Amount,
+				&dto.TransactionDTO{
+					CardType: cardType,
+					Details:  userRequest.Message,
+				},
+			)
+		}
+	}
+
+	request.FinalResponse(ctx, err, nil)
 }

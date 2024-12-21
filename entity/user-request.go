@@ -13,7 +13,9 @@ type UserRequest struct {
 	Amount        int                    `gorm:"type:int(11)" json:"amount"`
 	Message       string                 `gorm:"type:text" json:"message"`
 	RejectMessage string                 `gorm:"type:text" json:"reject_message"`
-	Approved      bool                   `gorm:"default:true" json:"approved"`
+	Status        int                    `gorm:"type:int(1)" json:"status"`
 	Data          map[string]interface{} `gorm:"type:json;serializer:json" json:"data"`
 	CreatedAt     time.Time              `gorm:"column:created_at;type:datetime;default:CURRENT_TIMESTAMP();not null" json:"created_at"`
+
+	User User `gorm:"foreignKey:UserID" json:"user"`
 }

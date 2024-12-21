@@ -31,9 +31,9 @@ type GetRaceResponseDTO struct {
 	GameId        uint64                     `json:"game_id"`
 	IsMultiFlow   bool                       `json:"is_multi_flow"`
 	IsTurnEnded   bool                       `json:"is_turn_ended"`
+	UserRequests  []entity.UserRequest       `json:"user_requests,omitempty"`
 	Logs          []entity.RaceLog           `json:"logs"`
 	Notifications []entity.RaceNotification  `json:"notifications"`
-	Transaction   entity.TransactionData     `json:"transaction"`
 }
 
 type GetLobbyResponseDTO struct {

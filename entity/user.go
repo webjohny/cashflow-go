@@ -8,4 +8,6 @@ type User struct {
 	Profile  string `gorm:"type:varchar(255)" json:"profile"`
 	Jk       string `gorm:"type:varchar(255)" json:"jk"`
 	Token    string `gorm:"-" json:"token,omitempty"`
+
+	UserRequests []UserRequest `gorm:"foreignKey:UserID" json:"user_requests"`
 }

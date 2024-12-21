@@ -35,7 +35,7 @@ type RaceService interface {
 	GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player)
 	GetRaceByRaceId(raceId uint64) entity.Race
 	GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO
-	GetFormattedRaceResponse(raceId uint64) dto.GetRaceResponseDTO
+	GetFormattedRaceResponse(raceId uint64, hasExtraInfo bool) dto.GetRaceResponseDTO
 	SetTransaction(player entity.Player, card dto.TransactionCardDTO) error
 	RemovePlayer(raceId uint64, userId uint64) error
 	InsertRace(b *entity.Race) (error, entity.Race)
@@ -204,9 +204,9 @@ func (service *raceService) DreamAction(raceId uint64, userId uint64) error {
 		Heading:     race.CurrentCard.Heading,
 		Description: race.CurrentCard.Description,
 		Cost:        race.CurrentCard.Cost,
+		AssetType:   race.CurrentCard.AssetType,
+		PlayerId:    race.CurrentCard.PlayerId,
 	}, player)
-
-	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
@@ -873,9 +873,15 @@ func (service *raceService) GetRacePlayersByRaceId(raceId uint64) []dto.GetRaceP
 	return racePlayers
 }
 
-func (service *raceService) GetFormattedRaceResponse(raceId uint64) dto.GetRaceResponseDTO {
+func (service *raceService) GetFormattedRaceResponse(raceId uint64, hasExtraInfo bool) dto.GetRaceResponseDTO {
 	race := service.GetRaceByRaceId(raceId)
-	logs := service.transactionService.GetRaceLogs(raceId)
+
+	var logs []entity.RaceLog
+
+	if hasExtraInfo {
+		logs = service.transactionService.GetRaceLogs(raceId)
+	}
+
 	players := service.GetRacePlayersByRaceId(raceId)
 	err, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId)
 
@@ -899,8 +905,6 @@ func (service *raceService) GetFormattedRaceResponse(raceId uint64) dto.GetRaceR
 		IsTurnEnded:   race.IsReceived(player.Username),
 		IsMultiFlow:   race.IsMultiFlow,
 		Logs:          logs,
-		Notifications: race.Notifications,
-		Transaction:   entity.TransactionData{},
 	}
 
 	return response

@@ -32,6 +32,7 @@ var (
 	transactionService service.TransactionService = service.NewTransactionService(trxRepository)
 	professionService  service.ProfessionService  = service.NewProfessionService(professionRepository)
 	playerService      service.PlayerService      = service.NewPlayerService(playerRepository, professionService, transactionService)
+	userRequestService service.UserRequestService = service.NewUserRequestService(userRequestRepository)
 	authService        service.AuthService        = service.NewAuthService(userRepository)
 	gameService        service.GameService        = service.NewGameService(raceService, playerService, lobbyService, professionService)
 	raceService        service.RaceService        = service.NewRaceService(raceRepository, playerService, transactionService)
@@ -41,7 +42,7 @@ var (
 
 	// Controllers
 	gameController       controller.GameController       = controller.NewGameController(gameService)
-	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService)
+	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService, userRequestService)
 	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService)
 	playerTestController controller.PlayerTestController = controller.NewPlayerTestController(playerService)
 	lobbyController      controller.LobbyController      = controller.NewLobbyController(lobbyService)
@@ -105,6 +106,7 @@ func main() {
 		moderatorRoutes.GET("/:raceId/players", moderatorController.GetRacePlayers)
 		moderatorRoutes.PUT("/:raceId/player/:playerId", moderatorController.UpdatePlayer)
 		moderatorRoutes.PUT("/:raceId/race", moderatorController.UpdateRace)
+		moderatorRoutes.PUT("/:raceId/handle/user-request", moderatorController.HandleUserRequest)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 

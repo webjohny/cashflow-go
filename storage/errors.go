@@ -2,6 +2,8 @@ package storage
 
 const (
 	ErrorUndefinedUser                                = "error undefined user"
+	ErrorUndefinedUserRequest                         = "error undefined user request"
+	ErrorUserRequestHasBeenAlreadyApproved            = "error user request has been already approved"
 	ErrorUndefinedPlayer                              = "error undefined player"
 	ErrorUndefinedReceiverPlayer                      = "error undefined receiver player"
 	ErrorUndefinedGame                                = "error undefined game"

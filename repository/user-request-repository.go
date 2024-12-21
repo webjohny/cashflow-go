@@ -10,7 +10,8 @@ import (
 type UserRequestRepository interface {
 	Insert(b *entity.UserRequest) (error, entity.UserRequest)
 	Update(b *entity.UserRequest) (error, entity.UserRequest)
-	All() []entity.UserRequest
+	All(where string, params []interface{}) []entity.UserRequest
+	FindOneById(userRequestId uint64) entity.UserRequest
 }
 
 type userRequestConnection struct {
@@ -36,9 +37,23 @@ func (db *userRequestConnection) Insert(b *entity.UserRequest) (error, entity.Us
 	return nil, *b
 }
 
-func (db *userRequestConnection) All() []entity.UserRequest {
+func (db *userRequestConnection) FindOneById(userRequestId uint64) entity.UserRequest {
+	var request entity.UserRequest
+
+	db.connection.Find(&request, userRequestId)
+
+	return request
+}
+
+func (db *userRequestConnection) All(where string, params []interface{}) []entity.UserRequest {
 	var requests []entity.UserRequest
-	db.connection.Find(&requests)
+
+	if where != "" {
+		db.connection.Preload("User").Where(where, params...).Find(&requests)
+	} else {
+		db.connection.Find(&requests)
+	}
+
 	return requests
 }
 
@@ -52,5 +67,6 @@ func (db *userRequestConnection) Update(b *entity.UserRequest) (error, entity.Us
 	}
 
 	db.connection.Find(&b)
+
 	return nil, *b
 }

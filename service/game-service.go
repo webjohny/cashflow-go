@@ -61,7 +61,7 @@ func (service *gameService) GetGame(raceId uint64, userId uint64, isBigRace bool
 		BankruptedPlayers: make([]dto.GetRacePlayerResponseDTO, 0),
 	}
 
-	race := service.raceService.GetFormattedRaceResponse(raceId)
+	race := service.raceService.GetFormattedRaceResponse(raceId, false)
 	response.TurnResponses = race.TurnResponses
 	response.Players = race.Players
 	response.CurrentCard = &race.CurrentCard

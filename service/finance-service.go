@@ -106,6 +106,10 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 
 	updatedCash := player.Cash - data.Amount
 
+	if race.CurrentCard.ID == "" {
+		race.CurrentCard.ID = helper.Uuid(cardType)
+	}
+
 	transaction := dto.TransactionDTO{
 		CardID:      &race.CurrentCard.ID,
 		CardType:    cardType,
@@ -134,7 +138,7 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 	}
 
 	if !race.Options.EnableManager {
-		request.Approved = true
+		request.Status = 1
 	}
 
 	err, _ = service.userRequestRepository.Insert(&request)

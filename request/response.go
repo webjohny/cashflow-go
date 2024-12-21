@@ -1,6 +1,7 @@
 package request
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -48,6 +49,7 @@ func BuildErrorResponse(message string, err string, data interface{}) Response {
 
 func FinalResponse(ctx *gin.Context, err error, response interface{}) {
 	if err != nil {
+		fmt.Println("REQUEST ERROR: ", err)
 		response := BuildErrorResponse("Failed to process request", err.Error(), EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
