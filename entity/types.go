@@ -1,10 +1,10 @@
 package entity
 
 var LotteryTypes = struct {
-	Money    string
+	Cash     string
 	CashFlow string
 }{
-	Money:    "money",
+	Cash:     "cash",
 	CashFlow: "cashflow",
 }
 

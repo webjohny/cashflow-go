@@ -1550,7 +1550,16 @@
       "symbol":"new baby"
     }
   ],
-  "market":[
+  "market": [
+    {
+      "id":"damage",
+      "type":"damage",
+      "heading":"Арендатор повредил вашу собственность",
+      "symbol":"ANY",
+      "description":"Потеряв работу арендатор отказался платить и скрылся, заплатите $1000",
+      "asset_type":"anyRealEstate",
+      "cost":1000
+    },
     {
       "id":"itCompanyMarket",
       "type":"business",

@@ -178,7 +178,7 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 	if helper.Contains[int](card.Success, dice) {
 		var amount int
 
-		if card.AssetType == entity.LotteryTypes.Money {
+		if card.AssetType == entity.LotteryTypes.Cash {
 			amount = card.Outcome.Success - card.Cost
 		} else {
 			amount = -card.Cost

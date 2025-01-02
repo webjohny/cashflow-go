@@ -509,7 +509,6 @@ func (service *raceService) StocksAction(raceId uint64, userId uint64, count int
 		err = service.playerService.BuyStocks(cardStocks, player, true)
 	}
 
-	//this.#log.addLog(player, `Купил бизнес ${this.#card.symbol} за $${this.#card.cost}`);
 	if err == nil {
 		race.Respond(player.ID, race.CurrentPlayer.ID)
 		err, _ = service.UpdateRace(&race)
@@ -638,12 +637,14 @@ func (service *raceService) BabyAction(raceId uint64, userId uint64) (error, dto
 
 	if err != nil && !response {
 		return err, dto.MessageResponseDto{}
-	} else if response && err != nil {
-		return nil, dto.MessageResponseDto{Message: err.Error()}
 	}
 
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 	err = service.ChangeTurn(race, false, 0)
+
+	if response && err != nil {
+		return nil, dto.MessageResponseDto{Message: err.Error(), Result: false}
+	}
 
 	return err, dto.MessageResponseDto{Message: storage.MessageYouHadBaby, Result: true}
 }
@@ -765,15 +766,15 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 		Details:  race.CurrentCard.Heading,
 	}
 
-	if actionType == entity.TransactionCardType.Damage {
+	if cardMarket.Type == entity.TransactionCardType.Damage {
 		if !player.HasOwnRealEstates() {
-			return errors.New(storage.ErrorUndefinedTypeOfDeal)
+			return errors.New(storage.ErrorNotFoundTheRealEstate)
 		}
 
 		transactionCard.CardType = entity.TransactionCardType.Damage
-	} else if actionType == entity.TransactionCardType.Business {
-		if !player.HasOwnBusiness() {
-			return errors.New(storage.ErrorUndefinedTypeOfDeal)
+	} else if cardMarket.Type == entity.TransactionCardType.Business {
+		if !player.HasOwnRealEstates() {
+			return errors.New(storage.ErrorNotFoundTheBusiness)
 		}
 
 		transactionCard.CardType = entity.TransactionCardType.MarketBusiness
@@ -788,7 +789,7 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 	var actionErr error
 
 	// Determine the action type and execute logic
-	switch actionType {
+	switch cardMarket.Type {
 	case entity.TransactionCardType.Damage:
 		actionErr = service.playerService.MarketDamage(cardMarket, player)
 	case entity.TransactionCardType.Business:
@@ -796,14 +797,13 @@ func (service *raceService) MarketAction(raceId uint64, userId uint64, actionTyp
 		cardMarketBusiness.Fill(race.CurrentCard)
 
 		actionErr = service.playerService.MarketBusiness(cardMarketBusiness, player)
-	default:
-		return errors.New(storage.ErrorUndefinedTypeOfDeal)
 	}
 
 	if actionErr != nil {
 		return actionErr
 	}
 
+	race.Respond(player.ID, race.CurrentPlayer.ID)
 	if err, _ = service.UpdateRace(&race); err != nil {
 		return err
 	}

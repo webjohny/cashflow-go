@@ -233,7 +233,7 @@ func (c *playerTestController) BuyLottery(ctx *gin.Context) {
 		Heading:     "Sister-In-Law borrows Money",
 		Description: "Sister-in-law is downsized.Needs $5,000 to make house payment.",
 		Cost:        1000,
-		AssetType:   entity.LotteryTypes.Money,
+		AssetType:   entity.LotteryTypes.Cash,
 		Rule:        "If you choose to help. Pay $5,000 and roll 1 die:",
 		SubRule: []string{
 			"Die = 1-3, She never pays you back and you're out $5,000",
@@ -879,7 +879,7 @@ func (c *playerTestController) BuyRiskStocks(ctx *gin.Context) {
 		Heading:     "Рискованные акции",
 		Description: "Крупнейшая компания распродаёт свои акции по 0.1$, купи 100,000 акций и сможешь забрать 100,000$",
 		Cost:        10000,
-		AssetType:   entity.LotteryTypes.Money,
+		AssetType:   entity.LotteryTypes.Cash,
 		Rule:        "If you choose to help. Pay $10,000 and roll 1 die:",
 		SubRule: []string{
 			"Кубик = 1-3, Ты проиграл $10,000",
