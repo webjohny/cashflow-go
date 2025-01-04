@@ -178,9 +178,7 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 	if helper.Contains[int](card.Success, dice) {
 		var amount int
 
-		if card.AssetType == entity.LotteryTypes.Cash {
-			amount = card.Outcome.Success - card.Cost
-		} else {
+		if card.AssetType == entity.LotteryTypes.CashFlow {
 			amount = -card.Cost
 			business := entity.CardBusiness{
 				ID:          card.ID,
@@ -193,7 +191,10 @@ func (service *playerService) BuyLottery(card entity.CardLottery, player entity.
 			}
 
 			player.Assets.Business = append(player.Assets.Business, business)
+		} else {
+			amount = card.Outcome.Success - card.Cost
 		}
+
 		err := service.UpdateCash(&player, amount, &dto.TransactionDTO{
 			CardID:   &card.ID,
 			CardType: entity.TransactionCardType.Lottery,
