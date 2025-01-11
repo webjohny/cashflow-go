@@ -9,6 +9,7 @@ type GetGameResponseDTO struct {
 	Players           []GetRacePlayerResponseDTO `json:"players"`
 	BankruptedPlayers []GetRacePlayerResponseDTO `json:"bankrupted_players"`
 	TurnResponses     []entity.RaceResponse      `json:"turn_responses"`
+	Options           entity.RaceOptions         `json:"options,omitempty"`
 	Status            string                     `json:"status"`
 	DiceValues        []int                      `json:"dice_values"`
 	CurrentPlayer     *GetRacePlayerResponseDTO  `json:"current_player"`
@@ -28,6 +29,7 @@ type GetRaceResponseDTO struct {
 	DiceValues    []int                      `json:"dice_values"`
 	CurrentPlayer GetRacePlayerResponseDTO   `json:"current_player"`
 	CurrentCard   entity.Card                `json:"current_card"`
+	Options       entity.RaceOptions         `json:"options,omitempty"`
 	GameId        uint64                     `json:"game_id"`
 	IsMultiFlow   bool                       `json:"is_multi_flow"`
 	IsTurnEnded   bool                       `json:"is_turn_ended"`

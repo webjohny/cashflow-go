@@ -72,6 +72,7 @@ func (service *gameService) GetGame(raceId uint64, userId uint64, isBigRace bool
 	response.Status = race.Status
 	response.DiceValues = race.DiceValues
 	response.Logs = race.Logs
+	response.Options = race.Options
 	response.Hash = helper.CreateHashByJson(race)
 
 	return nil, response

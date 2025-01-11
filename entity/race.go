@@ -61,6 +61,7 @@ type RaceOptions struct {
 	BigRaceGoalForPassiveIncome int               `json:"bigRaceGoalForPassiveIncome,omitempty"`
 	BigRaceConditions           BigRaceConditions `json:"bigRaceConditions,omitempty"`
 	EnableManager               bool              `json:"enableManager,omitempty"`
+	HideCards                   bool              `json:"hideCards,omitempty"`
 	EnableWaitList              bool              `json:"enableWaitList,omitempty"`
 	CardCollection              string            `json:"cardCollection,omitempty"`
 }

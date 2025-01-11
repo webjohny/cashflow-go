@@ -901,6 +901,7 @@ func (service *raceService) GetFormattedRaceResponse(raceId uint64, hasExtraInfo
 		DiceValues:    race.Dice,
 		CurrentPlayer: player,
 		CurrentCard:   race.CurrentCard,
+		Options:       race.Options,
 		GameId:        race.ID,
 		IsTurnEnded:   race.IsReceived(player.Username),
 		IsMultiFlow:   race.IsMultiFlow,
