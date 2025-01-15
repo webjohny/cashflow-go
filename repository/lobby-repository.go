@@ -14,6 +14,7 @@ type LobbyRepository interface {
 	DeleteLobby(b *entity.Lobby)
 	CancelLobby(b *entity.Lobby)
 	FindLobbyById(ID uint64) entity.Lobby
+	FindLobbyByGameId(gameId uint64) entity.Lobby
 }
 
 const LobbyTable = "lobbies"
@@ -80,7 +81,15 @@ func (db *lobbyConnection) CancelLobby(b *entity.Lobby) {
 func (db *lobbyConnection) FindLobbyById(ID uint64) entity.Lobby {
 	var lobby entity.Lobby
 
-	db.connection.Where("id = ? and status != ?", ID, entity.LobbyStatus.Cancelled).Find(&lobby)
+	db.connection.Where("id = ?", ID).Find(&lobby)
+
+	return lobby
+}
+
+func (db *lobbyConnection) FindLobbyByGameId(gameId uint64) entity.Lobby {
+	var lobby entity.Lobby
+
+	db.connection.Where("game_id = ?", gameId).Find(&lobby)
 
 	return lobby
 }

@@ -1,39 +1,39 @@
 [
   {
     "id": 1,
-    "profession": "Doctor(MD)",
+    "profession": "Врач",
     "income": {
-      "salary": 13200
+      "salary": 2500
     },
     "babies": 0,
     "expenses": {
-      "taxes": 3200,
-      "homeMortgagePayment": 1900,
-      "schoolLoanPayment": 700,
-      "carLoanPayment": 300,
-      "creditCardPayment": 200,
-      "otherExpenses": 2000,
+      "taxes": 460,
+      "homeMortgagePayment": 400,
+      "schoolLoanPayment": 0,
+      "carLoanPayment": 80,
+      "creditCardPayment": 60,
+      "otherExpenses": 620,
       "bankLoanPayment": 0,
-      "perChildExpense": 700
+      "perChildExpense": 140
     },
     "assets": {
-      "savings": 3500,
+      "savings": 750,
       "other": [],
       "stocks": [],
       "business": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 202000,
-      "schoolLoans": 150000,
-      "carLoans": 19000,
-      "creditCardDebt": 10000,
+      "homeMortgage": 38000,
+      "schoolLoans": 0,
+      "carLoans": 4000,
+      "creditCardDebt": 2000,
       "bankLoan": 0
     }
   },
   {
     "id": 2,
-    "profession": "Janitor",
+    "profession": "Швейцар",
     "income": {
       "salary": 1600
     },
@@ -49,7 +49,7 @@
       "perChildExpense": 100
     },
     "assets": {
-      "savings": 600,
+      "savings": 400,
       "other": [],
       "stocks": [],
       "business": [],
@@ -65,30 +65,30 @@
   },
   {
     "id": 3,
-    "profession": "Airline Pilot",
+    "profession": "Начальник отдела кадров",
     "income": {
       "salary": 9500,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 2000,
-      "homeMortgagePayment": 1000,
+      "taxes": 2350,
+      "homeMortgagePayment": 1330,
       "schoolLoanPayment": 0,
       "carLoanPayment": 300,
-      "creditCardPayment": 700,
-      "otherExpenses": 2000,
+      "creditCardPayment": 660,
+      "otherExpenses": 2260,
       "bankLoanPayment": 0,
-      "perChildExpense": 400
+      "perChildExpense": 480
     },
     "assets": {
-      "savings": 2500,
+      "savings": 400,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 90000,
+      "homeMortgage": 143000,
       "schoolLoans": 0,
       "carLoans": 15000,
       "creditCardDebt": 22000,
@@ -98,57 +98,57 @@
   },
   {
     "id": 4,
-    "profession": "Engineer",
+    "profession": "Бугалтер",
     "income": {
-      "salary": 4900,
+      "salary": 4600,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 1000,
+      "taxes": 910,
       "homeMortgagePayment": 700,
-      "schoolLoanPayment": 100,
-      "carLoanPayment": 200,
-      "creditCardPayment": 200,
-      "otherExpenses": 1000,
+      "schoolLoanPayment": 60,
+      "carLoanPayment": 120,
+      "creditCardPayment": 90,
+      "otherExpenses": 1050,
       "bankLoanPayment": 0,
-      "perChildExpense": 400
+      "perChildExpense": 120
     },
     "assets": {
-      "savings": 2500,
+      "savings": 500,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 75000,
-      "schoolLoans": 12000,
-      "carLoans": 7000,
-      "creditCardDebt": 5000,
+      "homeMortgage": 46000,
+      "schoolLoans": 0,
+      "carLoans": 5000,
+      "creditCardDebt": 2000,
       "bankLoan": 0,
       "realEstates": []
     }
   },
   {
     "id": 5,
-    "profession": "Secretary",
+    "profession": "Секретарь",
     "income": {
       "salary": 2500,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 500,
+      "taxes": 460,
       "homeMortgagePayment": 400,
       "schoolLoanPayment": 0,
-      "carLoanPayment": 100,
-      "creditCardPayment": 100,
-      "otherExpenses": 600,
+      "carLoanPayment": 60,
+      "creditCardPayment": 60,
+      "otherExpenses": 620,
       "bankLoanPayment": 0,
-      "perChildExpense": 100
+      "perChildExpense": 140
     },
     "assets": {
-      "savings": 700,
+      "savings": 710,
       "other": [],
       "stocks": [],
       "realEstates": []
@@ -164,42 +164,42 @@
   },
   {
     "id": 6,
-    "profession": "Truck Driver",
+    "profession": "Продавец-консультант",
     "income": {
-      "salary": 2500,
+      "salary": 2000,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 500,
-      "homeMortgagePayment": 400,
+      "taxes": 360,
+      "homeMortgagePayment": 300,
       "schoolLoanPayment": 0,
-      "carLoanPayment": 100,
-      "creditCardPayment": 100,
-      "otherExpenses": 600,
+      "carLoanPayment": 60,
+      "creditCardPayment": 60,
+      "otherExpenses": 500,
       "bankLoanPayment": 0,
-      "perChildExpense": 200
+      "perChildExpense": 110
     },
     "assets": {
-      "savings": 800,
+      "savings": 680,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 38000,
+      "homeMortgage": 31000,
       "schoolLoans": 0,
-      "carLoans": 4000,
-      "creditCardDebt": 3000,
+      "carLoans": 3000,
+      "creditCardDebt": 2000,
       "bankLoan": 0,
       "realEstates": []
     }
   },
   {
     "id": 7,
-    "profession": "Lawyer",
+    "profession": "Адвокат",
     "income": {
-      "salary": 7500,
+      "salary": 8500,
       "realEstates": []
     },
     "babies": 0,
@@ -209,18 +209,18 @@
       "schoolLoanPayment": 300,
       "carLoanPayment": 200,
       "creditCardPayment": 200,
-      "otherExpenses": 1500,
+      "otherExpenses": 1800,
       "bankLoanPayment": 0,
-      "perChildExpense": 400
+      "perChildExpense": 480
     },
     "assets": {
-      "savings": 2000,
+      "savings": 600,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 115000,
+      "homeMortgage": 130000,
       "schoolLoans": 78000,
       "carLoans": 11000,
       "creditCardDebt": 7000,
@@ -230,42 +230,42 @@
   },
   {
     "id": 8,
-    "profession": "Business MGR",
+    "profession": "Психолог",
     "income": {
-      "salary": 4600,
+      "salary": 3100,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 900,
-      "homeMortgagePayment": 700,
-      "schoolLoanPayment": 100,
+      "taxes": 600,
+      "homeMortgagePayment": 400,
+      "schoolLoanPayment": 30,
       "carLoanPayment": 100,
-      "creditCardPayment": 200,
-      "otherExpenses": 1000,
+      "creditCardPayment": 90,
+      "otherExpenses": 760,
       "bankLoanPayment": 0,
-      "perChildExpense": 300
+      "perChildExpense": 200
     },
     "assets": {
-      "savings": 400,
+      "savings": 450,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 75000,
-      "schoolLoans": 12000,
-      "carLoans": 6000,
-      "creditCardDebt": 4000,
+      "homeMortgage": 47000,
+      "schoolLoans": 6000,
+      "carLoans": 5000,
+      "creditCardDebt": 3000,
       "bankLoan": 0,
       "realEstates": []
     }
   },
   {
     "id": 9,
-    "profession": "Police Officer",
+    "profession": "Офицер полиции",
     "income": {
-      "salary": 3000,
+      "salary": 3100,
       "realEstates": []
     },
     "babies": 0,
@@ -275,18 +275,18 @@
       "schoolLoanPayment": 0,
       "carLoanPayment": 100,
       "creditCardPayment": 100,
-      "otherExpenses": 700,
+      "otherExpenses": 760,
       "bankLoanPayment": 0,
-      "perChildExpense": 200
+      "perChildExpense": 180
     },
     "assets": {
-      "savings": 500,
+      "savings": 450,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 46000,
+      "homeMortgage": 48000,
       "schoolLoans": 0,
       "carLoans": 5000,
       "creditCardDebt": 3000,
@@ -296,24 +296,24 @@
   },
   {
     "id": 10,
-    "profession": "Teacher(K-12)",
+    "profession": "Учитель",
     "income": {
-      "salary": 3300,
+      "salary": 3000,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
       "taxes": 500,
-      "homeMortgagePayment": 500,
+      "homeMortgagePayment": 400,
       "schoolLoanPayment": 100,
       "carLoanPayment": 100,
       "creditCardPayment": 200,
       "otherExpenses": 700,
       "bankLoanPayment": 0,
-      "perChildExpense": 200
+      "perChildExpense": 180
     },
     "assets": {
-      "savings": 400,
+      "savings": 500,
       "other": [],
       "stocks": [],
       "realEstates": []
@@ -329,54 +329,54 @@
   },
   {
     "id": 11,
-    "profession": "Nurse",
+    "profession": "IT специалист",
     "income": {
-      "salary": 3100,
+      "salary": 10000,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
       "taxes": 600,
-      "homeMortgagePayment": 400,
-      "schoolLoanPayment": 100,
-      "carLoanPayment": 100,
-      "creditCardPayment": 200,
-      "otherExpenses": 600,
+      "homeMortgagePayment": 1000,
+      "schoolLoanPayment": 1000,
+      "carLoanPayment": 400,
+      "creditCardPayment": 0,
+      "otherExpenses": 3800,
       "bankLoanPayment": 0,
-      "perChildExpense": 200
+      "perChildExpense": 500
     },
     "assets": {
-      "savings": 500,
+      "savings": 800,
       "other": [],
       "stocks": [],
       "realEstates": []
     },
     "liabilities": {
-      "homeMortgage": 47000,
-      "schoolLoans": 6000,
-      "carLoans": 5000,
-      "creditCardDebt": 4000,
+      "homeMortgage": 0,
+      "schoolLoans": 0,
+      "carLoans": 20000,
+      "creditCardDebt": 0,
       "bankLoan": 0,
       "realEstates": []
     }
   },
   {
     "id": 12,
-    "profession": "Mechanic",
+    "profession": "IT специалист",
     "income": {
-      "salary": 2000,
+      "salary": 4000,
       "realEstates": []
     },
     "babies": 0,
     "expenses": {
-      "taxes": 400,
-      "homeMortgagePayment": 300,
+      "taxes": 500,
+      "homeMortgagePayment": 400,
       "schoolLoanPayment": 0,
       "carLoanPayment": 100,
-      "creditCardPayment": 100,
-      "otherExpenses": 400,
+      "creditCardPayment": 50,
+      "otherExpenses": 2000,
       "bankLoanPayment": 0,
-      "perChildExpense": 100
+      "perChildExpense": 200
     },
     "assets": {
       "savings": 700,
@@ -387,8 +387,74 @@
     "liabilities": {
       "homeMortgage": 31000,
       "schoolLoans": 0,
-      "carLoans": 3000,
-      "creditCardDebt": 3000,
+      "carLoans": 6000,
+      "creditCardDebt": 1000,
+      "bankLoan": 0,
+      "realEstates": []
+    }
+  },
+  {
+    "id": 13,
+    "profession": "IT специалист",
+    "income": {
+      "salary": 2000,
+      "realEstates": []
+    },
+    "babies": 0,
+    "expenses": {
+      "taxes": 300,
+      "homeMortgagePayment": 200,
+      "schoolLoanPayment": 0,
+      "carLoanPayment": 0,
+      "creditCardPayment": 70,
+      "otherExpenses": 680,
+      "bankLoanPayment": 0,
+      "perChildExpense": 120
+    },
+    "assets": {
+      "savings": 550,
+      "other": [],
+      "stocks": [],
+      "realEstates": []
+    },
+    "liabilities": {
+      "homeMortgage": 0,
+      "schoolLoans": 0,
+      "carLoans": 0,
+      "creditCardDebt": 2000,
+      "bankLoan": 0,
+      "realEstates": []
+    }
+  },
+  {
+    "id": 14,
+    "profession": "Официант",
+    "income": {
+      "salary": 2800,
+      "realEstates": []
+    },
+    "babies": 0,
+    "expenses": {
+      "taxes": 400,
+      "homeMortgagePayment": 400,
+      "schoolLoanPayment": 0,
+      "carLoanPayment": 60,
+      "creditCardPayment": 50,
+      "otherExpenses": 800,
+      "bankLoanPayment": 0,
+      "perChildExpense": 150
+    },
+    "assets": {
+      "savings": 500,
+      "other": [],
+      "stocks": [],
+      "realEstates": []
+    },
+    "liabilities": {
+      "homeMortgage": 31000,
+      "schoolLoans": 0,
+      "carLoans": 4000,
+      "creditCardDebt": 1000,
       "bankLoan": 0,
       "realEstates": []
     }

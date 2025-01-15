@@ -22,17 +22,20 @@ type ModeratorController interface {
 type moderatorController struct {
 	playerService      service.PlayerService
 	raceService        service.RaceService
+	lobbyService       service.LobbyService
 	userRequestService service.UserRequestService
 }
 
 func NewModeratorController(
 	playerService service.PlayerService,
 	raceService service.RaceService,
+	lobbyService service.LobbyService,
 	userRequestService service.UserRequestService,
 ) ModeratorController {
 	return &moderatorController{
 		playerService:      playerService,
 		raceService:        raceService,
+		lobbyService:       lobbyService,
 		userRequestService: userRequestService,
 	}
 }
@@ -148,6 +151,10 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 	race := c.raceService.GetRaceByRaceId(raceId)
 
 	race.Status = body.Status
+
+	if race.Status == entity.RaceStatus.FINISHED || race.Status == entity.RaceStatus.CANCELLED {
+		_ = c.lobbyService.ChangeStatusByGameId(raceId, entity.LobbyStatus.Cancelled)
+	}
 
 	for k, raceResponse := range body.Responses {
 		race.Responses[k].Responded = raceResponse

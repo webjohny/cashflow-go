@@ -42,8 +42,8 @@ var (
 
 	// Controllers
 	gameController       controller.GameController       = controller.NewGameController(gameService)
-	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService, userRequestService)
-	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService)
+	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService, lobbyService, userRequestService)
+	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService, lobbyService)
 	playerTestController controller.PlayerTestController = controller.NewPlayerTestController(playerService)
 	lobbyController      controller.LobbyController      = controller.NewLobbyController(lobbyService)
 	financeController    controller.FinanceController    = controller.NewFinanceController(financeService)

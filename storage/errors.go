@@ -9,6 +9,7 @@ const (
 	ErrorUndefinedGame                                = "error undefined game"
 	ErrorGameIsFull                                   = "error game is full"
 	ErrorGameIsStarted                                = "error game is started"
+	ErrorGameIsFinished                               = "error game is finished"
 	ErrorUndefinedLobby                               = "error undefined lobby"
 	ErrorCannotCreatedRace                            = "error cannot created race"
 	ErrorCannotTakeBigDeals                           = "error cannot take big deals"

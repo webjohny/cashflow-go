@@ -72,6 +72,14 @@ func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profess
 	return instance
 }
 
+func (l *Lobby) ChangePlayerRole(userId uint64, role string) {
+	for k, p := range l.Players {
+		if p.ID == userId {
+			l.Players[k].Role = role
+		}
+	}
+}
+
 func (l *Lobby) AddPlayer(userId uint64, username string, role string) {
 	if !l.IsPlayerAlreadyJoined(username) {
 		l.Players = append(l.Players, LobbyPlayer{ID: userId, Username: username, Role: role, Color: helper.PickColor()})

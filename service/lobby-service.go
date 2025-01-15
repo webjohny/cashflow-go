@@ -14,13 +14,15 @@ import (
 )
 
 type LobbyService interface {
+	GetByID(lobbyId uint64) entity.Lobby
 	Create(username string, userId uint64) (error, entity.Lobby)
 	Update(lobby *entity.Lobby) (error, entity.Lobby)
-	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	Leave(ID uint64, userId uint64) (error, entity.Lobby)
 	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
+	Join(ID uint64, username string, userId uint64) (error, entity.LobbyPlayer)
 	GetLobby(lobbyId uint64, userId uint64) (error, dto.GetLobbyResponseDTO)
-	GetByID(lobbyId uint64) entity.Lobby
+	ChangeStatusByGameId(gameId uint64, status string) error
+	ChangeRoleByGameIdAndUserId(gameId uint64, userId uint64, role string) error
 }
 
 const LobbyMaxPlayers = 6
@@ -41,6 +43,53 @@ func (service *lobbyService) GetByID(lobbyId uint64) entity.Lobby {
 
 func (service *lobbyService) Update(lobby *entity.Lobby) (error, entity.Lobby) {
 	return service.lobbyRepository.UpdateLobby(lobby)
+}
+
+func (service *lobbyService) ChangeRoleByGameIdAndUserId(gameId uint64, userId uint64, role string) error {
+	logger.Info("LobbyService.ChangeRoleByGameIdAndUserId", map[string]interface{}{
+		"gameId": gameId,
+		"userId": userId,
+		"role":   role,
+	})
+
+	lobby := service.lobbyRepository.FindLobbyByGameId(gameId)
+
+	if lobby.ID == 0 {
+		return errors.New(storage.ErrorUndefinedLobby)
+	}
+
+	lobby.ChangePlayerRole(userId, role)
+
+	err, _ := service.lobbyRepository.UpdateLobby(&lobby)
+
+	if err != nil {
+		logger.Error(err)
+	}
+
+	return err
+}
+
+func (service *lobbyService) ChangeStatusByGameId(gameId uint64, status string) error {
+	logger.Info("LobbyService.ChangeStatusByGameId", map[string]interface{}{
+		"gameId": gameId,
+		"status": status,
+	})
+
+	lobby := service.lobbyRepository.FindLobbyByGameId(gameId)
+
+	if lobby.ID == 0 {
+		return errors.New(storage.ErrorUndefinedLobby)
+	}
+
+	lobby.Status = status
+
+	err, _ := service.lobbyRepository.UpdateLobby(&lobby)
+
+	if err != nil {
+		logger.Error(err)
+	}
+
+	return err
 }
 
 func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) (error, dto.GetLobbyResponseDTO) {
