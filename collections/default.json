@@ -402,7 +402,7 @@
       "asset_type":"absolute"
     }
   ],
-  "smallDeal":[
+  "_smallDeal":[
 
     {
       "id":"realEstate111",
@@ -561,7 +561,7 @@
       "cash_flow":300
     }
   ],
-  "_smallDeal":[
+  "smallDeal":[
     {
       "id":"lifece01100201",
       "type":"stock",
@@ -1730,7 +1730,7 @@
       "cost": 400
     },
     {
-      "id": "expense11",
+      "id": "expense11",f
       "type": "doodad",
       "heading": "Курсы фотографии",
       "description": "Вы решили научиться фотографии и записались на курсы.",
