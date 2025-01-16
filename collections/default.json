@@ -680,19 +680,6 @@
       ]
     },
     {
-      "id":"lifece10606002",
-      "type":"stock",
-      "symbol":"Mercedes",
-      "heading":"Акции Mercedes",
-      "description":"Спрос на новый модельный ряд поднял курс акций этой Компании.",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":60,
-      "range":[
-        10,
-        60
-      ]
-    },
-    {
       "id":"lifece10606003",
       "type":"stock",
       "symbol":"Mercedes",
@@ -712,7 +699,7 @@
       "heading":"Акции Mercedes",
       "description":"Автомобильный Бум на новый модельный ряд заметно повлиял на повышение курса акций этой Компании.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":65,
+      "price":70,
       "range": [
         10,
         60
@@ -811,6 +798,19 @@
       "description":"Скачок на фондовом рынке подкинул цену акций на максимальный уровень.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
       "price":150,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece4015015001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Непревзойдённые показатели продаж, компания выходит на новый уровень. Цена за акцию бьёт все рекорды.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":400,
       "range":[
         40,
         150
@@ -921,7 +921,7 @@
       "heading":"Акции GOOGLE",
       "description":"Эта компания выкупила все интернет поисковики. Сегодня мы вне конкуренции.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":700,
+      "price":1000,
       "range":[
         200,
         700
@@ -940,58 +940,68 @@
         700
       ]
     },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":30,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":5,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":10,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":20,
-      "range":[
-        5,
-        30
-      ]
-    },
+    [
+      {
+        "id": "life10u40",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции оператора мобильной связи Lifecell достигли верхней границы своего диапазона. Вложение выглядит перспективным для краткосрочной торговли.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 30,
+        "range": [5, 30]
+      },
+      {
+        "id": "life10u40",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Цена акций Lifecell упала до минимального значения. Это может быть хорошей возможностью для долгосрочных инвесторов.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 5,
+        "range": [5, 30]
+      },
+      {
+        "id": "life10u40",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции Lifecell стабилизировались на среднем уровне. Компанию ожидают новые продукты и расширение.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 10,
+        "range": [5, 30]
+      },
+      {
+        "id": "life10u40",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции Lifecell начинают подниматься в цене, ожидаются хорошие квартальные результаты.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 20,
+        "range": [5, 30]
+      },
+      {
+        "id": "lifecell100",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Lifecell вырвался вперёд, он главный монополист на рынке связи, цена сегодня подлетела до 100$. Это может быть началом долгосрочного роста.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 100,
+        "range": [5, 30]
+      },
+      {
+        "id": "lifecell1",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Цена акций Lifecell упала до минимального значения в $1 из-за новостей о снижении прибыли. Это высокорискованная инвестиция.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 1,
+        "range": [5, 30]
+      }
+    ],
     {
       "id":"lottery",
       "type":"lottery",
