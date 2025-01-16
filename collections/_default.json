@@ -563,7 +563,7 @@
   ],
   "smallDeal":[
     {
-      "id":"lifece01100201",
+      "id":"lifece0r1100201",
       "type":"stock",
       "symbol":"Brokerlife",
       "heading":"ПАММ СЧЕТ В Brokerlife",
@@ -576,7 +576,7 @@
       ]
     },
     {
-      "id":"lifece01100501",
+      "id":"lifece01100d501",
       "type":"stock",
       "symbol":"Brokerlife",
       "heading":"ПАММ СЧЕТ В Brokerlife",
@@ -589,7 +589,7 @@
       ]
     },
     {
-      "id":"lifece01101001",
+      "id":"lifece0110h1001",
       "type":"stock",
       "symbol":"Brokerlife",
       "heading":"ПАММ СЧЕТ В Brokerlife",
@@ -602,7 +602,7 @@
       ]
     },
     {
-      "id":"lifece01101501",
+      "id":"lifece0110i1501",
       "type":"stock",
       "symbol":"Brokerlife",
       "heading":"ПАММ СЧЕТ И Brokrlife",
@@ -615,7 +615,7 @@
       ]
     },
     {
-      "id":"lifece10600501",
+      "id":"lifece10600u501",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -628,7 +628,7 @@
       ]
     },
     {
-      "id":"lifece10601001",
+      "id":"lifece1060y1001",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -641,7 +641,7 @@
       ]
     },
     {
-      "id":"lifece10601501",
+      "id":"lifece106t01501",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -654,7 +654,7 @@
       ]
     },
     {
-      "id":"lifece10603001",
+      "id":"lifece1060r3001",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -667,7 +667,7 @@
       ]
     },
     {
-      "id":"lifece10606001",
+      "id":"lifece10e606001",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -680,20 +680,7 @@
       ]
     },
     {
-      "id":"lifece10606002",
-      "type":"stock",
-      "symbol":"Mercedes",
-      "heading":"Акции Mercedes",
-      "description":"Спрос на новый модельный ряд поднял курс акций этой Компании.",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":60,
-      "range":[
-        10,
-        60
-      ]
-    },
-    {
-      "id":"lifece10606003",
+      "id":"lifece10606w003",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
@@ -706,20 +693,20 @@
       ]
     },
     {
-      "id":"lifece10606501",
+      "id":"lifece1060q6501",
       "type":"stock",
       "symbol":"Mercedes",
       "heading":"Акции Mercedes",
       "description":"Автомобильный Бум на новый модельный ряд заметно повлиял на повышение курса акций этой Компании.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":65,
+      "price":70,
       "range": [
         10,
         60
       ]
     },
     {
-      "id":"lifece401500101",
+      "id":"lifece4015q00101",
       "type":"stock",
       "symbol":"Apple",
       "asset_type":"manipulation",
@@ -729,7 +716,7 @@
       "increase":2
     },
     {
-      "id":"lifece401500201",
+      "id":"lifece4015002q01",
       "type":"stock",
       "asset_type":"manipulation",
       "symbol":"Apple",
@@ -739,7 +726,7 @@
       "decrease":2
     },
     {
-      "id":"lifece401503001",
+      "id":"lifece40150w3001",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
@@ -752,7 +739,7 @@
       ]
     },
     {
-      "id":"lifece401504001",
+      "id":"lifece401e504001",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
@@ -765,7 +752,7 @@
       ]
     },
     {
-      "id":"lifece401504002",
+      "id":"lifece40150r4002",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
@@ -778,7 +765,7 @@
       ]
     },
     {
-      "id":"lifece4015010001",
+      "id":"lifece4015t010001",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
@@ -791,7 +778,7 @@
       ]
     },
     {
-      "id":"lifece4015012001",
+      "id":"lifece401501y2001",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
@@ -804,11 +791,24 @@
       ]
     },
     {
-      "id":"lifece4015015001",
+      "id":"lifece4015015u001",
       "type":"stock",
       "symbol":"Apple",
       "heading":"Акции Apple",
       "description":"Скачок на фондовом рынке подкинул цену акций на максимальный уровень.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":150,
+      "range":[
+        40,
+        150
+      ]
+    },
+    {
+      "id":"lifece4015c0153001",
+      "type":"stock",
+      "symbol":"Apple",
+      "heading":"Акции Apple",
+      "description":"Непревзойдённые показатели продаж, компания выходит на новый уровень. Цена за акцию бьёт все рекорды.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
       "price":400,
       "range":[
@@ -817,7 +817,7 @@
       ]
     },
     {
-      "id":"lifece20070000001",
+      "id":"lifece200700fsd00001",
       "type":"stock",
       "symbol":"GOOGLE",
       "asset_type":"manipulation",
@@ -827,7 +827,7 @@
       "increase":2
     },
     {
-      "id":"lifece20070020001",
+      "id":"lifece2007002wr0001",
       "type":"stock",
       "symbol":"GOOGLE",
       "asset_type":"manipulation",
@@ -837,7 +837,7 @@
       "decrease":2
     },
     {
-      "id":"lifece20070010001",
+      "id":"lifece2007g5g0010001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -850,7 +850,7 @@
       ]
     },
     {
-      "id":"lifece20070020001",
+      "id":"lifece2007h50020001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -863,7 +863,7 @@
       ]
     },
     {
-      "id":"lifece20070030001",
+      "id":"lifece20070fs030001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -876,7 +876,7 @@
       ]
     },
     {
-      "id":"lifece20070040001",
+      "id":"lifece200700sg40001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -889,7 +889,7 @@
       ]
     },
     {
-      "id":"lifece20070050001",
+      "id":"lifece2007ht0050001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -902,7 +902,7 @@
       ]
     },
     {
-      "id":"lifece20070060001",
+      "id":"lifece2007005h460001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
@@ -915,11 +915,24 @@
       ]
     },
     {
-      "id":"lifece20070070001",
+      "id":"lifece20070fvd070001",
       "type":"stock",
       "symbol":"GOOGLE",
       "heading":"Акции GOOGLE",
       "description":"Эта компания выкупила все интернет поисковики. Сегодня мы вне конкуренции.",
+      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price":1000,
+      "range":[
+        200,
+        700
+      ]
+    },
+    {
+      "id":"lifece20sg070070002",
+      "type":"stock",
+      "symbol":"GOOGLE",
+      "heading":"Акции GOOGLE",
+      "description":"Биржевой бум! Акции этого интернета гиганта достигли рекордной отметки.",
       "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
       "price":700,
       "range":[
@@ -927,71 +940,68 @@
         700
       ]
     },
-    {
-      "id":"lifece20070070002",
-      "type":"stock",
-      "symbol":"GOOGLE",
-      "heading":"Акции GOOGLE",
-      "description":"Биржевой бум! Акции этого интернета гиганта достигли рекордной отметки.",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":1400,
-      "range":[
-        200,
-        700
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":100,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":5,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":10,
-      "range":[
-        5,
-        30
-      ]
-    },
-    {
-      "id":"life10u40",
-      "type":"stock",
-      "symbol":"Lifecell",
-      "heading":"Lifecell оператор мобильной связи",
-      "description":"Research and development delays cause low share price for this longtime pharmaceutical company",
-      "rule":"Только ты можешь купить акции. Каждый может продать по этой цене.",
-      "price":20,
-      "range":[
-        5,
-        30
-      ]
-    },
+    [
+      {
+        "id": "life10htu4035",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции оператора мобильной связи Lifecell достигли верхней границы своего диапазона. Вложение выглядит перспективным для краткосрочной торговли.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 30,
+        "range": [5, 30]
+      },
+      {
+        "id": "life10u4wge036",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Цена акций Lifecell упала до минимального значения. Это может быть хорошей возможностью для долгосрочных инвесторов.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 5,
+        "range": [5, 30]
+      },
+      {
+        "id": "life10u4ht037",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции Lifecell стабилизировались на среднем уровне. Компанию ожидают новые продукты и расширение.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 10,
+        "range": [5, 30]
+      },
+      {
+        "id": "life1wwew0u4038",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Акции Lifecell начинают подниматься в цене, ожидаются хорошие квартальные результаты.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 20,
+        "range": [5, 30]
+      },
+      {
+        "id": "lifecell10tret0hj",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Lifecell вырвался вперёд, он главный монополист на рынке связи, цена сегодня подлетела до 100$. Это может быть началом долгосрочного роста.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 100,
+        "range": [5, 30]
+      },
+      {
+        "id": "lifecellsdfgsd1rty",
+        "type": "stock",
+        "symbol": "Lifecell",
+        "heading": "Lifecell оператор мобильной связи",
+        "description": "Цена акций Lifecell упала до минимального значения в $1 из-за новостей о снижении прибыли. Это высокорискованная инвестиция.",
+        "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+        "price": 1,
+        "range": [5, 30]
+      }
+    ],
     {
       "id":"lottery",
       "type":"lottery",
