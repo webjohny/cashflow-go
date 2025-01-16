@@ -150,6 +150,8 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 
 	race := c.raceService.GetRaceByRaceId(raceId)
 
+	race.Options.EnableManager = body.EnableManager
+	race.Options.HideCards = body.HideCards
 	race.Status = body.Status
 
 	if race.Status == entity.RaceStatus.FINISHED || race.Status == entity.RaceStatus.CANCELLED {
@@ -160,10 +162,15 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 		race.Responses[k].Responded = raceResponse
 	}
 
+	err, _ = c.raceService.UpdateRace(&race)
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
 	if int(race.CurrentPlayer.ID) != body.CurrentPlayer || len(race.Responses) == 1 {
 		err = c.raceService.ChangeTurn(race, false, body.CurrentPlayer)
-	} else {
-		err, race = c.raceService.UpdateRace(&race)
 	}
 
 	request.FinalResponse(ctx, err, map[string]interface{}{

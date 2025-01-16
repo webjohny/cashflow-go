@@ -115,5 +115,19 @@ func (c *playerController) BecomeModerator(ctx *gin.Context) {
 
 	err = c.raceService.RemovePlayer(raceId, userId)
 
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	err = c.raceService.SetOptions(raceId, entity.RaceOptions{
+		EnableManager: true,
+	})
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
 	request.FinalResponse(ctx, err, response)
 }

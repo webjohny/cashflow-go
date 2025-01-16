@@ -38,6 +38,7 @@ type RaceService interface {
 	GetFormattedRaceResponse(raceId uint64, hasExtraInfo bool) dto.GetRaceResponseDTO
 	SetTransaction(player entity.Player, card dto.TransactionCardDTO) error
 	RemovePlayer(raceId uint64, userId uint64) error
+	SetOptions(raceId uint64, options entity.RaceOptions) error
 	InsertRace(b *entity.Race) (error, entity.Race)
 	UpdateRace(b *entity.Race) (error, entity.Race)
 }
@@ -66,6 +67,25 @@ func (service *raceService) UpdateRace(b *entity.Race) (error, entity.Race) {
 	logger.Info("RaceService.UpdateRace", b)
 
 	return service.raceRepository.UpdateRace(b)
+}
+
+func (service *raceService) SetOptions(raceId uint64, options entity.RaceOptions) error {
+	logger.Info("RaceService.SetOptions", map[string]interface{}{
+		"raceId":  raceId,
+		"options": options,
+	})
+
+	race := service.GetRaceByRaceId(raceId)
+
+	if race.ID == 0 {
+		return errors.New(storage.ErrorUndefinedGame)
+	}
+
+	race.Options.Merge(options)
+
+	err, _ := service.raceRepository.UpdateRace(&race)
+
+	return err
 }
 
 func (service *raceService) GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player) {

@@ -11,6 +11,7 @@ type RacePlayerProfileResponseDTO struct {
 	TotalIncome   int                              `json:"total_income"`
 	TotalExpenses int                              `json:"total_expenses"`
 	CashFlow      int                              `json:"cash_flow"`
+	ExtraCashFlow int                              `json:"extra_cash_flow"`
 	PassiveIncome int                              `json:"passive_income"`
 	Cash          int                              `json:"cash"`
 }

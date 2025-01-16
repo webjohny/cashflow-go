@@ -66,6 +66,25 @@ type RaceOptions struct {
 	CardCollection              string            `json:"cardCollection,omitempty"`
 }
 
+func (c *RaceOptions) Merge(override RaceOptions) {
+	if override.BigRaceGoalForPassiveIncome != c.BigRaceGoalForPassiveIncome {
+		c.BigRaceGoalForPassiveIncome = override.BigRaceGoalForPassiveIncome
+	}
+
+	if override.EnableManager != c.EnableManager {
+		c.EnableManager = override.EnableManager
+	}
+	if override.HideCards != c.HideCards {
+		c.HideCards = override.HideCards
+	}
+	if override.EnableWaitList != c.EnableWaitList {
+		c.EnableWaitList = override.EnableWaitList
+	}
+	if override.CardCollection != "" {
+		c.CardCollection = override.CardCollection
+	}
+}
+
 type RaceCardMap struct {
 	Active map[string]int   `json:"active"`
 	Map    map[string][]int `json:"map"`
