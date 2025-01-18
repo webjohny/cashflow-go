@@ -381,7 +381,7 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 		race.CardMap.Next(tile)
 
 		if tile == "dream" {
-			players := service.raceService.GetRacePlayersByRaceId(raceId)
+			players := service.raceService.GetRacePlayersByRaceId(raceId, false)
 
 			for _, currentPlayer := range players {
 				if currentPlayer.Info.Dream.ID == int(player.CurrentPosition) {

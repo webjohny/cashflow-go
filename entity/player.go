@@ -97,6 +97,7 @@ type Player struct {
 	OnBigRace       bool              `gorm:"default:false" json:"on_big_race"`
 	HasBankrupt     uint8             `json:"has_bankrupt"`
 	AboutToBankrupt string            `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
+	IsActive        bool              `gorm:"default:true" json:"is_active"`
 	CreatedAt       datatypes.Date    `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 
 	PassiveIncome int `json:"passive_income" gorm:"-"`

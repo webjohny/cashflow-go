@@ -78,7 +78,7 @@ func (c *moderatorController) GetRacePlayers(ctx *gin.Context) {
 
 	var err error
 
-	players := c.raceService.GetRacePlayersByRaceId(raceId)
+	players := c.raceService.GetRacePlayersByRaceId(raceId, false)
 
 	request.FinalResponse(ctx, err, map[string]interface{}{
 		"players": players,
@@ -91,6 +91,7 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 
 	var err error
 	var body dto.ModeratorUpdatePlayerDto
+	var isUpdateRace bool
 
 	if err = ctx.BindJSON(&body); err != nil {
 		request.FinalResponse(ctx, err, nil)
@@ -103,6 +104,7 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 		request.FinalResponse(ctx, err, nil)
 		return
 	}
+	isUpdateRace = player.IsActive != body.IsActive
 
 	player.Cash = body.Cash
 	player.CashFlow = body.CashFlow
@@ -111,6 +113,7 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 	player.LastPosition = uint8(body.LastPosition)
 	player.SkippedTurns = uint8(body.SkippedTurns)
 	player.OnBigRace = body.OnBigRace
+	player.IsActive = body.IsActive
 	player.Assets.Savings = body.Savings
 
 	for _, realEstate := range player.Assets.RealEstates {
@@ -145,7 +148,18 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 		}
 	}
 
-	err, player = c.playerService.UpdatePlayer(&player)
+	err, _ = c.playerService.UpdatePlayer(&player)
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	if isUpdateRace {
+		race := c.raceService.GetRaceByRaceId(raceId)
+		race.Responses = c.raceService.CreateResponses(raceId, player.ID)
+		err, _ = c.raceService.UpdateRace(&race)
+	}
 
 	request.FinalResponse(ctx, err, map[string]interface{}{
 		"player": player,
@@ -186,7 +200,7 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 	}
 
 	if int(race.CurrentPlayer.ID) != body.CurrentPlayer || len(race.Responses) == 1 {
-		err = c.raceService.ChangeTurn(race, false, body.CurrentPlayer)
+		err = c.raceService.ChangeTurn(race, true, body.CurrentPlayer)
 	}
 
 	request.FinalResponse(ctx, err, map[string]interface{}{

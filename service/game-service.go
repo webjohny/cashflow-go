@@ -210,7 +210,7 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 		UserId:   players[0].UserID,
 		Username: players[0].Username,
 	}
-	race.Responses = service.createResponses(race.ID, race.CurrentPlayer.ID)
+	race.Responses = service.raceService.CreateResponses(race.ID, race.CurrentPlayer.ID)
 	race.CurrentCard = entity.Card{}
 	race.Status = entity.RaceStatus.STARTED
 	race.Notifications = make([]entity.RaceNotification, 0)
@@ -346,23 +346,4 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 	}
 
 	return nil, race
-}
-
-func (service *gameService) createResponses(raceId uint64, currentPlayerId uint64) []entity.RaceResponse {
-	players := service.playerService.GetAllPlayersByRaceId(raceId)
-
-	responses := make([]entity.RaceResponse, 0)
-
-	if len(players) > 0 {
-		for _, player := range players {
-			response := player.CreateResponse()
-
-			if player.OnBigRace && player.ID != currentPlayerId {
-				response.Responded = true
-			}
-			responses = append(responses, response)
-		}
-	}
-
-	return responses
 }

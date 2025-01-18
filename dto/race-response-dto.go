@@ -61,6 +61,7 @@ type GetRacePlayerResponseDTO struct {
 	GoalPassiveIncome bool                                `json:"goal_passive_income"`
 	GoalPersonalDream bool                                `json:"goal_personal_dream"`
 	OnBigRace         bool                                `json:"on_big_race"`
+	IsActive          bool                                `json:"is_active"`
 	HasBankrupt       bool                                `json:"has_bankrupt"`
 	AboutToBankrupt   string                              `json:"about_to_bankrupt"`
 	HasMlm            bool                                `json:"has_mlm"`

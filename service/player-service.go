@@ -881,6 +881,10 @@ func (service *playerService) GetPlayerByUsernameAndRaceId(raceId uint64, userna
 }
 
 func (service *playerService) GetAllPlayersByRaceId(raceId uint64) []entity.Player {
+	return service.playerRepository.AllActiveByRaceId(raceId)
+}
+
+func (service *playerService) GetAllStatePlayersByRaceId(raceId uint64) []entity.Player {
 	return service.playerRepository.AllByRaceId(raceId)
 }
 
@@ -966,6 +970,7 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 		GoalPassiveIncome: player.GoalPassiveIncomeOnBigRace(),
 		GoalPersonalDream: player.GoalPersonalDream(),
 		OnBigRace:         player.OnBigRace,
+		IsActive:          player.IsActive,
 		HasBankrupt:       player.HasBankrupt == 1,
 		AboutToBankrupt:   player.AboutToBankrupt,
 	}

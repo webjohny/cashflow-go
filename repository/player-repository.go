@@ -12,6 +12,7 @@ type PlayerRepository interface {
 	UpdatePlayer(b *entity.Player) (error, entity.Player)
 	UpdateCash(b *entity.Player, cash int)
 	AllByRaceId(raceId uint64) []entity.Player
+	AllActiveByRaceId(raceId uint64) []entity.Player
 	DeletePlayer(b *entity.Player) error
 	IsCurrentPlayerOnTheRace(player entity.Player) bool
 	FindPlayerByRaceIdAndInfoDreamId(raceId uint64, dreamId int) entity.Player
@@ -49,11 +50,13 @@ func (db *playerConnection) InsertPlayer(b *entity.Player) (error, entity.Player
 	return nil, *b
 }
 
-func (db *playerConnection) AllByRaceId(raceId uint64) []entity.Player {
-	//logger.Info("PlayerRepository.UpdateCash", map[string]interface{}{
-	//	"raceId": raceId,
-	//})
+func (db *playerConnection) AllActiveByRaceId(raceId uint64) []entity.Player {
+	var players []entity.Player
+	db.connection.Where("race_id = ? AND role != 'moderator' AND is_active = 1", raceId).Find(&players)
+	return players
+}
 
+func (db *playerConnection) AllByRaceId(raceId uint64) []entity.Player {
 	var players []entity.Player
 	db.connection.Where("race_id = ? AND role != 'moderator'", raceId).Find(&players)
 	return players

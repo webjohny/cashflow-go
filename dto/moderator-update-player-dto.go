@@ -11,6 +11,7 @@ type ModeratorUpdatePlayerDto struct {
 	CurrentPosition int                               `json:"currentPosition" binding:"numeric"`
 	SkippedTurns    int                               `json:"skippedTurns" binding:"numeric"`
 	OnBigRace       bool                              `json:"onBigRace" binding:"boolean"`
+	IsActive        bool                              `json:"isActive" binding:"boolean"`
 	RealEstate      map[string]entity.CardRealEstate  `json:"realEstate,omitempty" binding:"omitempty,dive"`
 	Business        map[string]entity.CardBusiness    `json:"business,omitempty" binding:"omitempty,dive"`
 	Stocks          map[string]entity.CardStocks      `json:"stock,omitempty" binding:"omitempty,dive"`

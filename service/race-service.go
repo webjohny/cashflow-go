@@ -32,9 +32,10 @@ type RaceService interface {
 	DownsizedAction(raceId uint64, userId uint64) error
 	BigBankruptAction(raceId uint64, userId uint64) error
 	ChangeTurn(race entity.Race, forced bool, definedPlayerId int) error
+	CreateResponses(raceId uint64, currentPlayerId uint64) []entity.RaceResponse
 	GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player)
 	GetRaceByRaceId(raceId uint64) entity.Race
-	GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO
+	GetRacePlayersByRaceId(raceId uint64, all bool) []dto.GetRacePlayerResponseDTO
 	GetFormattedRaceResponse(raceId uint64, hasExtraInfo bool) dto.GetRaceResponseDTO
 	SetTransaction(player entity.Player, card dto.TransactionCardDTO) error
 	RemovePlayer(raceId uint64, userId uint64) error
@@ -366,6 +367,30 @@ func (service *raceService) ChangeTurn(race entity.Race, forced bool, definedPla
 	}
 
 	return nil
+}
+
+func (service *raceService) CreateResponses(raceId uint64, currentPlayerId uint64) []entity.RaceResponse {
+	logger.Info("RaceService.createResponses", map[string]interface{}{
+		"raceId":          raceId,
+		"currentPlayerId": currentPlayerId,
+	})
+
+	players := service.playerService.GetAllPlayersByRaceId(raceId)
+
+	responses := make([]entity.RaceResponse, 0)
+
+	if len(players) > 0 {
+		for _, player := range players {
+			response := player.CreateResponse()
+
+			if player.OnBigRace && player.ID != currentPlayerId {
+				response.Responded = true
+			}
+			responses = append(responses, response)
+		}
+	}
+
+	return responses
 }
 
 func (service *raceService) SellRealEstateAction(raceId uint64, userId uint64, realEstateId string) error {
@@ -880,8 +905,14 @@ func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {
 	return service.raceRepository.FindRaceById(raceId)
 }
 
-func (service *raceService) GetRacePlayersByRaceId(raceId uint64) []dto.GetRacePlayerResponseDTO {
-	players := service.playerService.GetAllPlayersByRaceId(raceId)
+func (service *raceService) GetRacePlayersByRaceId(raceId uint64, all bool) []dto.GetRacePlayerResponseDTO {
+	players := make([]entity.Player, 0)
+
+	if all {
+		players = service.playerService.GetAllStatePlayersByRaceId(raceId)
+	} else {
+		players = service.playerService.GetAllPlayersByRaceId(raceId)
+	}
 
 	racePlayers := make([]dto.GetRacePlayerResponseDTO, 0)
 
@@ -902,7 +933,7 @@ func (service *raceService) GetFormattedRaceResponse(raceId uint64, hasExtraInfo
 		logs = service.transactionService.GetRaceLogs(raceId)
 	}
 
-	players := service.GetRacePlayersByRaceId(raceId)
+	players := service.GetRacePlayersByRaceId(raceId, hasExtraInfo)
 	err, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId)
 
 	if err != nil {

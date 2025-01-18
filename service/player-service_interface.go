@@ -48,6 +48,7 @@ type PlayerService interface {
 	GetPlayerByUserIdAndRaceId(raceId uint64, userId uint64) (error, entity.Player)
 	GetPlayerByPlayerIdAndRaceId(raceId uint64, playerId uint64) (error, entity.Player)
 	GetAllPlayersByRaceId(raceId uint64) []entity.Player
+	GetAllStatePlayersByRaceId(raceId uint64) []entity.Player
 	GetProfessionById(id uint8) (error, entity.Profession)
 	GetRacePlayer(raceId uint64, userId uint64) (error, dto.GetRacePlayerResponseDTO)
 	GetFormattedPlayerResponse(player entity.Player, hasRestrictedFields bool) dto.GetRacePlayerResponseDTO
