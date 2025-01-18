@@ -237,18 +237,22 @@ func (r *Race) GetDice() objects.Dice {
 	return objects.NewDice(dice, 1, 6)
 }
 
-func (r *Race) NextPlayer() {
+func (r *Race) GetNextPlayer() RaceResponse {
 	players := r.Responses
 	username := r.CurrentPlayer.Username
-
-	var next RaceResponse
 
 	for i, player := range players {
 		if player.Username == username {
 			nextIndex := (i + 1) % len(players)
-			next = players[nextIndex]
+			return players[nextIndex]
 		}
 	}
+
+	return RaceResponse{}
+}
+
+func (r *Race) NextPlayer() {
+	next := r.GetNextPlayer()
 
 	r.CurrentPlayer.ID = next.ID
 	r.CurrentPlayer.UserId = next.UserId

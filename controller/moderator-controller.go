@@ -157,8 +157,9 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 
 	if isUpdateRace {
 		race := c.raceService.GetRaceByRaceId(raceId)
+		user := race.GetNextPlayer()
 		race.Responses = c.raceService.CreateResponses(raceId, player.ID)
-		err, _ = c.raceService.UpdateRace(&race)
+		err = c.raceService.ChangeTurn(race, true, int(user.ID))
 	}
 
 	request.FinalResponse(ctx, err, map[string]interface{}{
