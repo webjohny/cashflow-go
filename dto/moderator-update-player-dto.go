@@ -13,7 +13,7 @@ type ModeratorUpdatePlayerDto struct {
 	OnBigRace       bool                              `json:"onBigRace" binding:"boolean"`
 	RealEstate      map[string]entity.CardRealEstate  `json:"realEstate,omitempty" binding:"omitempty,dive"`
 	Business        map[string]entity.CardBusiness    `json:"business,omitempty" binding:"omitempty,dive"`
-	Stocks          map[string]entity.CardStocks      `json:"stocks,omitempty" binding:"omitempty,dive"`
+	Stocks          map[string]entity.CardStocks      `json:"stock,omitempty" binding:"omitempty,dive"`
 	Other           map[string]entity.CardOtherAssets `json:"other,omitempty" binding:"omitempty,dive"`
 	Expenses        ModeratorUpdatePlayerExpenseDto   `json:"expenses" binding:"required"`
 	Liabilities     ModeratorUpdatePlayerLiabilityDto `json:"liabilities" binding:"required"`

@@ -113,20 +113,36 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 	player.OnBigRace = body.OnBigRace
 	player.Assets.Savings = body.Savings
 
-	for _, realEstate := range body.RealEstate {
-		player.CreateOrUpdateRealEstateByID(realEstate)
+	for _, realEstate := range player.Assets.RealEstates {
+		if item, ok := body.RealEstate[realEstate.ID]; ok {
+			player.CreateOrUpdateRealEstateByID(item)
+		} else {
+			player.RemoveRealEstate(realEstate.ID)
+		}
 	}
 
-	for _, business := range body.Business {
-		player.CreateOrUpdateBusinessByID(business)
+	for _, business := range player.Assets.Business {
+		if item, ok := body.Business[business.ID]; ok {
+			player.CreateOrUpdateBusinessByID(item)
+		} else {
+			player.RemoveBusiness(business.ID)
+		}
 	}
 
-	for _, other := range body.Other {
-		player.CreateOrUpdateOtherAssetByID(other)
+	for _, other := range player.Assets.OtherAssets {
+		if item, ok := body.Other[other.ID]; ok {
+			player.CreateOrUpdateOtherAssetByID(item)
+		} else {
+			player.RemoveOtherAssetsByID(other.ID)
+		}
 	}
 
-	for _, stocks := range body.Stocks {
-		player.CreateOrUpdateStocksByID(stocks)
+	for _, stock := range player.Assets.Stocks {
+		if item, ok := body.Stocks[stock.ID]; ok {
+			player.CreateOrUpdateStocksByID(item)
+		} else {
+			player.RemoveStocks(stock.Symbol)
+		}
 	}
 
 	err, player = c.playerService.UpdatePlayer(&player)
