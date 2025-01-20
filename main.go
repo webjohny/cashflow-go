@@ -41,6 +41,7 @@ var (
 	financeService     service.FinanceService     = service.NewFinanceService(userRequestRepository, cardService, raceService, playerService)
 
 	// Controllers
+	backdoorController   controller.BackdoorController   = controller.NewBackdoorController(cardService, raceService)
 	gameController       controller.GameController       = controller.NewGameController(gameService)
 	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService, lobbyService, userRequestService)
 	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService, lobbyService)
@@ -90,6 +91,11 @@ func main() {
 	{
 		authRoutes.POST("/login", authController.Login)
 		authRoutes.POST("/register", authController.Register)
+	}
+
+	backdoorRoutes := r.Group("api/backdoor", middleware.GetGameId())
+	{
+		backdoorRoutes.POST("/:raceId/change-card", backdoorController.ChangeCard)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
