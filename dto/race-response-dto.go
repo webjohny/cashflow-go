@@ -3,11 +3,11 @@ package dto
 import "github.com/webjohny/cashflow-go/entity"
 
 type RacePlayerProfileResponseDTO struct {
-	Income        RacePlayerIncomeResponseDTO      `json:"income"`
-	Babies        uint8                            `json:"babies"`
-	Expenses      map[string]int                   `json:"expenses"`
-	Assets        entity.PlayerAssets              `json:"assets"`
-	Liabilities   RacePlayerLiabilitiesResponseDTO `json:"liabilities"`
+	Income        RacePlayerIncomeResponseDTO      `json:"income,omitempty"`
+	Babies        uint8                            `json:"babies,omitempty"`
+	Expenses      map[string]int                   `json:"expenses,omitempty"`
+	Assets        entity.PlayerAssets              `json:"assets,omitempty"`
+	Liabilities   RacePlayerLiabilitiesResponseDTO `json:"liabilities,omitempty"`
 	TotalIncome   int                              `json:"total_income"`
 	TotalExpenses int                              `json:"total_expenses"`
 	CashFlow      int                              `json:"cash_flow"`
@@ -54,6 +54,7 @@ type GetRacePlayerResponseDTO struct {
 	CurrentPosition   uint8                               `json:"current_position"`
 	ExtraDices        int                                 `json:"extra_dices"`
 	Dices             []int                               `json:"dices,omitempty"`
+	Notifications     []entity.PlayerNotification         `json:"notifications,omitempty"`
 	DualDiceCount     int                                 `json:"dual_dice_count"`
 	SkippedTurns      uint8                               `json:"skipped_turns"`
 	AllowOnBigRace    bool                                `json:"allow_on_big_race"`

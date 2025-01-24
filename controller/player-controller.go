@@ -15,6 +15,7 @@ type PlayerController interface {
 	MoveOnBigRace(ctx *gin.Context)
 	SetDream(ctx *gin.Context)
 	BecomeModerator(ctx *gin.Context)
+	IsReadNotification(ctx *gin.Context)
 }
 
 type playerController struct {
@@ -23,7 +24,11 @@ type playerController struct {
 	lobbyService  service.LobbyService
 }
 
-func NewPlayerController(playerService service.PlayerService, raceService service.RaceService, lobbyService service.LobbyService) PlayerController {
+func NewPlayerController(
+	playerService service.PlayerService,
+	raceService service.RaceService,
+	lobbyService service.LobbyService,
+) PlayerController {
 	return &playerController{
 		playerService: playerService,
 		raceService:   raceService,
@@ -46,7 +51,7 @@ func (c *playerController) GetRacePlayer(ctx *gin.Context) {
 		} else if race.Status == entity.RaceStatus.FINISHED {
 			err = errors.New(storage.ErrorGameIsFinished)
 		} else {
-			err, response = c.playerService.GetRacePlayer(raceId, userId)
+			err, response = c.playerService.GetRacePlayer(raceId, userId, true)
 		}
 	}
 
@@ -90,6 +95,26 @@ func (c *playerController) SetDream(ctx *gin.Context) {
 	}
 
 	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) IsReadNotification(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	notificationId := ctx.Param("notificationId")
+
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	player.RemoveNotification(notificationId)
+
+	err, _ = c.playerService.UpdatePlayer(&player)
+
+	request.FinalResponse(ctx, err, nil)
 }
 
 func (c *playerController) BecomeModerator(ctx *gin.Context) {

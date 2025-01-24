@@ -934,7 +934,7 @@ func (service *raceService) GetFormattedRaceResponse(raceId uint64, hasExtraInfo
 	}
 
 	players := service.GetRacePlayersByRaceId(raceId, hasExtraInfo)
-	err, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId)
+	err, player := service.playerService.GetRacePlayer(raceId, race.CurrentPlayer.UserId, hasExtraInfo)
 
 	if err != nil {
 		logger.Error(err, map[string]interface{}{

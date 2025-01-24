@@ -912,11 +912,11 @@ func (service *playerService) GetPlayerByPlayerIdAndRaceId(raceId uint64, player
 	return nil, player
 }
 
-func (service *playerService) GetRacePlayer(raceId uint64, userId uint64) (error, dto.GetRacePlayerResponseDTO) {
+func (service *playerService) GetRacePlayer(raceId uint64, userId uint64, full bool) (error, dto.GetRacePlayerResponseDTO) {
 	player := service.playerRepository.FindPlayerByUserIdAndRaceId(raceId, userId)
 
 	if player.ID != 0 {
-		return nil, service.GetFormattedPlayerResponse(player, false)
+		return nil, service.GetFormattedPlayerResponse(player, full)
 	}
 
 	return errors.New(storage.ErrorUndefinedPlayer), dto.GetRacePlayerResponseDTO{}
@@ -932,23 +932,7 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 		Role:     player.Role,
 		Color:    player.Color,
 		Profile: dto.RacePlayerProfileResponseDTO{
-			Income: dto.RacePlayerIncomeResponseDTO{
-				RealEstates: player.Assets.RealEstates,
-				Business:    player.Assets.Business,
-				Salary:      player.Salary,
-			},
-			Babies:   player.Babies,
-			Expenses: player.Expenses,
-			Assets:   player.Assets,
-			Liabilities: dto.RacePlayerLiabilitiesResponseDTO{
-				RealEstates:    player.Assets.RealEstates,
-				Business:       player.Assets.Business,
-				BankLoan:       player.Liabilities.BankLoan,
-				HomeMortgage:   player.Liabilities.HomeMortgage,
-				SchoolLoans:    player.Liabilities.SchoolLoans,
-				CarLoans:       player.Liabilities.CarLoans,
-				CreditCardDebt: player.Liabilities.CreditCardDebt,
-			},
+			Babies:        player.Babies,
 			TotalIncome:   player.CalculateTotalIncome(),
 			TotalExpenses: player.CalculateTotalExpenses(),
 			PassiveIncome: player.CalculatePassiveIncome(),
@@ -976,6 +960,23 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 	}
 
 	if hasRestrictedFields {
+		response.Profile.Income = dto.RacePlayerIncomeResponseDTO{
+			RealEstates: player.Assets.RealEstates,
+			Business:    player.Assets.Business,
+			Salary:      player.Salary,
+		}
+		response.Profile.Expenses = player.Expenses
+		response.Profile.Assets = player.Assets
+		response.Profile.Liabilities = dto.RacePlayerLiabilitiesResponseDTO{
+			RealEstates:    player.Assets.RealEstates,
+			Business:       player.Assets.Business,
+			BankLoan:       player.Liabilities.BankLoan,
+			HomeMortgage:   player.Liabilities.HomeMortgage,
+			SchoolLoans:    player.Liabilities.SchoolLoans,
+			CarLoans:       player.Liabilities.CarLoans,
+			CreditCardDebt: player.Liabilities.CreditCardDebt,
+		}
+		response.Notifications = player.Notifications
 		response.Dices = player.Dices
 	}
 

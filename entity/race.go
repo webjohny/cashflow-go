@@ -86,8 +86,8 @@ func (c *RaceOptions) Merge(override RaceOptions) {
 }
 
 type RaceCardMap struct {
-	Active map[string]int   `json:"active"`
-	Map    map[string][]int `json:"map"`
+	Active map[string]int   `json:"active,omitempty"`
+	Map    map[string][]int `json:"map,omitempty"`
 }
 
 func (rcm *RaceCardMap) HasMapping() bool {

@@ -67,7 +67,7 @@ func (c *moderatorController) GetRacePlayer(ctx *gin.Context) {
 	var response interface{}
 
 	if userId != 0 {
-		err, response = c.playerService.GetRacePlayer(raceId, userId)
+		err, response = c.playerService.GetRacePlayer(raceId, userId, true)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -220,11 +220,17 @@ func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
 	}
 
 	var userRequest entity.UserRequest
-	var player entity.Player
 
 	err, userRequest = c.userRequestService.HandleUserRequest(body)
 
-	if userRequest.ID > 0 && err == nil {
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	var player entity.Player
+
+	if userRequest.ID > 0 && userRequest.Status == 1 {
 		err, player = c.playerService.GetPlayerByUserIdAndRaceId(userRequest.RaceID, userRequest.UserID)
 
 		cardType := entity.TransactionCardType.Payday
@@ -243,6 +249,12 @@ func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
 				},
 			)
 		}
+	} else if userRequest.Status == 2 {
+		err, player = c.playerService.GetPlayerByUserIdAndRaceId(userRequest.RaceID, userRequest.UserID)
+
+		player.SetNotification(userRequest.RejectMessage, entity.NotificationTypes.Error)
+
+		err, _ = c.playerService.UpdatePlayer(&player)
 	}
 
 	request.FinalResponse(ctx, err, nil)

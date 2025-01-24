@@ -20,6 +20,18 @@ var PlayerRoles = struct {
 	Moderator: "moderator",
 }
 
+var NotificationTypes = struct {
+	Warning string
+	Info    string
+	Error   string
+	Success string
+}{
+	Warning: "warning",
+	Info:    "info",
+	Error:   "error",
+	Success: "success",
+}
+
 type PlayerIncome struct {
 	RealEstates []CardRealEstate `json:"realEstates"`
 	Business    []CardBusiness   `json:"business"`
@@ -27,12 +39,12 @@ type PlayerIncome struct {
 }
 
 type PlayerAssets struct {
-	Dreams      []CardDream       `json:"dreams"`
-	OtherAssets []CardOtherAssets `json:"other"`
-	RealEstates []CardRealEstate  `json:"realEstates"`
-	Business    []CardBusiness    `json:"business"`
-	Stocks      []CardStocks      `json:"stocks"`
-	Savings     int               `json:"savings"`
+	Dreams      []CardDream       `json:"dreams,omitempty"`
+	OtherAssets []CardOtherAssets `json:"other,omitempty"`
+	RealEstates []CardRealEstate  `json:"realEstates,omitempty"`
+	Business    []CardBusiness    `json:"business,omitempty"`
+	Stocks      []CardStocks      `json:"stocks,omitempty"`
+	Savings     int               `json:"savings,omitempty"`
 }
 
 type PlayerLiabilities struct {
@@ -70,35 +82,42 @@ type PlayerInfo struct {
 	Conditions  BigRaceConditions `json:"conditions"`
 }
 
+type PlayerNotification struct {
+	ID      string `json:"id"`
+	Message string `json:"message"`
+	Type    string `json:"type"`
+}
+
 type Player struct {
-	ID              uint64            `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserID          uint64            `gorm:"index:idx_player" json:"user_id"`
-	RaceID          uint64            `gorm:"index:idx_player" json:"race_id"`
-	Username        string            `gorm:"index:idx_player;type:varchar(255)" json:"username"`
-	Role            string            `gorm:"type:varchar(255)" json:"role"`
-	Color           string            `gorm:"type:varchar(255)" json:"color"`
-	Salary          int               `json:"salary" gorm:"allowzero"`
-	Babies          uint8             `json:"babies" gorm:"allowzero"`
-	Expenses        map[string]int    `gorm:"type:json;serializer:json" json:"expenses"`
-	Assets          PlayerAssets      `gorm:"type:json;serializer:json" json:"assets"`
-	Liabilities     PlayerLiabilities `gorm:"type:json;serializer:json" json:"liabilities"`
-	Cash            int               `json:"cash" gorm:"allowzero"`
-	CashFlow        int               `json:"cash_flow" gorm:"allowzero"`
-	ProfessionID    uint8             `json:"profession_id"`
-	Info            PlayerInfo        `gorm:"type:json;serializer:json" json:"Info"`
-	Profession      Profession        `gorm:"-" json:"profession"`
-	LastPosition    uint8             `json:"last_position" gorm:"allowzero"`
-	CurrentPosition uint8             `json:"current_position" gorm:"allowzero"`
-	ExtraDices      int               `json:"extra_dices" gorm:"allowzero"`
-	DualDiceCount   int               `json:"dual_dice_count" gorm:"allowzero"`
-	Dices           []int             `json:"dices" gorm:"type:json;serializer:json"`
-	SkippedTurns    uint8             `json:"skipped_turns" gorm:"allowzero"`
-	IsRolledDice    uint8             `json:"is_rolled_dice"`
-	OnBigRace       bool              `gorm:"default:false" json:"on_big_race"`
-	HasBankrupt     uint8             `json:"has_bankrupt"`
-	AboutToBankrupt string            `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
-	IsActive        bool              `gorm:"default:true" json:"is_active"`
-	CreatedAt       datatypes.Date    `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+	ID              uint64               `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID          uint64               `gorm:"index:idx_player" json:"user_id"`
+	RaceID          uint64               `gorm:"index:idx_player" json:"race_id"`
+	Username        string               `gorm:"index:idx_player;type:varchar(255)" json:"username"`
+	Role            string               `gorm:"type:varchar(255)" json:"role"`
+	Color           string               `gorm:"type:varchar(255)" json:"color"`
+	Salary          int                  `json:"salary" gorm:"allowzero"`
+	Babies          uint8                `json:"babies" gorm:"allowzero"`
+	Expenses        map[string]int       `gorm:"type:json;serializer:json" json:"expenses"`
+	Assets          PlayerAssets         `gorm:"type:json;serializer:json" json:"assets"`
+	Liabilities     PlayerLiabilities    `gorm:"type:json;serializer:json" json:"liabilities"`
+	Cash            int                  `json:"cash" gorm:"allowzero"`
+	CashFlow        int                  `json:"cash_flow" gorm:"allowzero"`
+	ProfessionID    uint8                `json:"profession_id"`
+	Info            PlayerInfo           `gorm:"type:json;serializer:json" json:"Info"`
+	Profession      Profession           `gorm:"-" json:"profession"`
+	LastPosition    uint8                `json:"last_position" gorm:"allowzero"`
+	CurrentPosition uint8                `json:"current_position" gorm:"allowzero"`
+	ExtraDices      int                  `json:"extra_dices" gorm:"allowzero"`
+	DualDiceCount   int                  `json:"dual_dice_count" gorm:"allowzero"`
+	Dices           []int                `json:"dices" gorm:"type:json;serializer:json"`
+	Notifications   []PlayerNotification `json:"notifications" gorm:"type:json;serializer:json"`
+	SkippedTurns    uint8                `json:"skipped_turns" gorm:"allowzero"`
+	IsRolledDice    uint8                `json:"is_rolled_dice"`
+	OnBigRace       bool                 `gorm:"default:false" json:"on_big_race"`
+	HasBankrupt     uint8                `json:"has_bankrupt"`
+	AboutToBankrupt string               `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
+	IsActive        bool                 `gorm:"default:true" json:"is_active"`
+	CreatedAt       datatypes.Date       `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 
 	PassiveIncome int `json:"passive_income" gorm:"-"`
 	TotalExpenses int `json:"total_expenses" gorm:"-"`
@@ -107,6 +126,23 @@ type Player struct {
 
 func (r *Player) GetStringID() string {
 	return strconv.Itoa(int(r.ID))
+}
+
+func (r *Player) SetNotification(message string, typeMessage string) {
+	r.Notifications = append(r.Notifications, PlayerNotification{
+		ID:      helper.Uuid("n"),
+		Message: message,
+		Type:    typeMessage,
+	})
+}
+
+func (r *Player) RemoveNotification(ID string) {
+	for key, notification := range r.Notifications {
+		if notification.ID == ID {
+			r.Notifications = append(r.Notifications[:key], r.Notifications[key+1:]...)
+			break
+		}
+	}
 }
 
 func (r *Player) CalculateDices() int {

@@ -1,13 +1,13 @@
 package entity
 
 type Card struct {
-	ID            string        `json:"id"`
-	Type          string        `json:"type"`
-	Symbol        string        `json:"symbol"`
-	Name          string        `json:"name"`
-	Family        string        `json:"family"`
-	Heading       string        `json:"heading"`
-	Description   string        `json:"description"`
+	ID            string        `json:"id,omitempty"`
+	Type          string        `json:"type,omitempty"`
+	Symbol        string        `json:"symbol,omitempty"`
+	Name          string        `json:"name,omitempty"`
+	Family        string        `json:"family,omitempty"`
+	Heading       string        `json:"heading,omitempty"`
+	Description   string        `json:"description,omitempty"`
 	Cost          int           `json:"cost,omitempty"`
 	Rule          string        `json:"rule,omitempty"`
 	IsConditional bool          `json:"is_conditional,omitempty"`

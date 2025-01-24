@@ -151,6 +151,7 @@ func main() {
 		playerRoutes.POST("/on-big-race/:raceId", playerController.MoveOnBigRace)
 		playerRoutes.POST("/dream/:raceId", playerController.SetDream)
 		playerRoutes.POST("/moderator/:raceId", playerController.BecomeModerator)
+		playerRoutes.POST("/read-notification/:notificationId/:raceId", playerController.IsReadNotification)
 	}
 
 	playerTestRoutes := r.Group("test/player")
