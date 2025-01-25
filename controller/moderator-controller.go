@@ -109,12 +109,18 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 	player.Cash = body.Cash
 	player.CashFlow = body.CashFlow
 	player.Babies = uint8(body.Babies)
-	player.CurrentPosition = uint8(body.CurrentPosition)
-	player.LastPosition = uint8(body.LastPosition)
 	player.SkippedTurns = uint8(body.SkippedTurns)
 	player.OnBigRace = body.OnBigRace
 	player.IsActive = body.IsActive
 	player.Assets.Savings = body.Savings
+
+	if body.Liabilities.BankLoan > 0 {
+		player.Expenses["bankLoan"] = body.Liabilities.BankLoan / 10
+	} else {
+		player.Expenses["bankLoan"] = 0
+	}
+
+	player.Liabilities.BankLoan = body.Liabilities.BankLoan
 
 	for _, realEstate := range player.Assets.RealEstates {
 		if item, ok := body.RealEstate[realEstate.ID]; ok {

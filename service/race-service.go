@@ -917,7 +917,7 @@ func (service *raceService) GetRacePlayersByRaceId(raceId uint64, all bool) []dt
 	racePlayers := make([]dto.GetRacePlayerResponseDTO, 0)
 
 	for _, player := range players {
-		racePlayer := service.playerService.GetFormattedPlayerResponse(player, false)
+		racePlayer := service.playerService.GetFormattedPlayerResponse(player, all)
 		racePlayers = append(racePlayers, racePlayer)
 	}
 
