@@ -63,25 +63,6 @@ type PlayerAccountInfo struct {
 	CashFlow      []int `json:"cashFlow"`
 }
 
-type PlayerDream struct {
-	ID    int    `json:"id" form:"id"`
-	Name  string `json:"name" form:"name"`
-	Price int    `json:"price" form:"price"`
-}
-
-type PlayerInfo struct {
-	ID          uint64            `json:"id"`
-	Profession  Profession        `json:"profession"`
-	Babies      int               `json:"babies"`
-	Dream       PlayerDream       `json:"dream"`
-	FullName    string            `json:"fullName"`
-	Profile     interface{}       `json:"profile"`
-	Assets      interface{}       `json:"assets"`
-	Liabilities interface{}       `json:"liabilities"`
-	Account     PlayerAccountInfo `json:"account"`
-	Conditions  BigRaceConditions `json:"conditions"`
-}
-
 type PlayerNotification struct {
 	ID      string `json:"id"`
 	Message string `json:"message"`

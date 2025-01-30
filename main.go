@@ -150,6 +150,8 @@ func main() {
 		playerRoutes.GET("/info", playerController.GetRacePlayer)
 		playerRoutes.POST("/on-big-race/:raceId", playerController.MoveOnBigRace)
 		playerRoutes.POST("/dream/:raceId", playerController.SetDream)
+		playerRoutes.GET("/data/:raceId", playerController.GetPlayerData)
+		playerRoutes.PUT("/data/:raceId", playerController.SetPlayerData)
 		playerRoutes.POST("/moderator/:raceId", playerController.BecomeModerator)
 		playerRoutes.POST("/read-notification/:notificationId/:raceId", playerController.IsReadNotification)
 	}

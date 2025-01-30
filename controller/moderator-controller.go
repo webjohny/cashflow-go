@@ -189,6 +189,7 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 
 	race.Options.EnableManager = body.EnableManager
 	race.Options.HideCards = body.HideCards
+	race.Options.HandMode = body.HandMode
 	race.Status = body.Status
 
 	if race.Status == entity.RaceStatus.FINISHED || race.Status == entity.RaceStatus.CANCELLED {

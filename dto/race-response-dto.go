@@ -39,6 +39,18 @@ type RacePlayerLiabilitiesResponseDTO struct {
 	CreditCardDebt int                     `json:"creditCardDebt"`
 }
 
+type RacePlayerProfessionResponseDTO struct {
+	ID         uint64 `json:"id"`
+	Profession string `json:"profession"`
+}
+
+type RacePlayerInfoResponseDTO struct {
+	ID         uint64                   `json:"id"`
+	Dream      entity.PlayerDream       `json:"dream"`
+	FullName   string                   `json:"fullName"`
+	Conditions entity.BigRaceConditions `json:"conditions"`
+}
+
 type GetRacePlayerResponseDTO struct {
 	ID                uint64                              `json:"id"`
 	UserId            uint64                              `json:"user_id"`
@@ -46,8 +58,8 @@ type GetRacePlayerResponseDTO struct {
 	Role              string                              `json:"role"`
 	Color             string                              `json:"color"`
 	Profile           RacePlayerProfileResponseDTO        `json:"profile"`
-	Info              entity.PlayerInfo                   `json:"info"`
-	Profession        entity.Profession                   `json:"profession"`
+	Info              RacePlayerInfoResponseDTO           `json:"info"`
+	Profession        RacePlayerProfessionResponseDTO     `json:"profession"`
 	IsRolledDice      bool                                `json:"is_rolled_dice"`
 	LastPosition      uint8                               `json:"last_position"`
 	Transactions      []RacePlayerTransactionsResponseDTO `json:"transactions"`

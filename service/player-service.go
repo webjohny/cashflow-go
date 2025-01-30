@@ -401,12 +401,31 @@ func (service *playerService) BigBankrupt(player entity.Player) error {
 	if player.ProfessionID > 0 {
 		profession = service.professionService.GetRandomProfession(&[]int{})
 	} else {
-		profession = player.Info.Profession
+		profession = service.professionService.GetByID(uint64(player.ProfessionID))
 	}
 
 	player.Reset(profession)
 
 	err, _ := service.UpdatePlayer(&player)
+
+	return err
+}
+
+func (service *playerService) SetPlayerData(raceId uint64, userId uint64, dto entity.PlayerInfoData) error {
+	logger.Info("PlayerService.SetPlayerData", map[string]interface{}{
+		"raceId": raceId,
+		"userId": userId,
+	})
+
+	err, player := service.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+	if err != nil {
+		return errors.New(storage.ErrorUndefinedPlayer)
+	}
+
+	player.Info.Data = dto
+
+	err, _ = service.UpdatePlayer(&player)
 
 	return err
 }
@@ -940,8 +959,16 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 			ExtraCashFlow: player.CashFlow,
 			Cash:          player.Cash,
 		},
-		Info:              player.Info,
-		Profession:        profession,
+		Info: dto.RacePlayerInfoResponseDTO{
+			ID:         player.Info.ID,
+			Dream:      player.Info.Dream,
+			FullName:   player.Info.FullName,
+			Conditions: player.Info.Conditions,
+		},
+		Profession: dto.RacePlayerProfessionResponseDTO{
+			ID:         profession.ID,
+			Profession: profession.Profession,
+		},
 		IsRolledDice:      player.IsRolledDice == 1,
 		LastPosition:      player.LastPosition,
 		Transactions:      make([]dto.RacePlayerTransactionsResponseDTO, 0),

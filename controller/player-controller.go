@@ -12,6 +12,8 @@ import (
 
 type PlayerController interface {
 	GetRacePlayer(ctx *gin.Context)
+	GetPlayerData(ctx *gin.Context)
+	SetPlayerData(ctx *gin.Context)
 	MoveOnBigRace(ctx *gin.Context)
 	SetDream(ctx *gin.Context)
 	BecomeModerator(ctx *gin.Context)
@@ -52,6 +54,66 @@ func (c *playerController) GetRacePlayer(ctx *gin.Context) {
 			err = errors.New(storage.ErrorGameIsFinished)
 		} else {
 			err, response = c.playerService.GetRacePlayer(raceId, userId, true)
+		}
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) GetPlayerData(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+	var response interface{}
+
+	if userId != 0 {
+		race := c.raceService.GetRaceByRaceId(raceId)
+
+		if race.ID == 0 {
+			err = errors.New(storage.ErrorUndefinedGame)
+		} else if race.Status == entity.RaceStatus.FINISHED {
+			err = errors.New(storage.ErrorGameIsFinished)
+		} else {
+			var player entity.Player
+			err, player = c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+			if player.ID > 0 {
+				response = player.Info.Data
+			}
+		}
+	}
+
+	request.FinalResponse(ctx, err, response)
+}
+
+func (c *playerController) SetPlayerData(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	raceId := helper.GetRaceId(ctx)
+
+	var setPlayerDataDTO entity.PlayerInfoData
+	var err error
+	var response interface{}
+
+	errDTO := ctx.ShouldBind(&setPlayerDataDTO)
+
+	if errDTO != nil {
+		response = request.BuildErrorResponse("Failed to process request", errDTO.Error(), request.EmptyObj{})
+		request.FinalResponse(ctx, err, response)
+		return
+	}
+
+	if userId != 0 {
+		race := c.raceService.GetRaceByRaceId(raceId)
+
+		if race.ID == 0 {
+			err = errors.New(storage.ErrorUndefinedGame)
+		} else if race.Status == entity.RaceStatus.FINISHED {
+			err = errors.New(storage.ErrorGameIsFinished)
+		} else {
+			err = c.playerService.SetPlayerData(raceId, userId, setPlayerDataDTO)
+
+			response = request.SuccessResponse(nil)
 		}
 	}
 
