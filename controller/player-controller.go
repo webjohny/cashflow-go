@@ -89,7 +89,7 @@ func (c *playerController) GetPlayerData(ctx *gin.Context) {
 					}
 				}
 				if len(player.Info.Data.SumExpenses) == 0 {
-					player.Info.Data.CashFlow = [][]string{
+					player.Info.Data.SumExpenses = [][]string{
 						{"", strconv.Itoa(player.CalculateTotalExpenses())},
 					}
 				}
