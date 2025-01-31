@@ -8,6 +8,7 @@ import (
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
 	"gopkg.in/errgo.v2/errors"
+	"strconv"
 )
 
 type PlayerController interface {
@@ -79,6 +80,7 @@ func (c *playerController) GetPlayerData(ctx *gin.Context) {
 			err, player = c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 			if player.ID > 0 {
+				player.Info.Data.Assets.Savings = strconv.Itoa(player.Assets.Savings)
 				response = player.Info.Data
 			}
 		}
