@@ -80,7 +80,24 @@ func (c *playerController) GetPlayerData(ctx *gin.Context) {
 			err, player = c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 			if player.ID > 0 {
-				player.Info.Data.Assets.Savings = strconv.Itoa(player.Assets.Savings)
+				if player.Info.Data.Assets.Savings == "" {
+					player.Info.Data.Assets.Savings = strconv.Itoa(player.Assets.Savings)
+				}
+				if len(player.Info.Data.CashFlow) == 0 {
+					player.Info.Data.CashFlow = [][]string{
+						{"", strconv.Itoa(player.CalculateCashFlow())},
+					}
+				}
+				if len(player.Info.Data.SumExpenses) == 0 {
+					player.Info.Data.CashFlow = [][]string{
+						{"", strconv.Itoa(player.CalculateTotalExpenses())},
+					}
+				}
+				if len(player.Info.Data.CommonIncome) == 0 {
+					player.Info.Data.CommonIncome = [][]string{
+						{"", strconv.Itoa(player.CalculateTotalIncome())},
+					}
+				}
 				response = player.Info.Data
 			}
 		}
