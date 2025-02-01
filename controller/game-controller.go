@@ -36,13 +36,12 @@ func NewGameController(gameService service.GameService) GameController {
 func (c *gameController) GetGame(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
 	raceId := helper.GetRaceId(ctx)
-	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
 
 	if userId != 0 {
-		err, response = c.gameService.GetGame(raceId, userId, bigRace)
+		err, response = c.gameService.GetGame(raceId, userId)
 	}
 
 	request.FinalResponse(ctx, err, response)

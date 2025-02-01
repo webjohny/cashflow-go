@@ -878,6 +878,17 @@ func (service *playerService) SetTransaction(player entity.Player, data dto.Tran
 }
 
 func (service *playerService) UpdatePlayer(b *entity.Player) (error, entity.Player) {
+	logger.Info("PlayerService.UpdatePlayer", map[string]interface{}{
+		"c":   b.Cash,
+		"acf": b.CashFlow,
+		"cf":  b.CalculateCashFlow(),
+		"ti":  b.CalculateTotalIncome(),
+		"te":  b.CalculateTotalExpenses(),
+		"pi":  b.CalculatePassiveIncome(),
+		"st":  b.SkippedTurns,
+		"p":   strconv.Itoa(int(b.LastPosition)) + "/" + strconv.Itoa(int(b.CurrentPosition)),
+	})
+
 	return service.playerRepository.UpdatePlayer(b)
 }
 

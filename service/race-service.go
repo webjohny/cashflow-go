@@ -59,13 +59,13 @@ func NewRaceService(raceRepo repository.RaceRepository, playerService PlayerServ
 }
 
 func (service *raceService) InsertRace(b *entity.Race) (error, entity.Race) {
-	logger.Info("RaceService.InsertRace", b)
+	logger.Info("RaceService.InsertRace")
 
 	return service.raceRepository.InsertRace(b)
 }
 
 func (service *raceService) UpdateRace(b *entity.Race) (error, entity.Race) {
-	logger.Info("RaceService.UpdateRace", b)
+	logger.Info("RaceService.UpdateRace")
 
 	return service.raceRepository.UpdateRace(b)
 }

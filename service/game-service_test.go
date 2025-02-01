@@ -112,7 +112,7 @@ func TestStartGame(t *testing.T) {
 		err, ratRace := gameService.Start(lobby.ID)
 
 		// Get game
-		err, raceResponse := gameService.GetGame(ratRace.ID, 0, false)
+		err, raceResponse := gameService.GetGame(ratRace.ID, 0)
 
 		playerRepo.FindPlayerByUsernameFunc = func(username string) entity.Player {
 			return entity.Player{

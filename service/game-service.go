@@ -15,7 +15,7 @@ import (
 type GameService interface {
 	Start(lobbyId uint64) (error, entity.Race)
 	RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto, isBigRace bool) (error, []int)
-	GetGame(raceId uint64, userId uint64, isBigRace bool) (error, dto.GetGameResponseDTO)
+	GetGame(raceId uint64, userId uint64) (error, dto.GetGameResponseDTO)
 	ChangeTurn(raceId uint64) error
 	Cancel(raceId uint64, userId uint64) error
 	Reset(raceId uint64, userId uint64) error
@@ -43,7 +43,7 @@ func NewGameService(
 	}
 }
 
-func (service *gameService) GetGame(raceId uint64, userId uint64, isBigRace bool) (error, dto.GetGameResponseDTO) {
+func (service *gameService) GetGame(raceId uint64, userId uint64) (error, dto.GetGameResponseDTO) {
 	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
 
 	if err != nil {

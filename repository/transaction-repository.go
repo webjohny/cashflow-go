@@ -111,7 +111,7 @@ func (db *transactionConnection) FindRaceTransaction(player entity.Player, data 
 func (db *transactionConnection) FindTransaction(data dto.TransactionDTO) entity.Transaction {
 	var transaction entity.Transaction
 
-	db.connection.Model(TransactionsTable).
+	db.connection.Model(&entity.Transaction{}).
 		Where("race_id", data.RaceID).
 		Where("player_id", data.PlayerID).
 		Where("details", data.Details).

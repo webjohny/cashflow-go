@@ -54,10 +54,10 @@ var (
 )
 
 func init() {
-	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true})
-	//log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+	//log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: false})
+	log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
 	log.SetOutput(colorable.NewColorableStdout())
-	log.SetReportCaller(true)
+	//log.SetReportCaller(true)
 
 	log.SetOutput(os.Stdout)
 

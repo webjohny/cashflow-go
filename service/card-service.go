@@ -412,6 +412,12 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 
 	err = service.processCard(action, race, player)
 
+	logger.Info("CardService.GetCard", map[string]interface{}{
+		"raceId":   raceId,
+		"playerId": player.ID,
+		"card":     helper.JsonSerialize(card),
+	})
+
 	if err == nil {
 		err, _ = service.raceService.UpdateRace(&race)
 	}

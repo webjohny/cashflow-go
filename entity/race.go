@@ -150,6 +150,7 @@ type Race struct {
 	Responses         []RaceResponse       `gorm:"type:json;serializer:json" json:"responses"`
 	IsMultiFlow       bool                 `gorm:"is_multi_flow" json:"is_multi_flow"`
 	Status            string               `gorm:"status;type:enum('lobby','started','cancelled','finished')" json:"status"`
+	Hash              string               `gorm:"hash" json:"hash"`
 	CurrentPlayer     RacePlayer           `gorm:"type:json;serializer:json" json:"current_player,omitempty"`
 	CurrentCard       Card                 `gorm:"type:json;serializer:json" json:"current_card,omitempty"`
 	Notifications     []RaceNotification   `gorm:"type:json;serializer:json" json:"notifications"`
