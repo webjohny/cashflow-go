@@ -44,6 +44,7 @@ type GetLobbyResponseDTO struct {
 	Hash     string               `json:"hash"`
 	GameId   uint64               `json:"game_id"`
 	LobbyId  uint64               `json:"lobby_id"`
+	Options  entity.RaceOptions   `json:"options"`
 	Players  []entity.LobbyPlayer `json:"players"`
 	Status   string               `json:"status"`
 }

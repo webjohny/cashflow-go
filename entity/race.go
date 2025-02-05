@@ -63,6 +63,9 @@ type RaceOptions struct {
 	EnableManager               bool              `json:"enableManager,omitempty"`
 	HideCards                   bool              `json:"hideCards,omitempty"`
 	HandMode                    bool              `json:"handMode,omitempty"`
+	BannerLink                  string            `json:"bannerLink,omitempty"`
+	BannerImage                 string            `json:"bannerImage,omitempty"`
+	MeetLink                    string            `json:"meetLink,omitempty"`
 	EnableWaitList              bool              `json:"enableWaitList,omitempty"`
 	CardCollection              string            `json:"cardCollection,omitempty"`
 }

@@ -16,6 +16,7 @@ import (
 type LobbyService interface {
 	GetByID(lobbyId uint64) entity.Lobby
 	Create(username string, userId uint64) (error, entity.Lobby)
+	SetOptions(lobbyId uint64, body dto.SetOptionsLobbyRequestDTO) error
 	Update(lobby *entity.Lobby) (error, entity.Lobby)
 	Leave(ID uint64, userId uint64) (error, entity.Lobby)
 	Cancel(ID uint64, userId uint64) (error, entity.Lobby)
@@ -43,6 +44,23 @@ func (service *lobbyService) GetByID(lobbyId uint64) entity.Lobby {
 
 func (service *lobbyService) Update(lobby *entity.Lobby) (error, entity.Lobby) {
 	return service.lobbyRepository.UpdateLobby(lobby)
+}
+
+func (service *lobbyService) SetOptions(lobbyId uint64, body dto.SetOptionsLobbyRequestDTO) error {
+	lobby := service.lobbyRepository.FindLobbyById(lobbyId)
+
+	if lobby.ID == 0 {
+		return errors.New(storage.ErrorUndefinedLobby)
+	}
+
+	lobby.Options.HandMode = body.HandMode
+	lobby.Options.MeetLink = body.MeetLink
+	lobby.Options.BannerLink = body.BannerLink
+	lobby.Options.BannerImage = body.BannerImage
+
+	err, _ := service.Update(&lobby)
+
+	return err
 }
 
 func (service *lobbyService) ChangeRoleByGameIdAndUserId(gameId uint64, userId uint64, role string) error {
@@ -111,6 +129,7 @@ func (service *lobbyService) GetLobby(lobbyId uint64, userId uint64) (error, dto
 		Players:  lobby.Players,
 		Status:   lobby.Status,
 		LobbyId:  lobby.ID,
+		Options:  lobby.Options,
 		GameId:   lobby.GameId,
 		Hash:     helper.CreateHashByJson(lobby),
 	}
@@ -128,7 +147,7 @@ func (service *lobbyService) Create(username string, userId uint64) (error, enti
 		Players:    make([]entity.LobbyPlayer, 0),
 		MaxPlayers: LobbyMaxPlayers,
 		Status:     entity.LobbyStatus.New,
-		Options:    make(map[string]interface{}),
+		Options:    entity.RaceOptions{},
 		CreatedAt:  datatypes.Date(time.Now()),
 	}
 	lobby.AddOwner(userId, username)

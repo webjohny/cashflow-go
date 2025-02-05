@@ -123,6 +123,7 @@ func main() {
 		lobbyRoutes.GET("/join/:lobbyId", lobbyController.Join)
 		lobbyRoutes.GET("/leave/:lobbyId", lobbyController.Leave)
 		lobbyRoutes.GET("/cancel/:lobbyId", lobbyController.Cancel)
+		lobbyRoutes.PUT("/options/:lobbyId", lobbyController.SetOptions)
 		// userRoutes.POST("/picture", userController.SaveFile)
 	}
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
@@ -15,6 +16,7 @@ type LobbyController interface {
 	Join(ctx *gin.Context)
 	Leave(ctx *gin.Context)
 	Cancel(ctx *gin.Context)
+	SetOptions(ctx *gin.Context)
 	GetLobby(ctx *gin.Context)
 }
 
@@ -54,6 +56,25 @@ func (c *lobbyController) Create(ctx *gin.Context) {
 	}
 
 	request.FinalResponse(ctx, err, lobby)
+}
+
+func (c *lobbyController) SetOptions(ctx *gin.Context) {
+	userId := helper.GetUserId(ctx)
+	lobbyId := helper.GetLobbyId(ctx)
+
+	var err error
+	var body dto.SetOptionsLobbyRequestDTO
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	if userId != 0 {
+		err = c.lobbyService.SetOptions(lobbyId, body)
+	}
+
+	request.FinalResponse(ctx, err, nil)
 }
 
 func (c *lobbyController) Join(ctx *gin.Context) {

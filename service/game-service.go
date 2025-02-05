@@ -284,7 +284,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		BankruptedPlayers: make([]entity.RaceBankruptPlayer, 0),
 		Logs:              make([]entity.RaceLog, 0),
 		Dice:              make([]int, 0),
-		Options:           entity.RaceOptions{},
+		Options:           lobby.Options,
 		CreatedAt:         datatypes.Date(time.Now()),
 	})
 
