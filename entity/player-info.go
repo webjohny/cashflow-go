@@ -7,11 +7,12 @@ type PlayerDream struct {
 }
 
 type PlayerInfo struct {
-	ID         uint64            `json:"id"`
-	Dream      PlayerDream       `json:"dream"`
-	FullName   string            `json:"fullName"`
-	Data       PlayerInfoData    `json:"data"`
-	Conditions BigRaceConditions `json:"conditions"`
+	ID                uint64            `json:"id"`
+	Dream             PlayerDream       `json:"dream"`
+	FullName          string            `json:"fullName"`
+	GoalPassiveIncome int               `json:"goalPassiveIncome"`
+	Data              PlayerInfoData    `json:"data"`
+	Conditions        BigRaceConditions `json:"conditions"`
 }
 
 type PlayerInfoData struct {

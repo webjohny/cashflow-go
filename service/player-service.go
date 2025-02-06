@@ -453,6 +453,7 @@ func (service *playerService) MoveOnBigRace(player entity.Player) error {
 	player.DualDiceCount = 0
 	player.ExtraDices = 0
 	player.Salary = 0
+	player.Info.GoalPassiveIncome = cashFlow + 150_000
 	player.Dices = make([]int, 0)
 	player.Expenses = make(map[string]int)
 	player.Assets = entity.PlayerAssets{
@@ -537,7 +538,7 @@ func (service *playerService) MarketDamage(card entity.CardMarket, player entity
 	return nil
 }
 
-func (service *playerService) MarketManipulation(card entity.CardMarket, player entity.Player) error {
+func (service *playerService) MarketManipulation(card entity.CardMarket, player entity.Player, players []entity.Player) error {
 	logger.Info("PlayerService.MarketManipulation", map[string]interface{}{
 		"playerId": player.ID,
 		"card":     card,
@@ -563,6 +564,13 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 			}
 
 			player.RemoveRealEstate(asset.ID)
+
+			for _, anotherPlayer := range players {
+				if anotherPlayer.FindRealEstateByID(asset.ID).ID != "" {
+					anotherPlayer.RemoveRealEstate(asset.ID)
+					_, _ = service.UpdatePlayer(&player)
+				}
+			}
 
 			if card.AssetType == entity.MarketTypes.AnyRealEstate {
 				break
@@ -596,6 +604,15 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 			}
 
 			businesses[i].CashFlow += (card.CashFlow / 100) * percent
+
+			for _, anotherPlayer := range players {
+				bKey, anBusiness := anotherPlayer.FindBusinessByID(asset.ID)
+
+				if anBusiness != nil && anBusiness.Percent > 0 {
+					anotherPlayer.Assets.Business[bKey].CashFlow += (card.CashFlow / 100) * anBusiness.Percent
+					_, _ = service.UpdatePlayer(&anotherPlayer)
+				}
+			}
 
 			if card.AssetType == entity.MarketTypes.AnyBusiness ||
 				card.AssetType == entity.MarketTypes.AnyStartup {
@@ -971,10 +988,11 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 			Cash:          player.Cash,
 		},
 		Info: dto.RacePlayerInfoResponseDTO{
-			ID:         player.Info.ID,
-			Dream:      player.Info.Dream,
-			FullName:   player.Info.FullName,
-			Conditions: player.Info.Conditions,
+			ID:                player.Info.ID,
+			Dream:             player.Info.Dream,
+			GoalPassiveIncome: player.Info.GoalPassiveIncome,
+			FullName:          player.Info.FullName,
+			Conditions:        player.Info.Conditions,
 		},
 		Profession: dto.RacePlayerProfessionResponseDTO{
 			ID:         profession.ID,

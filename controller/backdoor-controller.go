@@ -40,6 +40,8 @@ func (c *backdoorController) ChangeCard(ctx *gin.Context) {
 	race := c.raceService.GetRaceByRaceId(raceId)
 	race.CurrentCard = body.Card
 
+	err = c.cardService.ProcessCard(race)
+
 	if race.CurrentCard.Family == "market" || race.CurrentCard.Type == "stock" {
 		race.IsMultiFlow = race.CurrentCard.OnlyYou == false
 	} else {

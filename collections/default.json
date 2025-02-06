@@ -1773,7 +1773,17 @@
       "symbol": "new baby"
     }
   ],
-  "market": [
+  "market": [{
+    "id": "success",
+    "type": "success",
+    "heading": "Экономический рост",
+    "symbol": "jewelry",
+    "description": "Ваша компания расширяется, вы делегировали основную работу и ваш пасс. дох. увеличился на $300",
+    "asset_type": "eachStartup",
+    "cash_flow": 300,
+    "only_you": true
+  }],
+  "market1": [
     {
       "id": "damage",
       "type": "damage",

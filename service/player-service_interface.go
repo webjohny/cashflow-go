@@ -35,7 +35,7 @@ type PlayerService interface {
 	MoveOnBigRace(player entity.Player) error
 	SetDream(raceId uint64, userId uint64, playerDream entity.PlayerDream) error
 	MarketDamage(card entity.CardMarket, player entity.Player) error
-	MarketManipulation(card entity.CardMarket, player entity.Player) error
+	MarketManipulation(card entity.CardMarket, player entity.Player, players []entity.Player) error
 	MarketBusiness(card entity.CardMarketBusiness, player entity.Player) error
 	SellAllProperties(player entity.Player) (error, int)
 	SetTransaction(player entity.Player, data dto.TransactionDTO) error

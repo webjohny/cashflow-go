@@ -21,6 +21,7 @@ type CardService interface {
 	GetCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
 	TestCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
 	CheckPayDay(player entity.Player) int
+	ProcessCard(race entity.Race) error
 }
 
 type CardRatRace struct {
@@ -123,7 +124,7 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 		race.IsMultiFlow = false
 	}
 
-	err = service.processCard(action, race, player)
+	err = service.ProcessCard(race)
 
 	if err == nil {
 		err, _ = service.raceService.UpdateRace(&race)
@@ -410,7 +411,7 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 
 	race.CurrentCard = card
 
-	err = service.processCard(action, race, player)
+	err = service.ProcessCard(race)
 
 	logger.Info("CardService.GetCard", map[string]interface{}{
 		"raceId":   raceId,
@@ -425,10 +426,10 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 	return err, race.CurrentCard
 }
 
-func (service *cardService) processCard(action string, race entity.Race, currentPlayer entity.Player) error {
+func (service *cardService) ProcessCard(race entity.Race) error {
 	card := race.CurrentCard
 
-	if action == "small" {
+	if card.Name == "smallDeal" {
 		if card.AssetType == entity.StockTypes.Manipulation {
 			players := service.playerService.GetAllPlayersByRaceId(race.ID)
 			cardStocks := entity.CardStocks{}
@@ -453,7 +454,7 @@ func (service *cardService) processCard(action string, race entity.Race, current
 			if (race.CurrentCard.OnlyYou && race.CurrentPlayer.ID == pl.ID) || !race.CurrentCard.OnlyYou {
 				cardMarket := entity.CardMarket{}
 				cardMarket.Fill(race.CurrentCard)
-				err := service.playerService.MarketManipulation(cardMarket, pl)
+				err := service.playerService.MarketManipulation(cardMarket, pl, players)
 
 				if err != nil {
 					logger.Error(err)

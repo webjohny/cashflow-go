@@ -114,7 +114,7 @@ func (c *playerTestController) MarketManipulation(ctx *gin.Context) {
 
 	card := c.getCard(ctx, "inflation").(entity.CardMarket)
 
-	err := c.playerService.MarketManipulation(card, b)
+	err := c.playerService.MarketManipulation(card, b, []entity.Player{b})
 
 	if err != nil {
 		logger.Error(err, nil)

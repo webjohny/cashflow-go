@@ -45,10 +45,11 @@ type RacePlayerProfessionResponseDTO struct {
 }
 
 type RacePlayerInfoResponseDTO struct {
-	ID         uint64                   `json:"id"`
-	Dream      entity.PlayerDream       `json:"dream"`
-	FullName   string                   `json:"fullName"`
-	Conditions entity.BigRaceConditions `json:"conditions"`
+	ID                uint64                   `json:"id"`
+	Dream             entity.PlayerDream       `json:"dream"`
+	FullName          string                   `json:"fullName"`
+	GoalPassiveIncome int                      `json:"goalPassiveIncome"`
+	Conditions        entity.BigRaceConditions `json:"conditions"`
 }
 
 type GetRacePlayerResponseDTO struct {
