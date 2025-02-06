@@ -560,6 +560,21 @@
       "cash_flow": 300
     }
   ],
+  "__smallDeal": [
+    {
+      "id": "dsdasdas",
+      "type": "stock",
+      "symbol": "Lifecell",
+      "heading": "Lifecell оператор мобильной связи",
+      "description": "Акции оператора мобильной связи Lifecell достигли верхней границы своего диапазона. Вложение выглядит перспективным для краткосрочной торговли.",
+      "rule": "Только ты можешь купить акции. Каждый может продать по этой цене.",
+      "price": 30,
+      "range": [
+        5,
+        30
+      ]
+    }
+  ],
   "smallDeal": [
     {
       "id": "lifece0r1100201",
@@ -1773,7 +1788,7 @@
       "symbol": "new baby"
     }
   ],
-  "market": [{
+  "__market": [{
     "id": "success",
     "type": "success",
     "heading": "Экономический рост",
@@ -1783,7 +1798,7 @@
     "cash_flow": 300,
     "only_you": true
   }],
-  "market1": [
+  "market": [
     {
       "id": "damage",
       "type": "damage",
