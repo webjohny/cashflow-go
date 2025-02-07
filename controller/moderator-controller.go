@@ -165,6 +165,11 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 		race := c.raceService.GetRaceByRaceId(raceId)
 		user := race.GetNextPlayer()
 		race.Responses = c.raceService.CreateResponses(raceId, player.ID)
+		race.CurrentPlayer = entity.RacePlayer{
+			ID:       user.ID,
+			UserId:   user.UserId,
+			Username: user.Username,
+		}
 		err = c.raceService.ChangeTurn(race, true, int(user.ID))
 	}
 
