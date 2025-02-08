@@ -557,7 +557,7 @@ func (e *Player) ConditionsForCompletedBigRace() bool {
 }
 
 func (e *Player) GoalPassiveIncomeOnBigRace() bool {
-	return e.Info.GoalPassiveIncome <= e.CalculatePassiveIncome()
+	return e.Info.GoalPassiveIncome > 0 && e.Info.GoalPassiveIncome <= e.CalculatePassiveIncome()
 }
 
 func (e *Player) GoalPersonalDream() bool {
