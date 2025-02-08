@@ -133,7 +133,8 @@ type CardDoodad struct {
 	Description   string `json:"description"`
 	Cost          int    `json:"cost"`
 	Rule          string `json:"rule,omitempty"`
-	IsConditional bool   `json:"is_conditional"`
+	IsConditional bool   `json:"is_conditional,omitempty"`
+	AssetType     string `json:"asset_type,omitempty"`
 	HasBabies     bool   `json:"has_babies"`
 }
 

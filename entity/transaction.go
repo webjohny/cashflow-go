@@ -1,8 +1,6 @@
 package entity
 
-import (
-	"gorm.io/datatypes"
-)
+import "time"
 
 var TransactionCardType = struct {
 	Skip             string
@@ -111,5 +109,5 @@ type Transaction struct {
 	TransactionType string           `gorm:"type:varchar(20)" json:"transaction_type"` // Handle enum in application logic
 	Details         string           `gorm:"type:varchar(255)" json:"description"`
 	Data            *TransactionData `gorm:"type:json;serializer:json" json:"data,omitempty"`
-	CreatedAt       datatypes.Date   `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+	CreatedAt       time.Time        `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }

@@ -3,7 +3,6 @@ package entity
 import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/objects"
-	"gorm.io/datatypes"
 	"math/rand"
 	"time"
 )
@@ -162,7 +161,7 @@ type Race struct {
 	Dice              []int                `gorm:"type:json;serializer:json" json:"dice"`
 	Options           RaceOptions          `gorm:"type:json;serializer:json" json:"options"`
 	CardMap           RaceCardMap          `gorm:"type:json;serializer:json" json:"card_map"`
-	CreatedAt         datatypes.Date       `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+	CreatedAt         time.Time            `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }
 
 func (r *Race) Respond(ID uint64, currentPlayerID uint64) {

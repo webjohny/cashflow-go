@@ -98,6 +98,7 @@ func (service *playerService) AreYouBankrupt(player entity.Player) error {
 		})
 		player.Reset(profession)
 		player.HasBankrupt = 1
+		player.Info = entity.PlayerInfo{}
 
 		err, _ := service.playerRepository.UpdatePlayer(&player)
 
@@ -118,6 +119,10 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 		"playerId": player.ID,
 		"card":     card,
 	})
+
+	if player.HasHealthyInsurance() {
+		return errors.New(storage.WarnYouHaveHealthyInsurance)
+	}
 
 	cost := card.Cost
 
@@ -453,6 +458,7 @@ func (service *playerService) MoveOnBigRace(player entity.Player) error {
 	player.DualDiceCount = 0
 	player.ExtraDices = 0
 	player.Salary = 0
+	player.Info.Data = entity.PlayerInfoData{}
 	player.Info.GoalPassiveIncome = cashFlow + 150_000
 	player.Dices = make([]int, 0)
 	player.Expenses = make(map[string]int)

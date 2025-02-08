@@ -110,6 +110,8 @@ func (c *moderatorController) UpdatePlayer(ctx *gin.Context) {
 	player.CashFlow = body.CashFlow
 	player.Babies = uint8(body.Babies)
 	player.SkippedTurns = uint8(body.SkippedTurns)
+	player.DualDiceCount = body.DualDiceCount
+	player.ExtraDices = body.ExtraDices
 	player.OnBigRace = body.OnBigRace
 	player.IsActive = body.IsActive
 	player.Assets.Savings = body.Savings

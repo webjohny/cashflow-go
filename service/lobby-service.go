@@ -8,7 +8,6 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
-	"gorm.io/datatypes"
 	"log"
 	"time"
 )
@@ -148,7 +147,7 @@ func (service *lobbyService) Create(username string, userId uint64) (error, enti
 		MaxPlayers: LobbyMaxPlayers,
 		Status:     entity.LobbyStatus.New,
 		Options:    entity.RaceOptions{},
-		CreatedAt:  datatypes.Date(time.Now()),
+		CreatedAt:  time.Now(),
 	}
 	lobby.AddOwner(userId, username)
 	err, instance := service.lobbyRepository.InsertLobby(lobby)

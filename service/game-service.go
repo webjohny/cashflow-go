@@ -7,7 +7,6 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
-	"gorm.io/datatypes"
 	"log"
 	"time"
 )
@@ -218,7 +217,7 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	race.Logs = make([]entity.RaceLog, 0)
 	race.Dice = make([]int, 0)
 	race.Options = entity.RaceOptions{}
-	race.CreatedAt = datatypes.Date(time.Now())
+	race.CreatedAt = time.Now()
 	err, _ := service.raceService.UpdateRace(&race)
 
 	return err
@@ -285,7 +284,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		Logs:              make([]entity.RaceLog, 0),
 		Dice:              make([]int, 0),
 		Options:           lobby.Options,
-		CreatedAt:         datatypes.Date(time.Now()),
+		CreatedAt:         time.Now(),
 	})
 
 	if err != nil {
@@ -316,7 +315,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 			Assets:       profession.Assets,
 			Liabilities:  profession.Liabilities,
 			ProfessionID: uint8(profession.ID),
-			CreatedAt:    datatypes.Date(time.Now()),
+			CreatedAt:    time.Now(),
 		})
 
 		if playerErr != nil {

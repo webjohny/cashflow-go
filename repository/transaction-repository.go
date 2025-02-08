@@ -6,7 +6,6 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/request"
-	"gorm.io/datatypes"
 	"time"
 
 	"gorm.io/gorm"
@@ -36,7 +35,7 @@ func NewTransactionRepository(dbConn *gorm.DB) TransactionRepository {
 }
 
 func (db *transactionConnection) InsertTransaction(b *entity.Transaction) error {
-	b.CreatedAt = datatypes.Date(time.Now())
+	b.CreatedAt = time.Now()
 	result := db.connection.Save(&b)
 
 	if result.Error != nil {

@@ -2,10 +2,10 @@ package entity
 
 import (
 	"github.com/webjohny/cashflow-go/helper"
-	"gorm.io/datatypes"
 	"math"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 var PlayerRoles = struct {
@@ -98,7 +98,7 @@ type Player struct {
 	HasBankrupt     uint8                `json:"has_bankrupt"`
 	AboutToBankrupt string               `json:"about_to_bankrupt" gorm:"type:varchar(255)"`
 	IsActive        bool                 `gorm:"default:true" json:"is_active"`
-	CreatedAt       datatypes.Date       `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+	CreatedAt       time.Time            `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 
 	PassiveIncome int `json:"passive_income" gorm:"-"`
 	TotalExpenses int `json:"total_expenses" gorm:"-"`
@@ -373,6 +373,16 @@ func (e *Player) FindAllRealEstateBySymbol(symbol string) []CardRealEstate {
 	}
 
 	return realEstates
+}
+
+func (e *Player) HasHealthyInsurance() bool {
+	for i := 0; i < len(e.Assets.OtherAssets); i++ {
+		if OtherAssetTypes.HealthyInsurance == e.Assets.OtherAssets[i].AssetType {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (e *Player) FindOtherAssetsBySymbol(symbol string) (int, *CardOtherAssets) {

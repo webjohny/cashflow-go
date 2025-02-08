@@ -727,6 +727,7 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 		Cost:          race.CurrentCard.Cost,
 		Rule:          race.CurrentCard.Rule,
 		IsConditional: race.CurrentCard.IsConditional,
+		AssetType:     race.CurrentCard.AssetType,
 		HasBabies:     race.CurrentCard.HasBabies,
 	}, player)
 

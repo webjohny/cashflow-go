@@ -2,7 +2,7 @@ package entity
 
 import (
 	"github.com/webjohny/cashflow-go/helper"
-	"gorm.io/datatypes"
+	"time"
 )
 
 var LobbyStatus = struct {
@@ -23,13 +23,13 @@ type LobbyPlayer struct {
 }
 
 type Lobby struct {
-	ID         uint64         `gorm:"primary_key:auto_increment" json:"id"`
-	GameId     uint64         `gorm:"index;type:int(11)" json:"game_id"`
-	Players    []LobbyPlayer  `gorm:"type:json;serializer:json" json:"players"`
-	MaxPlayers int8           `gorm:"max_players:int(3)" json:"max_players"`
-	Status     string         `gorm:"status;type:enum('new','started','cancelled')" json:"status"`
-	Options    RaceOptions    `gorm:"type:json;serializer:json" json:"options"`
-	CreatedAt  datatypes.Date `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
+	ID         uint64        `gorm:"primary_key:auto_increment" json:"id"`
+	GameId     uint64        `gorm:"index;type:int(11)" json:"game_id"`
+	Players    []LobbyPlayer `gorm:"type:json;serializer:json" json:"players"`
+	MaxPlayers int8          `gorm:"max_players:int(3)" json:"max_players"`
+	Status     string        `gorm:"status;type:enum('new','started','cancelled')" json:"status"`
+	Options    RaceOptions   `gorm:"type:json;serializer:json" json:"options"`
+	CreatedAt  time.Time     `gorm:"column:created_at;type:datetime;default:current_timestamp;not null" json:"created_at"`
 }
 
 func (l *Lobby) PreparePlayer(raceId uint64, username string, profession Profession) Player {

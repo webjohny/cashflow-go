@@ -19,11 +19,13 @@ var BusinessTypes = struct {
 }
 
 var OtherAssetTypes = struct {
-	Piece string
-	Whole string
+	Piece            string
+	Whole            string
+	HealthyInsurance string
 }{
-	Piece: "piece",
-	Whole: "whole",
+	Piece:            "piece",
+	Whole:            "whole",
+	HealthyInsurance: "healthyInsurance",
 }
 
 var RealEstateTypes = struct {

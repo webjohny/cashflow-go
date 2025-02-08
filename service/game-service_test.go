@@ -7,7 +7,6 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	repository_mocks "github.com/webjohny/cashflow-go/repository/mocks"
 	"github.com/webjohny/cashflow-go/service"
-	"gorm.io/datatypes"
 	"testing"
 	"time"
 )
@@ -27,7 +26,7 @@ func TestStartGame(t *testing.T) {
 	//	MaxPlayers: service.LobbyMaxPlayers,
 	//	Status:     entity.LobbyStatus.New,
 	//	Options:    make(map[string]interface{}),
-	//	CreatedAt:  datatypes.Date(time.Now()),
+	//	CreatedAt:  time.Now(),
 	//}
 
 	lobbyDefault := entity.Lobby{
@@ -36,7 +35,7 @@ func TestStartGame(t *testing.T) {
 		MaxPlayers: service.LobbyMaxPlayers,
 		Status:     entity.LobbyStatus.New,
 		Options:    make(map[string]interface{}),
-		CreatedAt:  datatypes.Date(time.Now()),
+		CreatedAt:  time.Now(),
 	}
 
 	lobbyService := service.NewLobbyService(lobbyRepo)
@@ -203,7 +202,7 @@ func TestStartGame(t *testing.T) {
 			HasBankrupt:     0,
 			AboutToBankrupt: "",
 			HasMlm:          0,
-			CreatedAt:       datatypes.Date{},
+			CreatedAt:       time.Time{},
 		}
 
 		assert.NoError(t, err)
