@@ -98,7 +98,7 @@ func (service *playerService) AreYouBankrupt(player entity.Player) error {
 		})
 		player.Reset(profession)
 		player.HasBankrupt = 1
-		player.Info = entity.PlayerInfo{}
+		player.Info.Data = entity.PlayerInfoData{}
 
 		err, _ := service.playerRepository.UpdatePlayer(&player)
 

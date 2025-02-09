@@ -38,8 +38,6 @@ type RaceService interface {
 	GetRacePlayersByRaceId(raceId uint64, all bool) []dto.GetRacePlayerResponseDTO
 	GetFormattedRaceResponse(raceId uint64, hasExtraInfo bool) dto.GetRaceResponseDTO
 	SetTransaction(player entity.Player, card dto.TransactionCardDTO) error
-	RemovePlayer(raceId uint64, userId uint64) error
-	SetOptions(raceId uint64, options entity.RaceOptions) error
 	InsertRace(b *entity.Race) (error, entity.Race)
 	UpdateRace(b *entity.Race) (error, entity.Race)
 }
@@ -68,25 +66,6 @@ func (service *raceService) UpdateRace(b *entity.Race) (error, entity.Race) {
 	logger.Info("RaceService.UpdateRace")
 
 	return service.raceRepository.UpdateRace(b)
-}
-
-func (service *raceService) SetOptions(raceId uint64, options entity.RaceOptions) error {
-	logger.Info("RaceService.SetOptions", map[string]interface{}{
-		"raceId":  raceId,
-		"options": options,
-	})
-
-	race := service.GetRaceByRaceId(raceId)
-
-	if race.ID == 0 {
-		return errors.New(storage.ErrorUndefinedGame)
-	}
-
-	race.Options.Merge(options)
-
-	err, _ := service.raceRepository.UpdateRace(&race)
-
-	return err
 }
 
 func (service *raceService) GetRaceAndPlayer(raceId uint64, userId uint64) (error, entity.Race, entity.Player) {
@@ -877,29 +856,6 @@ func (service *raceService) PaydayAction(raceId uint64, userId uint64, actionTyp
 	}
 
 	return service.ChangeTurn(race, false, 0)
-}
-
-func (service *raceService) RemovePlayer(raceId uint64, userId uint64) error {
-	logger.Info("RaceService.RemovePlayer", map[string]interface{}{
-		"raceId": raceId,
-		"userId": userId,
-	})
-
-	err, race, player := service.GetRaceAndPlayer(raceId, userId)
-
-	if err != nil {
-		return err
-	}
-
-	race.RemoveResponsePlayer(player.ID)
-
-	if race.CurrentPlayer.ID == player.ID {
-		race.PickCurrentPlayer(int(race.Responses[0].ID))
-	}
-
-	err, _ = service.UpdateRace(&race)
-
-	return err
 }
 
 func (service *raceService) GetRaceByRaceId(raceId uint64) entity.Race {

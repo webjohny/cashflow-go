@@ -200,21 +200,22 @@ func (c *playerController) BecomeModerator(ctx *gin.Context) {
 		return
 	}
 
-	err = c.raceService.RemovePlayer(raceId, userId)
+	err, race, player := c.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		request.FinalResponse(ctx, err, nil)
 		return
 	}
 
-	err = c.raceService.SetOptions(raceId, entity.RaceOptions{
-		EnableManager: true,
-	})
+	race.RemoveResponsePlayer(player.ID)
 
-	if err != nil {
-		request.FinalResponse(ctx, err, nil)
-		return
+	if race.CurrentPlayer.ID == player.ID {
+		race.PickCurrentPlayer(int(race.Responses[0].ID))
 	}
+
+	race.Options.EnableManager = true
+
+	err, _ = c.raceService.UpdateRace(&race)
 
 	request.FinalResponse(ctx, err, response)
 }
