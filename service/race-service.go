@@ -687,11 +687,15 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	if player.Babies == 0 && race.CurrentCard.HasBabies {
+	if (player.Babies == 0 && race.CurrentCard.HasBabies) || player.HasHealthyInsurance() {
 		err = service.ChangeTurn(race, false, 0)
 
 		if err != nil {
 			return err
+		}
+
+		if player.HasHealthyInsurance() {
+			return errors.New(storage.WarnYouHaveHealthyInsurance)
 		}
 
 		return errors.New(storage.WarnYouHaveNoBabies)
