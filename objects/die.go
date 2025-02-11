@@ -1,6 +1,8 @@
 package objects
 
 import (
+	cryptoRand "crypto/rand"
+	"math/big"
 	"math/rand"
 	"time"
 )
@@ -22,9 +24,12 @@ func NewDie(numberOfSides, face int) Die {
 // Roll simulates rolling the die and returns the face value
 func (d *Die) Roll() int {
 	// Seed the random number generator to produce different results each time
-	rand.Seed(time.Now().UnixNano())
+	num, _ := cryptoRand.Int(cryptoRand.Reader, big.NewInt(999999999999))
+	rand.Seed(time.Now().UnixNano() + num.Int64())
 
 	// Simulate rolling the die
+	d.face = rand.Intn(d.numberOfSides) + 1
+	d.face = rand.Intn(d.numberOfSides) + 1
 	d.face = rand.Intn(d.numberOfSides) + 1
 	//d.face = 6
 

@@ -10,6 +10,7 @@ import (
 	"github.com/webjohny/cashflow-go/repository"
 	"github.com/webjohny/cashflow-go/storage"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -572,7 +573,7 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 			player.RemoveRealEstate(asset.ID)
 
 			for _, anotherPlayer := range players {
-				if anotherPlayer.FindRealEstateByID(asset.ID).ID != "" {
+				if anotherPlayer.ID != player.ID && anotherPlayer.FindRealEstateByID(asset.ID).ID != "" {
 					anotherPlayer.RemoveRealEstate(asset.ID)
 					_, _ = service.UpdatePlayer(&player)
 				}
@@ -582,6 +583,14 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 				break
 			}
 		}
+
+		for k, rE := range player.Assets.RealEstates {
+			for _, item := range realEstates {
+				if rE.ID == item.ID {
+					player.Assets.RealEstates[k] = item
+				}
+			}
+		}
 	}
 
 	if card.Type == "success" {
@@ -589,13 +598,11 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 
 		//@toDo make by ID for any business
 		if card.Symbol != "ANY" {
-			assets := player.FindAllBusinessBySymbol(card.Symbol)
+			businesses = player.FindAllBusinessBySymbol(card.Symbol)
 
-			if len(assets) == 0 {
+			if len(businesses) == 0 {
 				return nil
 			}
-
-			businesses = assets
 		}
 
 		for i, asset := range businesses {
@@ -612,6 +619,10 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 			businesses[i].CashFlow += (card.CashFlow / 100) * percent
 
 			for _, anotherPlayer := range players {
+				if anotherPlayer.ID == player.ID {
+					continue
+				}
+
 				bKey, anBusiness := anotherPlayer.FindBusinessByID(asset.ID)
 
 				if anBusiness != nil && anBusiness.Percent > 0 {
@@ -620,12 +631,18 @@ func (service *playerService) MarketManipulation(card entity.CardMarket, player 
 				}
 			}
 
-			if card.AssetType == entity.MarketTypes.AnyBusiness ||
-				card.AssetType == entity.MarketTypes.AnyStartup {
+			if strings.HasPrefix(card.AssetType, "any") {
 				break
 			}
 		}
-		player.Assets.Business = businesses
+
+		for k, bus := range player.Assets.Business {
+			for _, item := range businesses {
+				if bus.ID == item.ID {
+					player.Assets.Business[k] = item
+				}
+			}
+		}
 	}
 
 	err, _ := service.UpdatePlayer(&player)
