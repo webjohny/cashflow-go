@@ -124,30 +124,26 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 		return errors.New(storage.ErrorTransactionAlreadyExists), false
 	}
 
-	var request entity.UserRequest
+	if race.Options.EnableManager {
+		var request entity.UserRequest
 
-	request.Type = data.Type
-	request.CurrentCard = race.CurrentCard.ID
-	request.RaceID = raceId
-	request.UserID = userId
-	request.Message = data.Message
-	request.Amount = data.Amount
-	request.Data = map[string]interface{}{
-		"last":    player.LastPosition,
-		"current": player.CurrentPosition,
-	}
+		request.Type = data.Type
+		request.CurrentCard = race.CurrentCard.ID
+		request.RaceID = raceId
+		request.UserID = userId
+		request.Message = data.Message
+		request.Amount = data.Amount
+		request.Data = map[string]interface{}{
+			"last":    player.LastPosition,
+			"current": player.CurrentPosition,
+		}
 
-	if !race.Options.EnableManager {
-		request.Status = 1
-	}
+		err, _ = service.userRequestRepository.Insert(&request)
 
-	err, _ = service.userRequestRepository.Insert(&request)
-
-	if err != nil {
-		return err, false
-	}
-
-	if !race.Options.EnableManager {
+		if err != nil {
+			return err, false
+		}
+	} else {
 		err = service.playerService.UpdateCash(&player, data.Amount, &transaction)
 
 		return err, true
@@ -401,7 +397,7 @@ func (service *financeService) TakeLoan(raceId uint64, userId uint64, amount int
 		"amount": amount,
 	})
 
-	err, player := service.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+	err, race, player := service.raceService.GetRaceAndPlayer(raceId, userId)
 
 	if err != nil {
 		return err
@@ -411,9 +407,45 @@ func (service *financeService) TakeLoan(raceId uint64, userId uint64, amount int
 		return errors.New(storage.ErrorUndefinedPlayer)
 	}
 
-	if amount%1000 != 0 {
-		return errors.New(storage.ErrorWrongAmountForTakingLoan)
+	transaction := dto.TransactionDTO{
+		CardID:      &race.CurrentCard.ID,
+		CardType:    entity.TransactionCardType.TakeLoan,
+		Details:     "",
+		PlayerID:    player.ID,
+		RaceID:      player.RaceID,
+		CurrentCash: &player.Cash,
 	}
 
-	return service.playerService.TakeLoan(player, amount)
+	if trx := service.playerService.GetTransaction(transaction); trx.ID != 0 {
+		return errors.New(storage.ErrorTransactionAlreadyExists)
+	}
+
+	if race.Options.EnableManager {
+		var request entity.UserRequest
+
+		request.Type = entity.TransactionCardType.TakeLoan
+		request.CurrentCard = race.CurrentCard.ID
+		request.RaceID = raceId
+		request.UserID = userId
+		request.Message = entity.TransactionCardType.TakeLoan
+		request.Amount = amount
+		request.Data = map[string]interface{}{
+			"last":    player.LastPosition,
+			"current": player.CurrentPosition,
+		}
+
+		err, _ = service.userRequestRepository.Insert(&request)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		if amount%1000 != 0 {
+			return errors.New(storage.ErrorWrongAmountForTakingLoan)
+		}
+
+		return service.playerService.TakeLoan(player, amount)
+	}
+
+	return err
 }

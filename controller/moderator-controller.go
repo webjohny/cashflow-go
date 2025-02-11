@@ -247,21 +247,19 @@ func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
 	if userRequest.ID > 0 && userRequest.Status == 1 {
 		err, player = c.playerService.GetPlayerByUserIdAndRaceId(userRequest.RaceID, userRequest.UserID)
 
-		cardType := entity.TransactionCardType.Payday
-
-		if userRequest.Type == "baby" {
-			cardType = entity.TransactionCardType.Baby
-		}
-
 		if player.ID > 0 && err == nil {
-			err = c.playerService.UpdateCash(
-				&player,
-				userRequest.Amount,
-				&dto.TransactionDTO{
-					CardType: cardType,
-					Details:  userRequest.Message,
-				},
-			)
+			if userRequest.Type == entity.TransactionCardType.TakeLoan {
+				err = c.playerService.TakeLoan(player, userRequest.Amount)
+			} else {
+				err = c.playerService.UpdateCash(
+					&player,
+					userRequest.Amount,
+					&dto.TransactionDTO{
+						CardType: userRequest.Type,
+						Details:  userRequest.Message,
+					},
+				)
+			}
 		}
 	} else if userRequest.Status == 2 {
 		err, player = c.playerService.GetPlayerByUserIdAndRaceId(userRequest.RaceID, userRequest.UserID)
