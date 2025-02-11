@@ -233,7 +233,7 @@ func (service *raceService) LotteryAction(raceId uint64, userId uint64, isBigRac
 
 	dice := objects.NewDice(1, 2, 6)
 	roll := dice.Roll(1)
-	rolledDice := roll[0] | 1
+	rolledDice := roll[0]
 
 	var status bool
 

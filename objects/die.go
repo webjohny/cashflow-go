@@ -2,6 +2,7 @@ package objects
 
 import (
 	cryptoRand "crypto/rand"
+	"fmt"
 	"math/big"
 	"math/rand"
 	"time"
@@ -31,6 +32,8 @@ func (d *Die) Roll() int {
 	d.face = rand.Intn(d.numberOfSides) + 1
 	d.face = rand.Intn(d.numberOfSides) + 1
 	d.face = rand.Intn(d.numberOfSides) + 1
+
+	fmt.Println("ROLLING", d.face, d.numberOfSides, num.Int64())
 	//d.face = 6
 
 	return d.face
