@@ -8,6 +8,7 @@ import (
 	"github.com/webjohny/cashflow-go/request"
 	"github.com/webjohny/cashflow-go/service"
 	"github.com/webjohny/cashflow-go/storage"
+	"strconv"
 	"time"
 )
 
@@ -118,9 +119,11 @@ func (c *gameController) ChangeTurn(ctx *gin.Context) {
 		return
 	}
 
+	forced, _ := strconv.ParseBool(ctx.Query("forced"))
+
 	var err error
 
-	err = c.gameService.ChangeTurn(raceId)
+	err = c.gameService.ChangeTurn(raceId, forced)
 
 	request.FinalResponse(ctx, err, nil)
 }

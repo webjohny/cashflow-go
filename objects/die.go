@@ -34,7 +34,7 @@ func (d *Die) Roll() int {
 	d.face = rand.Intn(d.numberOfSides) + 1
 
 	fmt.Println("ROLLING", d.face, d.numberOfSides, num.Int64())
-	d.face = 4
+	//d.face = 4
 
 	return d.face
 }

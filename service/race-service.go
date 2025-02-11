@@ -325,24 +325,32 @@ func (service *raceService) ChangeTurn(race entity.Race, forced bool, definedPla
 		return err
 	}
 
-	if player.SkippedTurns > 0 {
+	check := false
+
+	if definedPlayerId == 0 && player.SkippedTurns > 0 {
 		player.DecrementSkippedTurns()
+		check = true
+	} else if !forced && player.DualDiceCount > 0 {
+		player.DecrementDualDiceCount()
+		check = true
+	}
 
-		if player.DualDiceCount > 0 {
-			player.DecrementDualDiceCount()
-		}
-
+	if check {
 		err, _ = service.playerService.UpdatePlayer(&player)
 
 		if err != nil {
 			return err
 		}
+	}
 
-		err = service.ChangeTurn(race, true, 0)
+	if player.SkippedTurns == 0 {
+		return nil
+	}
 
-		if err != nil {
-			return err
-		}
+	err = service.ChangeTurn(race, true, 0)
+
+	if err != nil {
+		return err
 	}
 
 	return nil

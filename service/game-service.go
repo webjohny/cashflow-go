@@ -15,7 +15,7 @@ type GameService interface {
 	Start(lobbyId uint64) (error, entity.Race)
 	RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto, isBigRace bool) (error, []int)
 	GetGame(raceId uint64, userId uint64) (error, dto.GetGameResponseDTO)
-	ChangeTurn(raceId uint64) error
+	ChangeTurn(raceId uint64, forced bool) error
 	Cancel(raceId uint64, userId uint64) error
 	Reset(raceId uint64, userId uint64) error
 	GetTiles(raceId uint64, isBigRace bool) []string
@@ -243,7 +243,7 @@ func (service *gameService) GetTiles(raceId uint64, isBigRace bool) []string {
 	}
 }
 
-func (service *gameService) ChangeTurn(raceId uint64) error {
+func (service *gameService) ChangeTurn(raceId uint64, forced bool) error {
 	logger.Info("GameService.ChangeTurn", map[string]interface{}{
 		"raceId": raceId,
 	})
@@ -254,7 +254,7 @@ func (service *gameService) ChangeTurn(raceId uint64) error {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
 
-	return service.raceService.ChangeTurn(race, false, 0)
+	return service.raceService.ChangeTurn(race, forced, 0)
 }
 
 func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
