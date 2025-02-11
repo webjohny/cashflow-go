@@ -111,6 +111,11 @@ func (c *cardController) Selling(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
 
+	if !c.mutex.LockMethodRace("Selling", raceId, time.Second*3) {
+		request.TooManyRequests(ctx)
+		return
+	}
+
 	var body dto.CardSellingActionDTO
 
 	if err := ctx.BindJSON(&body); err != nil {
@@ -140,6 +145,11 @@ func (c *cardController) Accept(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
 
+	if !c.mutex.LockMethodRace("Accept", raceId, time.Second*3) {
+		request.TooManyRequests(ctx)
+		return
+	}
+
 	var err error
 	var response interface{}
 
@@ -158,6 +168,11 @@ func (c *cardController) Skip(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
+
+	if !c.mutex.LockMethodRace("Skip", raceId, time.Second*3) {
+		request.TooManyRequests(ctx)
+		return
+	}
 
 	var err error
 	var response interface{}
@@ -179,6 +194,11 @@ func (c *cardController) Purchase(ctx *gin.Context) {
 	raceId := helper.GetRaceId(ctx)
 	userId := helper.GetUserId(ctx)
 	bigRace := helper.GetBigRace(ctx)
+
+	if !c.mutex.LockMethodRace("Purchase", raceId, time.Second*3) {
+		request.TooManyRequests(ctx)
+		return
+	}
 
 	var body dto.CardPurchaseActionDTO
 

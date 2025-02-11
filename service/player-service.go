@@ -959,6 +959,11 @@ func (service *playerService) GetAllStatePlayersByRaceId(raceId uint64) []entity
 }
 
 func (service *playerService) GetTransaction(data dto.TransactionDTO) entity.Transaction {
+	if *data.CardID == "" {
+		return entity.Transaction{
+			ID: 1,
+		}
+	}
 	return service.transactionService.GetTransaction(data)
 }
 
