@@ -1381,7 +1381,7 @@
       "cash_flow": 2000
     }
   ],
-  "doodad": [{
+  "__doodad": [{
     "id": "expense130",
     "type": "doodad",
     "heading": "Грипп с осложнениями",
@@ -1397,7 +1397,7 @@
     "rule": "Если есть ребёнок",
     "has_babies": true
   }],
-  "__doodad": [
+  "doodad": [
     {
       "id": "expense1",
       "type": "doodad",

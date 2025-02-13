@@ -264,6 +264,10 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 		return errors.New(storage.ErrorForbiddenByOwner), 0
 	}
 
+	if business.AssetType == entity.BusinessTypes.Limited && count > business.Count {
+		return errors.New(storage.ErrorIncorrectCount), 0
+	}
+
 	if card.Cost < 10 {
 		totalCash = business.Cost * card.Cost
 	} else if card.Cost >= 10 && card.Cost <= 100 {
