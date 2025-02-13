@@ -1119,7 +1119,7 @@
       "symbol": "piece",
       "heading": "Золотые монеты 12го века",
       "description": "Супер возможность на покупку уникальных золотых монет.",
-      "rule": "Продавец сказал что в будущем сможете продать их 500$-4000$",
+      "rule": "Продавец сказал что в будущем сможете продать их 500$-4000$"
     }
   ],
   "bigDeal": [
@@ -1560,7 +1560,7 @@
       "id": "expense100",
       "type": "doodad",
       "heading": "Аппендицит",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Внезапный приступ аппендицита привел Вас на операционный стол. Счёт за медицинские услуги вас неприятно удивил.",
       "cost": 1200
     },
@@ -1568,7 +1568,7 @@
       "id": "expense110",
       "type": "doodad",
       "heading": "Отравление морепродуктами",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы решили побаловать себя суши в новом ресторане, но это обернулось пищевым отравлением. Лечение и восстановление заняли несколько дней.",
       "cost": 300
     },
@@ -1576,7 +1576,7 @@
       "id": "expense120",
       "type": "doodad",
       "heading": "Разбитая голова",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы поскользнулись на льду и сильно ударились головой. Вызвали скорую, наложили швы.",
       "cost": 500
     },
@@ -1584,7 +1584,7 @@
       "id": "expense130",
       "type": "doodad",
       "heading": "Грипп с осложнениями",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы не обратили внимание на первые симптомы гриппа, и он перерос в пневмонию. Теперь придется лечиться серьезно.",
       "cost": 900
     },
@@ -1592,7 +1592,7 @@
       "id": "expense140",
       "type": "doodad",
       "heading": "Зубная боль",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы откладывали визит к стоматологу, пока боль не стала невыносимой. Теперь вас ждёт дорогое лечение корневых каналов.",
       "cost": 600
     },
@@ -1600,7 +1600,7 @@
       "id": "expense150",
       "type": "doodad",
       "heading": "Аллергическая реакция",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы попробовали новый экзотический фрукт и покрылись сыпью. Пришлось обратиться к врачу и пройти курс лечения.",
       "cost": 250
     },
@@ -1608,7 +1608,7 @@
       "id": "expense160",
       "type": "doodad",
       "heading": "Укус насекомого",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вас укусила неизвестная мошка на пикнике, и началась аллергическая реакция. Срочное лечение обошлось в кругленькую сумму.",
       "cost": 180
     },
@@ -1616,7 +1616,7 @@
       "id": "expense170",
       "type": "doodad",
       "heading": "Растяжение связок",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Вы решили заняться спортом, но поторопились с нагрузкой. Итог – боль в ноге и несколько недель восстановления.",
       "cost": 400
     },
@@ -1624,7 +1624,7 @@
       "id": "expense180",
       "type": "doodad",
       "heading": "Обострение гастрита",
-      "asset_type":  "healthyInsurance",
+      "asset_type": "healthyInsurance",
       "description": "Стрессы и нерегулярное питание дали о себе знать – желудок сказал 'хватит'. Срочное лечение и диета обязательны.",
       "cost": 350
     },
