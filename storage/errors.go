@@ -47,4 +47,5 @@ const (
 	ErrorMovingBigRaceDeclined                        = "error moving big race declined"
 	ErrorYouAreBankrupt                               = "error you are bankrupt"
 	ErrorForbiddenByOwner                             = "error forbidden by owner"
+	ErrorIfHadBeenInsurance                           = "error if had been insurance"
 )

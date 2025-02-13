@@ -41,7 +41,7 @@ var (
 	financeService     service.FinanceService     = service.NewFinanceService(userRequestRepository, cardService, raceService, playerService)
 
 	// Controllers
-	backdoorController   controller.BackdoorController   = controller.NewBackdoorController(cardService, raceService)
+	backdoorController   controller.BackdoorController   = controller.NewBackdoorController(cardService, raceService, playerService, gameService)
 	gameController       controller.GameController       = controller.NewGameController(gameService)
 	moderatorController  controller.ModeratorController  = controller.NewModeratorController(playerService, raceService, lobbyService, userRequestService)
 	playerController     controller.PlayerController     = controller.NewPlayerController(playerService, raceService, lobbyService)

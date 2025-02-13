@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
@@ -13,7 +14,7 @@ import (
 
 type GameService interface {
 	Start(lobbyId uint64) (error, entity.Race)
-	RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto, isBigRace bool) (error, []int)
+	RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto) (error, []int)
 	GetGame(raceId uint64, userId uint64) (error, dto.GetGameResponseDTO)
 	ChangeTurn(raceId uint64, forced bool) error
 	Cancel(raceId uint64, userId uint64) error
@@ -77,7 +78,7 @@ func (service *gameService) GetGame(raceId uint64, userId uint64) (error, dto.Ge
 	return nil, response
 }
 
-func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto, isBigRace bool) (error, []int) {
+func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollDiceDto) (error, []int) {
 	logger.Info("GameService.RollDice", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
@@ -101,6 +102,12 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollD
 	if dto.Dices > 0 {
 		dice = getDice.Roll(dto.Dices)
 	}
+
+	if dto.DiceValue > 0 {
+		dice = []int{dto.DiceValue}
+	}
+
+	fmt.Println("dto.DiceValue", dto.DiceValue)
 
 	if dto.IsFinished {
 		dualDiceCount := player.DualDiceCount

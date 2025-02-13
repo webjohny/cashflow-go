@@ -85,7 +85,6 @@ func (c *gameController) RollDice(ctx *gin.Context) {
 	}
 
 	userId := helper.GetUserId(ctx)
-	bigRace := helper.GetBigRace(ctx)
 
 	var response dto.RollDiceResponseDto
 	var body dto.RollDiceDto
@@ -97,7 +96,7 @@ func (c *gameController) RollDice(ctx *gin.Context) {
 
 	var err error
 
-	err, response.DiceValues = c.gameService.RollDice(raceId, userId, body, bigRace)
+	err, response.DiceValues = c.gameService.RollDice(raceId, userId, body)
 
 	request.FinalResponse(ctx, err, response)
 }

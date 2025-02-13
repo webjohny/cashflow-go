@@ -135,9 +135,7 @@ func (r *Player) CalculateDices() int {
 }
 
 func (r *Player) AddDices(dices []int) {
-	for i := 0; i < len(dices); i++ {
-		r.Dices = append(r.Dices, dices[i])
-	}
+	r.Dices = append(r.Dices, dices...)
 }
 
 func (e *Player) FindStocksBySymbol(symbol string) (int, *CardStocks) {

@@ -121,15 +121,17 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 		"card":     card,
 	})
 
-	if player.HasHealthyInsurance() {
-		return errors.New(storage.WarnYouHaveHealthyInsurance)
+	if card.AssetType == entity.OtherAssetTypes.HealthyInsurance && player.HasHealthyInsurance() {
+		player.SetNotification(storage.YouHaveHealthyInsurance, entity.NotificationTypes.Info)
+		err, _ := service.UpdatePlayer(&player)
+		return err
+	} else if card.HasBabies && player.Babies <= 0 {
+		player.SetNotification(storage.YouHaveNoBabies, entity.NotificationTypes.Info)
+		err, _ := service.UpdatePlayer(&player)
+		return err
 	}
 
 	cost := card.Cost
-
-	if card.HasBabies && player.Babies <= 0 {
-		return errors.New(storage.WarnYouHaveNoBabies)
-	}
 
 	if player.Cash < cost {
 		return errors.New(storage.ErrorNotEnoughMoney)
@@ -147,7 +149,19 @@ func (service *playerService) Doodad(card entity.CardDoodad, player entity.Playe
 		return errors.New(storage.ErrorTransactionAlreadyExists)
 	}
 
-	return service.UpdateCash(&player, -cost, &transaction)
+	err := service.UpdateCash(&player, -cost, &transaction)
+
+	if err != nil {
+		return err
+	}
+
+	if card.AssetType == entity.OtherAssetTypes.HealthyInsurance && !player.HasHealthyInsurance() {
+		player.SetNotification(storage.ErrorIfHadBeenInsurance, entity.NotificationTypes.Warning)
+		err, _ = service.UpdatePlayer(&player)
+		return err
+	}
+
+	return nil
 }
 
 func (service *playerService) BuyDream(card entity.CardDream, player entity.Player) error {

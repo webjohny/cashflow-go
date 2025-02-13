@@ -695,18 +695,24 @@ func (service *raceService) DoodadAction(raceId uint64, userId uint64) error {
 
 	race.Respond(player.ID, race.CurrentPlayer.ID)
 
-	if (player.Babies == 0 && race.CurrentCard.HasBabies) || player.HasHealthyInsurance() {
-		err = service.ChangeTurn(race, false, 0)
+	card := race.CurrentCard
+
+	if (player.Babies == 0 && card.HasBabies) ||
+		(player.HasHealthyInsurance() && card.AssetType == entity.OtherAssetTypes.HealthyInsurance) {
+
+		if card.AssetType == entity.OtherAssetTypes.HealthyInsurance {
+			player.SetNotification(storage.YouHaveHealthyInsurance, entity.NotificationTypes.Info)
+		} else {
+			player.SetNotification(storage.YouHaveNoBabies, entity.NotificationTypes.Info)
+		}
+
+		err, _ = service.playerService.UpdatePlayer(&player)
 
 		if err != nil {
 			return err
 		}
 
-		if player.HasHealthyInsurance() {
-			return errors.New(storage.WarnYouHaveHealthyInsurance)
-		}
-
-		return errors.New(storage.WarnYouHaveNoBabies)
+		return service.ChangeTurn(race, false, 0)
 	}
 
 	err = service.playerService.Doodad(entity.CardDoodad{

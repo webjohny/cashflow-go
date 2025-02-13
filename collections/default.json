@@ -1381,7 +1381,23 @@
       "cash_flow": 2000
     }
   ],
-  "doodad": [
+  "doodad": [{
+    "id": "expense130",
+    "type": "doodad",
+    "heading": "Грипп с осложнениями",
+    "asset_type":  "healthyInsurance",
+    "description": "Вы не обратили внимание на первые симптомы гриппа, и он перерос в пневмонию. Теперь придется лечиться серьезно.",
+    "cost": 900
+  },{
+    "id": "expense13",
+    "type": "doodad",
+    "heading": "Поездка в аквапарк",
+    "description": "Семейный день в аквапарке с детьми.",
+    "cost": 200,
+    "rule": "Если есть ребёнок",
+    "has_babies": true
+  }],
+  "__doodad": [
     {
       "id": "expense1",
       "type": "doodad",
