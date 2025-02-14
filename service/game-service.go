@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
@@ -106,8 +105,6 @@ func (service *gameService) RollDice(raceId uint64, userId uint64, dto dto.RollD
 	if dto.DiceValue > 0 {
 		dice = []int{dto.DiceValue}
 	}
-
-	fmt.Println("dto.DiceValue", dto.DiceValue)
 
 	if dto.IsFinished {
 		dualDiceCount := player.DualDiceCount
