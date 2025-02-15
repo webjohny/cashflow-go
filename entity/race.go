@@ -64,6 +64,7 @@ type RaceOptions struct {
 	HandMode                    bool              `json:"handMode,omitempty"`
 	BannerLink                  string            `json:"bannerLink,omitempty"`
 	BannerImage                 string            `json:"bannerImage,omitempty"`
+	Language                    string            `json:"language,omitempty"`
 	MeetLink                    string            `json:"meetLink,omitempty"`
 	EnableWaitList              bool              `json:"enableWaitList,omitempty"`
 	CardCollection              string            `json:"cardCollection,omitempty"`

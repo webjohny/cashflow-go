@@ -280,6 +280,10 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		return errors.New(storage.ErrorGameIsStarted), entity.Race{}
 	}
 
+	if lobby.Options.Language == "" {
+		lobby.Options.Language = "en"
+	}
+
 	err, race := service.raceService.InsertRace(&entity.Race{
 		Responses:         make([]entity.RaceResponse, 0),
 		Status:            entity.RaceStatus.STARTED,

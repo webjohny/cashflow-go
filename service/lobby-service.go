@@ -56,6 +56,7 @@ func (service *lobbyService) SetOptions(lobbyId uint64, body dto.SetOptionsLobby
 	lobby.Options.MeetLink = body.MeetLink
 	lobby.Options.BannerLink = body.BannerLink
 	lobby.Options.BannerImage = body.BannerImage
+	lobby.Options.Language = body.Language
 
 	err, _ := service.Update(&lobby)
 

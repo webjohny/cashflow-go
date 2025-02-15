@@ -5,4 +5,5 @@ type SetOptionsLobbyRequestDTO struct {
 	MeetLink    string `json:"meetLink,omitempty"`
 	BannerLink  string `json:"bannerLink,omitempty"`
 	BannerImage string `json:"bannerImage,omitempty"`
+	Language    string `json:"language,omitempty"`
 }
