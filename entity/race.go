@@ -26,9 +26,14 @@ type RaceNotification struct {
 }
 
 type RaceLog struct {
-	Username string `json:"username"`
-	Color    string `json:"color"`
-	Message  string `json:"message"`
+	Amount          int    `json:"amount"`
+	CurrentCash     int    `json:"current_cash"`
+	UpdatedCash     int    `json:"updated_cash"`
+	CurrentCashFlow int    `json:"current_cashflow"`
+	UpdatedCashFlow int    `json:"updated_cashflow"`
+	Username        string `json:"username"`
+	Color           string `json:"color"`
+	Message         string `json:"message"`
 }
 
 type RaceResponse struct {

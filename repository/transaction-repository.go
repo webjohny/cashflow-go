@@ -56,7 +56,13 @@ func (db *transactionConnection) GetPlayerTransactions(playerId uint64) []entity
 
 func (db *transactionConnection) GetRaceTransactions(raceId uint64) []entity.Transaction {
 	var transactions []entity.Transaction
-	db.connection.Model(&entity.Transaction{}).Where("race_id = ?", raceId).Where("transaction_type != ?", entity.TransactionType.RACE).Scan(&transactions)
+	db.connection.Model(&entity.Transaction{}).
+		Where("race_id = ?", raceId).
+		Where("card_type != ?", entity.TransactionCardType.ReceiveMoney).
+		Where("card_type != ?", entity.TransactionCardType.ReceiveAssets).
+		Where("transaction_type != ?", entity.TransactionType.RACE).
+		Order("id DESC").
+		Scan(&transactions)
 	return transactions
 }
 

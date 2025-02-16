@@ -37,9 +37,9 @@ func (service *transactionService) InsertPlayerTransaction(b dto.TransactionCrea
 	trx.TransactionType = entity.TransactionType.PLAYER
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
-		CurrentCash: &b.CurrentCash,
-		UpdatedCash: &b.Cash,
-		Amount:      &b.Amount,
+		CurrentCash: b.CurrentCash,
+		UpdatedCash: b.Cash,
+		Amount:      b.Amount,
 	}
 	return service.transactionRepository.InsertTransaction(&trx)
 }
@@ -53,8 +53,8 @@ func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreate
 	trx.TransactionType = entity.TransactionType.RACE
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
-		Color:    &b.Color,
-		Username: &b.Username,
+		Color:    b.Color,
+		Username: b.Username,
 	}
 	return service.transactionRepository.InsertTransaction(&trx)
 }
@@ -62,17 +62,19 @@ func (service *transactionService) InsertRaceTransaction(b dto.TransactionCreate
 func (service *transactionService) InsertTransaction(b dto.TransactionDTO) error {
 	trx := entity.Transaction{}
 	trx.RaceID = &b.RaceID
-	trx.CardID = *b.CardID
+	trx.CardID = b.CardID
 	trx.CardType = b.CardType
 	trx.PlayerID = &b.PlayerID
 	trx.TransactionType = entity.TransactionType.PLAYER
 	trx.Details = b.Details
 	trx.Data = &entity.TransactionData{
-		Color:       &b.Color,
-		Username:    &b.Username,
-		CurrentCash: b.CurrentCash,
-		UpdatedCash: b.UpdatedCash,
-		Amount:      b.Amount,
+		Color:           b.Color,
+		Username:        b.Username,
+		CurrentCash:     b.CurrentCash,
+		UpdatedCash:     b.UpdatedCash,
+		CurrentCashFlow: b.CurrentCashFlow,
+		UpdatedCashFlow: b.UpdatedCashFlow,
+		Amount:          b.Amount,
 	}
 	return service.transactionRepository.InsertTransaction(&trx)
 }
@@ -99,9 +101,13 @@ func (service *transactionService) GetRaceLogs(raceId uint64) []entity.RaceLog {
 
 	for _, transaction := range transactions {
 		logs = append(logs, entity.RaceLog{
-			Username: *transaction.Data.Username,
-			Color:    *transaction.Data.Color,
-			Message:  transaction.Details,
+			Username:        transaction.Data.Username,
+			Color:           transaction.Data.Color,
+			CurrentCash:     transaction.Data.CurrentCash,
+			UpdatedCash:     transaction.Data.UpdatedCash,
+			CurrentCashFlow: transaction.Data.CurrentCashFlow,
+			UpdatedCashFlow: transaction.Data.UpdatedCashFlow,
+			Message:         transaction.Details,
 		})
 	}
 

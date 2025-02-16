@@ -19,17 +19,19 @@ type TransactionCreateRaceDTO struct {
 }
 
 type TransactionDTO struct {
-	RaceID      uint64  `json:"race_id" form:"race_id" binding:"required"`
-	CardID      *string `json:"card_id" form:"card_id" binding:"omitempty"`
-	CardType    string  `json:"card_type" form:"card_type" binding:"required"`
-	PlayerID    uint64  `json:"player_id" form:"player_id" binding:"required"`
-	SenderID    *uint64 `json:"sender_id" form:"sender_id" binding:"omitempty"`
-	Details     string  `json:"details" form:"details" binding:"required"`
-	Username    string  `json:"username" form:"username" binding:"required"`
-	Color       string  `json:"color" form:"color" binding:"required"`
-	CurrentCash *int    `json:"current_cash,omitempty" form:"current_cash" binding:"omitempty"`
-	UpdatedCash *int    `json:"updated_cash,omitempty" form:"updated_cash" binding:"omitempty"`
-	Amount      *int    `json:"amount,omitempty" form:"amount" binding:"required"`
+	RaceID          uint64 `json:"race_id" form:"race_id" binding:"required"`
+	CardID          string `json:"card_id" form:"card_id" binding:"omitempty"`
+	CardType        string `json:"card_type" form:"card_type" binding:"required"`
+	PlayerID        uint64 `json:"player_id" form:"player_id" binding:"required"`
+	SenderID        uint64 `json:"sender_id" form:"sender_id" binding:"omitempty"`
+	Details         string `json:"details" form:"details" binding:"required"`
+	Username        string `json:"username" form:"username" binding:"required"`
+	Color           string `json:"color" form:"color" binding:"required"`
+	CurrentCash     int    `json:"current_cash,omitempty" form:"current_cash" binding:"omitempty"`
+	UpdatedCash     int    `json:"updated_cash,omitempty" form:"updated_cash" binding:"omitempty"`
+	CurrentCashFlow int    `json:"current_cashflow,omitempty" form:"current_cashflow" binding:"omitempty"`
+	UpdatedCashFlow int    `json:"updated_cashflow,omitempty" form:"updated_cashflow" binding:"omitempty"`
+	Amount          int    `json:"amount,omitempty" form:"amount" binding:"required"`
 }
 
 type TransactionCardDTO struct {

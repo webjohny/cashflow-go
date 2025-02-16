@@ -172,7 +172,7 @@ func (service *playerService) BuyBusiness(card entity.CardBusiness, player entit
 		}
 
 		err = service.UpdateCash(&player, -cost, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.Business,
 			Details:  card.Heading,
 		})
@@ -288,7 +288,7 @@ func (service *playerService) SellBusiness(ID string, card entity.CardMarketBusi
 
 	if totalCash > 0 {
 		err := service.UpdateCash(&player, totalCash, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.MarketBusiness,
 			Details:  card.Heading,
 		})
@@ -354,7 +354,7 @@ func (service *playerService) MarketBusiness(card entity.CardMarketBusiness, pla
 
 	if card.Cost > 0 {
 		err = service.UpdateCash(&player, -card.Cost, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.MarketBusiness,
 			Details:  card.Heading,
 		})

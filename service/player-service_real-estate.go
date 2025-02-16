@@ -22,7 +22,7 @@ func (service *playerService) BuyRealEstate(card entity.CardRealEstate, player e
 	player.Assets.RealEstates = append(player.Assets.RealEstates, card)
 
 	err := service.UpdateCash(&player, -card.DownPayment, &dto.TransactionDTO{
-		CardID:   &card.ID,
+		CardID:   card.ID,
 		CardType: entity.TransactionCardType.RealEstate,
 		Details:  card.Heading,
 	})
@@ -85,7 +85,7 @@ func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEst
 
 		if owner.ID == currentPlayer.ID {
 			err := service.UpdateCash(&currentPlayer, -cardCost, &dto.TransactionDTO{
-				CardID:   &card.ID,
+				CardID:   card.ID,
 				CardType: entity.TransactionCardType.RealEstate,
 				Details:  card.Heading,
 			})
@@ -161,7 +161,7 @@ func (service *playerService) SellRealEstate(ID string, card entity.CardMarketRe
 
 	if totalCost > 0 && totalCost >= realEstate.Mortgage {
 		err := service.UpdateCash(&player, totalCost-realEstate.Mortgage, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.RealEstate,
 			Details:  card.Heading,
 		})

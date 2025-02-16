@@ -93,11 +93,13 @@ var TxTypes = struct {
 }
 
 type TransactionData struct {
-	CurrentCash *int    `json:"current_cash,omitempty"`
-	UpdatedCash *int    `json:"updated_cash,omitempty"`
-	Amount      *int    `json:"amount,omitempty"`
-	Username    *string `json:"username,omitempty"`
-	Color       *string `json:"color,omitempty"`
+	CurrentCash     int    `json:"current_cash,omitempty"`
+	UpdatedCash     int    `json:"updated_cash,omitempty"`
+	CurrentCashFlow int    `json:"current_cashflow,omitempty"`
+	UpdatedCashFlow int    `json:"updated_cashflow,omitempty"`
+	Amount          int    `json:"amount,omitempty"`
+	Username        string `json:"username,omitempty"`
+	Color           string `json:"color,omitempty"`
 }
 
 type Transaction struct {

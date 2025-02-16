@@ -8,6 +8,7 @@ import (
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
 	"log"
+	"math/rand"
 	"time"
 )
 
@@ -303,6 +304,11 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 	var players []entity.RacePlayer
 	var responses []entity.RaceResponse
 
+	for i := range lobby.Players {
+		j := rand.Intn(i + 1)
+		lobby.Players[i], lobby.Players[j] = lobby.Players[j], lobby.Players[i]
+	}
+
 	for i := 0; i < len(lobby.Players); i++ {
 		lobbyPlayer := lobby.Players[i]
 		profession := service.professionService.GetRandomProfession(&excluded)
@@ -339,7 +345,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		responses = append(responses, player.CreateResponse())
 	}
 
-	race.CurrentPlayer = players[helper.Random(len(players)-1)]
+	race.CurrentPlayer = players[0]
 	race.Responses = responses
 
 	err, _ = service.raceService.UpdateRace(&race)

@@ -49,7 +49,7 @@ func (service *playerService) BuyStocks(card entity.CardStocks, player entity.Pl
 
 	if updateCash {
 		err = service.UpdateCash(&player, -totalCost, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.RealEstate,
 			Details:  card.Heading,
 		})
@@ -91,7 +91,7 @@ func (service *playerService) SellStocks(card entity.CardStocks, player entity.P
 
 	if updateCash {
 		err = service.UpdateCash(&player, totalCost, &dto.TransactionDTO{
-			CardID:   &card.ID,
+			CardID:   card.ID,
 			CardType: entity.TransactionCardType.RealEstate,
 			Details:  card.Heading,
 		})
