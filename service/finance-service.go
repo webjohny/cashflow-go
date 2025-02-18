@@ -274,8 +274,9 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto
 			helper.CamelToCapitalize(receiver.Username),
 		)
 		transactionReceiverMessage = fmt.Sprintf(
-			"%s перевёл Вам (%s шт.) акций",
-			helper.CamelToCapitalize(receiver.Username),
+			"%s (#%s) перевёл Вам (%s шт.) акций",
+			helper.CamelToCapitalize(sender.Username),
+			sender.GetStringID(),
 			strconv.Itoa(data.Amount),
 		)
 		receiver.SetNotification(transactionReceiverMessage, entity.NotificationTypes.Success)
@@ -288,8 +289,9 @@ func (service *financeService) SendAssets(raceId uint64, userId uint64, data dto
 			helper.CamelToCapitalize(receiver.Username),
 		)
 		transactionReceiverMessage = fmt.Sprintf(
-			"%s перевёл Вам (%s шт.) акций",
-			helper.CamelToCapitalize(receiver.Username),
+			"%s (#%s) перевёл Вам (%s шт.) акций",
+			helper.CamelToCapitalize(sender.Username),
+			sender.GetStringID(),
 			strconv.Itoa(data.Amount),
 		)
 		receiver.SetNotification(transactionReceiverMessage, entity.NotificationTypes.Success)
