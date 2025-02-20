@@ -228,7 +228,7 @@ func (e *Player) DecrementDualDiceCount() {
 }
 
 func (e *Player) InitializeSkippedTurns() {
-	e.SkippedTurns = 3
+	e.SkippedTurns = 2
 }
 
 func (e *Player) DecrementSkippedTurns() {

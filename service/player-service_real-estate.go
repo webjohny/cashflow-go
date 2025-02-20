@@ -94,11 +94,9 @@ func (service *playerService) BuyRealEstateInPartnership(card entity.CardRealEst
 				return err
 			}
 		} else {
-			err, player := service.UpdatePlayer(&currentPlayer)
+			err, _ := service.UpdatePlayer(&currentPlayer)
 
 			if err != nil {
-				logger.Error(err, player)
-
 				return err
 			}
 		}

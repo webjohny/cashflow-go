@@ -85,7 +85,9 @@ func (service *financeService) AskMoney(raceId uint64, userId uint64, data dto.A
 
 			player.Assets.Savings = 0
 			cardType = entity.TransactionCardType.StartMoney
-		} else if race.CurrentCard.Type == "payday" || race.CurrentCard.Type == "cashFlowDay" {
+			race.CurrentCard.ID = cardType
+		} else if race.CurrentCard.Type == entity.TransactionCardType.Payday ||
+			race.CurrentCard.Type == entity.TransactionCardType.CashFlowDay {
 			cardType = race.CurrentCard.Type
 
 			if data.Amount != player.CalculateCashFlow() && data.Amount != (player.CalculateCashFlow()*countPayDay) {
@@ -376,7 +378,7 @@ func (service *financeService) PayTax(raceId uint64, userId uint64, amount int) 
 		result = player.Cash
 	}
 
-	if result != amount {
+	if result > amount {
 		return errors.New(storage.ErrorWrongAmount)
 	}
 
