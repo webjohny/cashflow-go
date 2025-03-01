@@ -21,6 +21,7 @@ type CardController interface {
 	Type(ctx *gin.Context)
 	TestCard(ctx *gin.Context)
 	ResetTransaction(ctx *gin.Context)
+	SetCards(ctx *gin.Context)
 }
 
 type cardController struct {
@@ -80,6 +81,26 @@ func (c *cardController) TestCard(ctx *gin.Context) {
 }
 
 func (c *cardController) ResetTransaction(ctx *gin.Context) {
+}
+
+func (c *cardController) SetCards(ctx *gin.Context) {
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+	var response interface{}
+
+	c.mutex.UnlockMethodRace("CardType", raceId)
+
+	var body dto.CreateCardsDTO
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	c.cardService.SetCards(body)
+
+	request.FinalResponse(ctx, err, response)
 }
 
 func (c *cardController) Prepare(ctx *gin.Context) {

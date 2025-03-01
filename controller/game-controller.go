@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/helper"
@@ -38,6 +39,8 @@ func (c *gameController) GetGame(ctx *gin.Context) {
 	userId := helper.GetUserId(ctx)
 	raceId := helper.GetRaceId(ctx)
 
+	fmt.Println(raceId, userId)
+
 	var err error
 	var response interface{}
 
@@ -70,7 +73,7 @@ func (c *gameController) Start(ctx *gin.Context) {
 	err, race := c.gameService.Start(lobbyId)
 
 	if err == nil {
-		response = dto.StartGameResponseDto{ID: race.ID, Redirect: storage.PathShowProfession}
+		response = dto.StartGameResponseDto{ID: race.ID, Options: race.Options, Redirect: storage.PathShowProfession}
 	}
 
 	request.FinalResponse(ctx, err, response)

@@ -16,3 +16,13 @@ func (lm *MutexMap) LockMethodRace(methodKey string, raceId uint64, tm time.Dura
 
 	return timedMutex.TryLock(tm)
 }
+
+func (lm *MutexMap) UnlockMethodRace(methodKey string, raceId uint64) {
+	key := methodKey + strconv.Itoa(int(raceId))
+	_, ok := lm.mutexes.Load(key)
+	if !ok {
+		return
+	}
+
+	lm.mutexes.Delete(key) // Remove the mutex from the map
+}

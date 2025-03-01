@@ -1,18 +1,17 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
-	"os"
 	"strconv"
 )
 
 type CardService interface {
+	SetCards(body dto.CreateCardsDTO)
 	Prepare(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
 	Accept(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
 	Purchase(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardPurchaseActionDTO) (error, interface{})
@@ -40,6 +39,8 @@ type cardService struct {
 	playerService PlayerService
 	ratRace       CardRatRace
 	bigRace       CardBigRace
+
+	cards map[string]map[string]map[string][]entity.Card
 }
 
 func NewCardService(gameService GameService, raceService RaceService, playerService PlayerService) CardService {
@@ -47,6 +48,7 @@ func NewCardService(gameService GameService, raceService RaceService, playerServ
 		gameService:   gameService,
 		raceService:   raceService,
 		playerService: playerService,
+		cards:         make(map[string]map[string]map[string][]entity.Card),
 		ratRace: CardRatRace{
 			Tiles: map[string][]int{
 				"deals":     {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23},
@@ -108,7 +110,11 @@ func (service *cardService) TestCard(action string, raceId uint64, userId uint64
 		tile = service.getBigCardType(int(player.CurrentPosition))
 	}
 
-	cardList := service.GetCards(race.Options.CardCollection)
+	err, cardList := service.getCards(race)
+
+	if err != nil {
+		return err, entity.Card{}
+	}
 
 	if !race.CardMap.HasMapping() {
 		race.CardMap.SetMap(cardList)
@@ -364,17 +370,15 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 	}
 
 	var card entity.Card
+	err, cardList := service.getCards(race)
+
+	if err != nil {
+		return err, entity.Card{}
+	}
 
 	if tile == "deals" {
-		card = entity.Card{
-			ID:      helper.Uuid("deal"),
-			Heading: "Выберите маленькую или большую сделку",
-			Family:  "deal",
-			Type:    "deal",
-		}
+		card = cardList["defaultDeal"][0]
 	} else {
-		cardList := service.GetCards(race.Options.CardCollection)
-
 		if !race.CardMap.HasMapping() {
 			race.CardMap.SetMap(cardList)
 		}
@@ -426,6 +430,13 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 	return err, race.CurrentCard
 }
 
+func (service *cardService) SetCards(body dto.CreateCardsDTO) {
+	if service.cards[body.Type] == nil {
+		service.cards[body.Type] = make(map[string]map[string][]entity.Card)
+	}
+	service.cards[body.Type][body.Language] = body.Cards
+}
+
 func (service *cardService) ProcessCard(race entity.Race) error {
 	card := race.CurrentCard
 
@@ -466,26 +477,20 @@ func (service *cardService) ProcessCard(race entity.Race) error {
 	return nil
 }
 
-func (service *cardService) GetCards(cardCollection string) map[string][]entity.Card {
-	logger.Info("CardService.GetCards", cardCollection)
+func (service *cardService) getCards(race entity.Race) (error, map[string][]entity.Card) {
+	logger.Info("CardService.getCards", race.Options.CardCollection, race.Options.Language)
 
-	if cardCollection == "" {
-		cardCollection = "default"
+	if race.Options.CardCollection == "" {
+		race.Options.CardCollection = "default"
 	}
 
-	data, err := os.ReadFile(os.Getenv("CARDS_PATH") + cardCollection + ".json")
-	if err != nil {
-		panic(err)
+	cards := service.cards[race.Options.CardCollection][race.Options.Language]
+
+	if cards == nil {
+		return errors.New(storage.ErrorCardsNotFound), make(map[string][]entity.Card)
 	}
 
-	var cards map[string][]entity.Card
-
-	err = json.Unmarshal(data, &cards)
-	if err != nil {
-		panic(err)
-	}
-
-	return cards
+	return nil, cards
 }
 
 func (service *cardService) getCardByTile(cardType string, currentPosition int, cardList map[string][]entity.Card) entity.Card {
@@ -565,18 +570,4 @@ func (service *cardService) getRatCardType(tilePosition int) string {
 		}
 	}
 	return ""
-}
-
-func (service *cardService) getPickCard(cardType string, cardCollection string) entity.Card {
-	logger.Info("CardService.getPickCard", map[string]interface{}{
-		"cardType": cardType,
-	})
-
-	if helper.Contains[string]([]string{}, cardType) {
-		return entity.Card{}
-	}
-
-	cardList := service.GetCards(cardCollection)
-
-	return cardList[cardType][helper.Random(len(cardList[cardType])-1)]
 }

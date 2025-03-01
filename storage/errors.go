@@ -39,6 +39,7 @@ const (
 	ErrorNotSuitableBuilding                          = "error not suitable building"
 	ErrorLimitedPartnership                           = "error limited partnership"
 	ErrorIncorrectCount                               = "error incorrect count"
+	ErrorCardsNotFound                                = "error cards not found"
 	ErrorNotFoundTheRealEstate                        = "error not found the real-estate"
 	ErrorNotFoundTheBusiness                          = "error not found the business"
 	ErrorTransactionAlreadyExists                     = "error transaction already exists"
