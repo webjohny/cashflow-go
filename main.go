@@ -110,6 +110,7 @@ func main() {
 	{
 		moderatorRoutes.GET("/:raceId/race", moderatorController.GetRace)
 		moderatorRoutes.GET("/:raceId/player", moderatorController.GetRacePlayer)
+		moderatorRoutes.POST("/:raceId/send-money", moderatorController.SendMoney)
 		moderatorRoutes.GET("/:raceId/players", moderatorController.GetRacePlayers)
 		moderatorRoutes.PUT("/:raceId/player/:playerId", moderatorController.UpdatePlayer)
 		moderatorRoutes.PUT("/:raceId/race", moderatorController.UpdateRace)

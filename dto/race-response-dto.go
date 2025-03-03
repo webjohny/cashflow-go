@@ -68,6 +68,7 @@ type GetRacePlayerResponseDTO struct {
 	ExtraDices        int                                 `json:"extra_dices"`
 	Dices             []int                               `json:"dices,omitempty"`
 	Notifications     []entity.PlayerNotification         `json:"notifications,omitempty"`
+	Data              entity.PlayerInfoData               `json:"data,omitempty"`
 	DualDiceCount     int                                 `json:"dual_dice_count"`
 	SkippedTurns      uint8                               `json:"skipped_turns"`
 	AllowOnBigRace    bool                                `json:"allow_on_big_race"`

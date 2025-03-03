@@ -12,6 +12,7 @@ import (
 type UserRequestService interface {
 	GetOneById(userRequestId uint64) entity.UserRequest
 	Update(userRequest entity.UserRequest) entity.UserRequest
+	Insert(userRequest entity.UserRequest) (error, entity.UserRequest)
 	HandleUserRequest(data dto.HandleUserRequestBodyDto) (error, entity.UserRequest)
 	GetAllByRaceId(raceId uint64) []entity.UserRequest
 }
@@ -32,6 +33,14 @@ func (service *userRequestService) Update(userRequest entity.UserRequest) entity
 		log.Fatalf("Failed to map: %v", err)
 	}
 	return updatedUserRequest
+}
+
+func (service *userRequestService) Insert(userRequest entity.UserRequest) (error, entity.UserRequest) {
+	err, insertedUserRequest := service.userRequestRepository.Insert(&userRequest)
+	if err != nil {
+		log.Fatalf("Failed to map: %v", err)
+	}
+	return nil, insertedUserRequest
 }
 
 func (service *userRequestService) GetOneById(userRequestId uint64) entity.UserRequest {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	logger "github.com/sirupsen/logrus"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
@@ -14,6 +15,7 @@ type ModeratorController interface {
 	GetRace(ctx *gin.Context)
 	GetRacePlayer(ctx *gin.Context)
 	GetRacePlayers(ctx *gin.Context)
+	SendMoney(ctx *gin.Context)
 	UpdatePlayer(ctx *gin.Context)
 	UpdateRace(ctx *gin.Context)
 	HandleUserRequest(ctx *gin.Context)
@@ -63,11 +65,22 @@ func (c *moderatorController) GetRacePlayer(ctx *gin.Context) {
 
 	raceId := helper.GetRaceId(ctx)
 
+	logger.Info("Moderator.GetRacePlayer", map[string]interface{}{
+		"playerId": userId,
+		"raceId":   raceId,
+	})
+
 	var err error
-	var response interface{}
+	var player entity.Player
+	var response dto.GetRacePlayerResponseDTO
 
 	if userId != 0 {
-		err, response = c.playerService.GetRacePlayer(raceId, userId, true)
+		err, player = c.playerService.GetPlayerByUserIdAndRaceId(raceId, userId)
+
+		if err == nil {
+			response = c.playerService.GetFormattedPlayerResponse(player, true)
+			response.Data = player.Info.Data
+		}
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -268,6 +281,38 @@ func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
 
 		err, _ = c.playerService.UpdatePlayer(&player)
 	}
+
+	request.FinalResponse(ctx, err, nil)
+}
+
+func (c *moderatorController) SendMoney(ctx *gin.Context) {
+	var err error
+	raceId := helper.GetRaceId(ctx)
+
+	var body dto.ModeratorSendMoneyDTO
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	err, player := c.playerService.GetPlayerByUserIdAndRaceId(raceId, uint64(body.Player))
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	player.SetNotification(body.Message, entity.NotificationTypes.Success)
+
+	err = c.playerService.UpdateCash(
+		&player,
+		body.Amount,
+		&dto.TransactionDTO{
+			CardType: entity.TransactionCardType.SendMoneyFromBank,
+			Details:  body.Message,
+		},
+	)
 
 	request.FinalResponse(ctx, err, nil)
 }
