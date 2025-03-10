@@ -45,7 +45,7 @@ func (c *cardController) Type(ctx *gin.Context) {
 	}
 
 	userId := helper.GetUserId(ctx)
-	bigRace := helper.GetBigRace(ctx)
+	cardType := ctx.Query("type")
 
 	var err error
 	var response interface{}
@@ -55,7 +55,7 @@ func (c *cardController) Type(ctx *gin.Context) {
 	} else if raceId == 0 {
 		err = errors.New(storage.ErrorUndefinedGame)
 	} else {
-		err, response = c.cardService.GetCard("", raceId, userId, bigRace)
+		err, response = c.cardService.GetCard("", raceId, userId, cardType)
 	}
 
 	request.FinalResponse(ctx, err, response)
@@ -109,17 +109,22 @@ func (c *cardController) Prepare(ctx *gin.Context) {
 
 	raceId := helper.GetRaceId(ctx)
 	userId := helper.GetUserId(ctx)
-	bigRace := helper.GetBigRace(ctx)
 
 	var err error
 	var response interface{}
+	var body dto.PrepareCardBodyDTO
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
 
 	if raceId == 0 {
 		err = errors.New(storage.ErrorUndefinedGame)
 	} else if userId == 0 {
 		err = errors.New(storage.ErrorUndefinedPlayer)
 	} else {
-		err, response = c.cardService.Prepare(actionType, raceId, family, userId, bigRace)
+		err, response = c.cardService.Prepare(actionType, raceId, family, userId, body)
 	}
 
 	request.FinalResponse(ctx, err, response)

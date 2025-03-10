@@ -7,17 +7,18 @@ import (
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/helper"
 	"github.com/webjohny/cashflow-go/storage"
+	"log"
 	"strconv"
 )
 
 type CardService interface {
 	SetCards(body dto.CreateCardsDTO)
-	Prepare(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
+	Prepare(actionType string, raceId uint64, family string, userId uint64, data dto.PrepareCardBodyDTO) (error, interface{})
 	Accept(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{})
 	Purchase(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardPurchaseActionDTO) (error, interface{})
 	Selling(actionType string, raceId uint64, userId uint64, isBigRace bool, dto dto.CardSellingActionDTO) (error, interface{})
 	Skip(raceId uint64, userId uint64, isBigRace bool) (error, interface{})
-	GetCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
+	GetCard(action string, raceId uint64, userId uint64, cardType string) (error, entity.Card)
 	TestCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card)
 	CheckPayDay(player entity.Player) int
 	ProcessCard(race entity.Race) error
@@ -178,7 +179,7 @@ func (service *cardService) CheckPayDay(player entity.Player) int {
 	return count
 }
 
-func (service *cardService) Prepare(actionType string, raceId uint64, family string, userId uint64, isBigRace bool) (error, interface{}) {
+func (service *cardService) Prepare(actionType string, raceId uint64, family string, userId uint64, data dto.PrepareCardBodyDTO) (error, interface{}) {
 	logger.Info("CardService.Prepare", map[string]interface{}{
 		"raceId":     raceId,
 		"family":     family,
@@ -186,8 +187,8 @@ func (service *cardService) Prepare(actionType string, raceId uint64, family str
 		"userId":     userId,
 	})
 
-	if family == "deal" {
-		err, card := service.GetCard(actionType, raceId, userId, isBigRace)
+	if family == "deal" || family == "market" {
+		err, card := service.GetCard(actionType, raceId, userId, data.Type)
 
 		return err, card
 	}
@@ -340,7 +341,7 @@ func (service *cardService) Selling(actionType string, raceId uint64, userId uin
 	return err, response
 }
 
-func (service *cardService) GetCard(action string, raceId uint64, userId uint64, isBigRace bool) (error, entity.Card) {
+func (service *cardService) GetCard(action string, raceId uint64, userId uint64, cardType string) (error, entity.Card) {
 	logger.Info("CardService.GetCard", map[string]interface{}{
 		"raceId": raceId,
 		"userId": userId,
@@ -378,12 +379,14 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 
 	if tile == "deals" {
 		card = cardList["defaultDeal"][0]
+		card.ID = helper.Uuid(card.ID)
+	} else if race.Options.EnableCardCategory && tile == "market" && action != "buy" {
+		card = cardList["defaultMarket"][0]
+		card.ID = helper.Uuid(card.ID)
 	} else {
 		if !race.CardMap.HasMapping() {
 			race.CardMap.SetMap(cardList)
 		}
-
-		race.CardMap.Next(tile)
 
 		if tile == "dream" {
 			players := service.raceService.GetRacePlayersByRaceId(raceId, false)
@@ -398,6 +401,22 @@ func (service *cardService) GetCard(action string, raceId uint64, userId uint64,
 						Cost:      currentPlayer.Info.Dream.Price,
 						PlayerId:  int(currentPlayer.ID),
 					}
+				}
+			}
+		}
+
+		log.Println("CARD_TYPE", cardType)
+
+		if cardType == "" {
+			race.CardMap.Next(tile)
+		} else {
+			for i := 0; i < len(race.CardMap.Map[tile]); i++ {
+				race.CardMap.Next(tile)
+
+				card = service.getCardByTile(tile, race.CardMap.Active[tile], cardList)
+
+				if card.Type == cardType {
+					break
 				}
 			}
 		}

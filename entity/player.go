@@ -9,11 +9,13 @@ import (
 )
 
 var PlayerRoles = struct {
+	Player    string
 	Guest     string
 	WaitList  string
 	Owner     string
 	Moderator string
 }{
+	Player:    "player",
 	Guest:     "guest",
 	WaitList:  "wait_list",
 	Owner:     "owner",

@@ -3,10 +3,10 @@ package service
 import (
 	"log"
 
+	"github.com/mashingan/smapping"
 	"github.com/webjohny/cashflow-go/dto"
 	"github.com/webjohny/cashflow-go/entity"
 	"github.com/webjohny/cashflow-go/repository"
-	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -41,6 +41,7 @@ func (service *authService) VerifyCredential(email string, password string) inte
 
 func (service *authService) CreateUser(user dto.RegisterDTO) entity.User {
 	userToCreate := entity.User{}
+	userToCreate.Role = entity.PlayerRoles.Player
 	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
 	if err != nil {
 		log.Fatalf("Failed map %v", err)

@@ -65,6 +65,7 @@ type RaceOptions struct {
 	BigRaceGoalForPassiveIncome int               `json:"bigRaceGoalForPassiveIncome,omitempty"`
 	BigRaceConditions           BigRaceConditions `json:"bigRaceConditions,omitempty"`
 	EnableManager               bool              `json:"enableManager,omitempty"`
+	EnableCardCategory          bool              `json:"enableCardCategory,omitempty"`
 	HideCards                   bool              `json:"hideCards,omitempty"`
 	HandMode                    bool              `json:"handMode,omitempty"`
 	BannerLink                  string            `json:"bannerLink,omitempty"`
@@ -82,6 +83,10 @@ func (c *RaceOptions) Merge(override RaceOptions) {
 
 	if override.EnableManager != c.EnableManager {
 		c.EnableManager = override.EnableManager
+	}
+
+	if override.EnableCardCategory != c.EnableCardCategory {
+		c.EnableCardCategory = override.EnableCardCategory
 	}
 	if override.HideCards != c.HideCards {
 		c.HideCards = override.HideCards
