@@ -40,6 +40,7 @@ const (
 	ErrorLimitedPartnership                           = "error limited partnership"
 	ErrorIncorrectCount                               = "error incorrect count"
 	ErrorCardsNotFound                                = "error cards not found"
+	ErrorProfessionsNotFound                          = "error professions not found"
 	ErrorNotFoundTheRealEstate                        = "error not found the real-estate"
 	ErrorNotFoundTheBusiness                          = "error not found the business"
 	ErrorTransactionAlreadyExists                     = "error transaction already exists"

@@ -24,14 +24,16 @@ type GameController interface {
 }
 
 type gameController struct {
-	gameService service.GameService
-	mutex       *objects.MutexMap
+	gameService       service.GameService
+	professionService service.ProfessionService
+	mutex             *objects.MutexMap
 }
 
-func NewGameController(gameService service.GameService) GameController {
+func NewGameController(gameService service.GameService, professionService service.ProfessionService) GameController {
 	return &gameController{
-		gameService: gameService,
-		mutex:       &objects.MutexMap{},
+		gameService:       gameService,
+		professionService: professionService,
+		mutex:             &objects.MutexMap{},
 	}
 }
 
@@ -139,4 +141,20 @@ func (c *gameController) GetTiles(ctx *gin.Context) {
 	request.FinalResponse(ctx, nil, map[string][]string{
 		"tiles": tiles,
 	})
+}
+
+func (c *gameController) SetProfessions(ctx *gin.Context) {
+	var err error
+	var response interface{}
+
+	var body dto.ProfessionsSetBodyDTO
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	c.professionService.SetProfessions(body)
+
+	request.FinalResponse(ctx, err, response)
 }

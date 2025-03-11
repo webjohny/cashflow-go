@@ -94,7 +94,7 @@ func (service *playerService) AreYouBankrupt(player entity.Player) error {
 			}
 		}
 
-		profession := service.professionService.GetRandomProfession(&[]int{
+		_, profession := service.professionService.GetRandomProfession(player.Info.Language, &[]int{
 			int(player.ProfessionID),
 		})
 		player.Reset(profession)
@@ -419,9 +419,9 @@ func (service *playerService) BigBankrupt(player entity.Player) error {
 	var profession entity.Profession
 
 	if player.ProfessionID > 0 {
-		profession = service.professionService.GetRandomProfession(&[]int{})
+		_, profession = service.professionService.GetRandomProfession(player.Info.Language, &[]int{})
 	} else {
-		profession = service.professionService.GetByID(uint64(player.ProfessionID))
+		_, profession = service.professionService.GetByID(uint64(player.ProfessionID), player.Info.Language)
 	}
 
 	player.Reset(profession)
@@ -950,8 +950,8 @@ func (service *playerService) GetPlayerByUsername(username string) entity.Player
 	return service.playerRepository.FindPlayerByUsername(username)
 }
 
-func (service *playerService) GetProfessionById(id uint8) (error, entity.Profession) {
-	profession := service.professionService.GetByID(uint64(id))
+func (service *playerService) GetProfessionById(id uint8, language string) (error, entity.Profession) {
+	_, profession := service.professionService.GetByID(uint64(id), language)
 
 	if profession.ID == 0 {
 		return errors.New(storage.ErrorUndefinedProfession), entity.Profession{}
@@ -1012,7 +1012,7 @@ func (service *playerService) GetRacePlayer(raceId uint64, userId uint64, full b
 }
 
 func (service *playerService) GetFormattedPlayerResponse(player entity.Player, hasRestrictedFields bool) dto.GetRacePlayerResponseDTO {
-	profession := service.professionService.GetByID(uint64(player.ProfessionID))
+	_, profession := service.professionService.GetByID(uint64(player.ProfessionID), player.Info.Language)
 
 	response := dto.GetRacePlayerResponseDTO{
 		ID:       player.ID,
@@ -1042,7 +1042,6 @@ func (service *playerService) GetFormattedPlayerResponse(player entity.Player, h
 		},
 		IsRolledDice:      player.IsRolledDice == 1,
 		LastPosition:      player.LastPosition,
-		Transactions:      make([]dto.RacePlayerTransactionsResponseDTO, 0),
 		CurrentPosition:   player.CurrentPosition,
 		ExtraDices:        player.ExtraDices,
 		DualDiceCount:     player.DualDiceCount,

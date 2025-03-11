@@ -174,6 +174,12 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	players := service.playerService.GetAllPlayersByRaceId(raceId)
 	race := service.raceService.GetRaceByRaceId(raceId)
 
+	err, _ := service.professionService.GetAll(race.Options.Language)
+
+	if err != nil {
+		return err
+	}
+
 	if race.ID == 0 {
 		return errors.New(storage.ErrorUndefinedGame)
 	}
@@ -185,7 +191,7 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	}
 
 	for _, player := range players {
-		profession := service.professionService.GetByID(uint64(player.ProfessionID))
+		_, profession := service.professionService.GetByID(uint64(player.ProfessionID), race.Options.Language)
 
 		profession.Assets.Business = make([]entity.CardBusiness, 0)
 		profession.Assets.RealEstates = make([]entity.CardRealEstate, 0)
@@ -223,7 +229,7 @@ func (service *gameService) Reset(raceId uint64, userId uint64) error {
 	race.Dice = make([]int, 0)
 	race.Options = entity.RaceOptions{}
 	race.CreatedAt = time.Now()
-	err, _ := service.raceService.UpdateRace(&race)
+	err, _ = service.raceService.UpdateRace(&race)
 
 	return err
 }
@@ -285,6 +291,12 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 		lobby.Options.Language = "en"
 	}
 
+	err, _ := service.professionService.GetAll(lobby.Options.Language)
+
+	if err != nil {
+		return err, entity.Race{}
+	}
+
 	err, race := service.raceService.InsertRace(&entity.Race{
 		Responses:         make([]entity.RaceResponse, 0),
 		Status:            entity.RaceStatus.STARTED,
@@ -311,7 +323,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 
 	for i := 0; i < len(lobby.Players); i++ {
 		lobbyPlayer := lobby.Players[i]
-		profession := service.professionService.GetRandomProfession(&excluded)
+		_, profession := service.professionService.GetRandomProfession(lobby.Options.Language, &excluded)
 		excluded = append(excluded, int(profession.ID))
 
 		profession.Assets.Business = make([]entity.CardBusiness, 0)
@@ -329,6 +341,7 @@ func (service *gameService) Start(lobbyId uint64) (error, entity.Race) {
 			Assets:       profession.Assets,
 			Liabilities:  profession.Liabilities,
 			ProfessionID: uint8(profession.ID),
+			Info:         entity.PlayerInfo{Language: lobby.Options.Language},
 			CreatedAt:    time.Now(),
 		})
 

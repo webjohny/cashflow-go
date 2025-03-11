@@ -66,9 +66,10 @@ type PlayerAccountInfo struct {
 }
 
 type PlayerNotification struct {
-	ID      string `json:"id"`
-	Message string `json:"message"`
-	Type    string `json:"type"`
+	ID      string      `json:"id"`
+	Message string      `json:"message"`
+	Type    string      `json:"type"`
+	Params  interface{} `json:"params,omitempty"`
 }
 
 type Player struct {
