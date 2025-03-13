@@ -382,7 +382,7 @@ func (service *financeService) PayTax(raceId uint64, userId uint64, amount int) 
 		return errors.New(storage.ErrorWrongAmount)
 	}
 
-	err = service.playerService.UpdateCash(&player, -result, &dto.TransactionDTO{
+	err = service.playerService.UpdateCash(&player, -amount, &dto.TransactionDTO{
 		CardID:   card.ID,
 		CardType: entity.TransactionCardType.PayTax,
 		Details:  card.Heading,
