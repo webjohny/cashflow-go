@@ -109,6 +109,7 @@ func main() {
 	moderatorRoutes := r.Group("api/moderator", middleware.AuthorizeJWT(jwtService), middleware.GetGameId())
 	{
 		moderatorRoutes.GET("/:raceId/race", moderatorController.GetRace)
+		moderatorRoutes.PUT("/:raceId/status", moderatorController.UpdateStatusRace)
 		moderatorRoutes.GET("/:raceId/player", moderatorController.GetRacePlayer)
 		moderatorRoutes.POST("/:raceId/send-money", moderatorController.SendMoney)
 		moderatorRoutes.GET("/:raceId/players", moderatorController.GetRacePlayers)

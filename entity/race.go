@@ -31,6 +31,7 @@ type RaceLog struct {
 	UpdatedCash     int    `json:"updated_cash"`
 	CurrentCashFlow int    `json:"current_cashflow"`
 	UpdatedCashFlow int    `json:"updated_cashflow"`
+	PlayerId        int    `json:"player_id"`
 	Username        string `json:"username"`
 	Color           string `json:"color"`
 	Message         string `json:"message"`

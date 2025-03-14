@@ -102,6 +102,7 @@ func (service *transactionService) GetRaceLogs(raceId uint64) []entity.RaceLog {
 	for _, transaction := range transactions {
 		logs = append(logs, entity.RaceLog{
 			Username:        transaction.Data.Username,
+			PlayerId:        int(*transaction.PlayerID),
 			Color:           transaction.Data.Color,
 			CurrentCash:     transaction.Data.CurrentCash,
 			UpdatedCash:     transaction.Data.UpdatedCash,

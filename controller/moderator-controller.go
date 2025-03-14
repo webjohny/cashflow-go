@@ -18,6 +18,7 @@ type ModeratorController interface {
 	SendMoney(ctx *gin.Context)
 	UpdatePlayer(ctx *gin.Context)
 	UpdateRace(ctx *gin.Context)
+	UpdateStatusRace(ctx *gin.Context)
 	HandleUserRequest(ctx *gin.Context)
 }
 
@@ -235,6 +236,36 @@ func (c *moderatorController) UpdateRace(ctx *gin.Context) {
 	request.FinalResponse(ctx, err, map[string]interface{}{
 		"race": race,
 	})
+}
+
+func (c *moderatorController) UpdateStatusRace(ctx *gin.Context) {
+	raceId := helper.GetRaceId(ctx)
+
+	var err error
+
+	var body dto.ModeratorUpdateStatusRaceDto
+
+	if err = ctx.BindJSON(&body); err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	race := c.raceService.GetRaceByRaceId(raceId)
+
+	race.Status = body.Status
+
+	if race.Status == entity.RaceStatus.FINISHED || race.Status == entity.RaceStatus.CANCELLED {
+		_ = c.lobbyService.ChangeStatusByGameId(raceId, entity.LobbyStatus.Cancelled)
+	}
+
+	err, _ = c.raceService.UpdateRace(&race)
+
+	if err != nil {
+		request.FinalResponse(ctx, err, nil)
+		return
+	}
+
+	request.FinalResponse(ctx, err, nil)
 }
 
 func (c *moderatorController) HandleUserRequest(ctx *gin.Context) {
